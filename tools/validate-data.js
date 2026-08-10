@@ -4,6 +4,7 @@ const read = (p) => JSON.parse(readFileSync(new URL(`../data/${p}`, import.meta.
 const nd = read('nd_tzi.json');
 const assets = read('assets_catalog.json').assets;
 const tr = read('threats_risks.json');
+const pm = read('policy_mapping.json');
 
 const knownControls = new Set();
 for (const fam of nd.document.security_families)
@@ -12,6 +13,11 @@ for (const fam of nd.document.security_families)
     for (const ch of c.children ?? []) knownControls.add(ch.canonical_id);
   }
 const knownAssets = new Set(assets.map(a => a.id));
+const knownParams = new Set();
+for (const fam of nd.document.security_families)
+  for (const c of fam.controls)
+    for (const node of [c, ...(c.children ?? [])])
+      for (const p of node.catalog?.parameters ?? []) knownParams.add(p.id);
 
 const errors = [];
 for (const r of tr.risks) {
@@ -26,5 +32,10 @@ for (const a of assets) {
   const n = tr.risks.filter(r => r.asset_id === a.id).length;
   if (n < 2) errors.push(`Актив ${a.id} (${a.name}): лише ${n} ризиків (мінімум 2)`);
 }
+// Валідація policy_mapping.json
+for (const gc of pm.global_constants)
+  for (const pid of gc.odp_params)
+    if (!knownParams.has(pid)) errors.push(`policy_mapping ${gc.key}: невідомий param ${pid}`);
+
 if (errors.length) { console.error(errors.join('\n')); process.exit(1); }
-console.log(`OK: ${tr.risks.length} ризиків, покриття всіх ${assets.length} класів`);
+console.log(`OK: ${tr.risks.length} ризиків, покриття всіх ${assets.length} класів, ${pm.global_constants.length} глобальних констант`);

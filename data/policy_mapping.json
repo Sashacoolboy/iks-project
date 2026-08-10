@@ -1,0 +1,75 @@
+{
+  "global_constants": [
+    {
+      "key": "organization_policy_id",
+      "label": "Розпорядчий документ організації",
+      "example": "Внутрішній Наказ № 45 від 10.08.2026",
+      "odp_params": []
+    },
+    {
+      "key": "security_officer_role",
+      "label": "Відповідальний за інформаційну безпеку",
+      "example": "Начальник ІБ (майор Петренко І.В.)",
+      "odp_params": [
+        "ac-1_odp.01",
+        "at-1_odp.01",
+        "au-1_odp.01",
+        "ca-1_odp.01",
+        "cp-1_odp.01",
+        "ia-1_odp.01",
+        "ir-1_odp.01",
+        "ma-1_odp.01",
+        "mp-1_odp.01",
+        "pe-1_odp.01",
+        "pl-1_odp.01",
+        "ps-1_odp.01",
+        "pt-1_odp.01",
+        "ra-1_odp.01",
+        "sa-1_odp.01",
+        "sc-1_odp.01",
+        "si-1_odp.01",
+        "sr-1_odp.01"
+      ]
+    },
+    {
+      "key": "crypto_hardware_token",
+      "label": "Апаратний засіб КЗІ (токен)",
+      "example": "Апаратний токен Алмаз-1К",
+      "odp_params": []
+    },
+    {
+      "key": "password_rotation_days",
+      "label": "Періодичність зміни паролів",
+      "example": "90 днів",
+      "odp_params": [
+        "ia-5_odp.01"
+      ]
+    },
+    {
+      "key": "session_timeout_minutes",
+      "label": "Тайм-аут сеансу (блокування)",
+      "example": "30 хвилин",
+      "odp_params": [
+        "ac-11_odp.01",
+        "sc-10_odp.01"
+      ]
+    },
+    {
+      "key": "log_retention_months",
+      "label": "Строк зберігання журналів аудиту",
+      "example": "6 місяців",
+      "odp_params": [
+        "au-4_odp.01",
+        "au-11.1_odp.01"
+      ]
+    },
+    {
+      "key": "incident_response_time",
+      "label": "Час реагування на інцидент",
+      "example": "2 години",
+      "odp_params": [
+        "ir-6_odp.01"
+      ]
+    }
+  ]
+}
