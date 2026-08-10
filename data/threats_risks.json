@@ -363,7 +363,7 @@
       "treatment_plan": "Датчики диму/вологи, вогнегасник, регламент реагування",
       "responsible": "Комендант",
       "residual_risk": "Низький",
-      "priority": "Високий",
+      "priority": "Середній",
       "control_refs": ["PE-13", "PE-15"],
       "enhancement_suggestions": []
     },
@@ -431,7 +431,7 @@
       "treatment_plan": "Замикання серверної шафи, окремий доступ до серверного приміщення",
       "responsible": "Комендант",
       "residual_risk": "Низький",
-      "priority": "Високий",
+      "priority": "Середній",
       "control_refs": ["PE-2", "PE-3"],
       "enhancement_suggestions": []
     },
@@ -448,7 +448,7 @@
       "treatment_plan": "План оновлень, контроль підтримуваних версій, усунення вразливостей",
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
-      "priority": "Критичний",
+      "priority": "Високий",
       "control_refs": ["SI-2", "RA-5"],
       "enhancement_suggestions": []
     },
@@ -550,7 +550,7 @@
       "treatment_plan": "Політики IAM хмари, MFA, аудит конфігурацій",
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
-      "priority": "Критичний",
+      "priority": "Високий",
       "control_refs": ["AC-6", "IA-2", "SA-9"],
       "enhancement_suggestions": ["IA-2(1)"]
     },
@@ -567,7 +567,7 @@
       "treatment_plan": "Локальне резервне копіювання критичних даних, план виходу (exit plan)",
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
-      "priority": "Критичний",
+      "priority": "Середній",
       "control_refs": ["CP-9", "SA-9"],
       "enhancement_suggestions": []
     },
@@ -584,7 +584,7 @@
       "treatment_plan": "Ізоляція ВМ, вимоги до сегментації у договорі з провайдером",
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
-      "priority": "Критичний",
+      "priority": "Середній",
       "control_refs": ["SC-7", "SA-9"],
       "enhancement_suggestions": []
     },
@@ -618,7 +618,7 @@
       "treatment_plan": "Процедура гарантованого знищення інформації перед списанням/передачею",
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
-      "priority": "Високий",
+      "priority": "Середній",
       "control_refs": ["MP-6"],
       "enhancement_suggestions": []
     }
