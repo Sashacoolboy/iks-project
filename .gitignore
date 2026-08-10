@@ -1,0 +1,3 @@
+node_modules/
+exports/*.docx
+.DS_Store
