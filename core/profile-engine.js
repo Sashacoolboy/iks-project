@@ -81,7 +81,7 @@ export function buildProfile(state, catalogs) {
             bpbValues,
             genericDefaults: catalogs.genericDefaults,
           });
-          if (r.source === 'empty') emptyParams.push(paramId);
+          if (r.source === 'empty' && !emptyParams.includes(paramId)) emptyParams.push(paramId);
           return r;
         };
         controls.push({ id: sa.control.id, statementLines: statementLinesFor(ndControl, resolve), emptyParams });

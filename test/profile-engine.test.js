@@ -54,3 +54,10 @@ test('глобальна політика підставляється у тек
 test('state_secret не має каталогу', () => {
   assert.equal(INFO_TYPES.state_secret, null);
 });
+
+test('emptyParams не містить дублікатів', () => {
+  const doc = buildProfile(baseState, catalogs);
+  for (const item of doc.items)
+    for (const c of item.controls)
+      assert.equal(new Set(c.emptyParams).size, c.emptyParams.length);
+});
