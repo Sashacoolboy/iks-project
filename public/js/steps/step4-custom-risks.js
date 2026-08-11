@@ -9,6 +9,14 @@ const INFO_OPTIONS = [
   { value: 'state_secret', label: 'Державна таємниця (каталог буде додано)', disabled: true },
 ];
 
+const STRATEGY_OPTIONS = ['Зменшення', 'Прийняття', 'Уникнення', 'Передача'];
+const RESIDUAL_OPTIONS = ['', 'Дуже низький', 'Низький', 'Середній', 'Високий', 'Критичний'];
+
+// Оновлення поля кастомного ризику без перерендеру (зберігає фокус в інпуті)
+const patchCustomRisk = (id, patch) =>
+  setState(s => ({ ...s, risks: { ...s.risks,
+    custom: s.risks.custom.map(r => r.id === id ? { ...r, ...patch } : r) } }));
+
 export const step = {
   id: 'custom-risks', title: 'Кастомні ризики та тип інформації',
   validate(state) { return state.info_type ? [] : ['Оберіть тип інформації']; },
@@ -58,13 +66,37 @@ export const step = {
       a.click();
       URL.revokeObjectURL(a.href);
     } }, '💾 Зберегти реєстр ризиків (DOCX)');
-    const customList = getState().risks.custom.map(r => el('li', {},
-      `${r.id}: ${r.threat} → ${r.level}`,
-      el('button', { type: 'button', onclick: () => {
+    const assetName = (id) => catalogs.assets.find(a => a.id === id)?.name ?? id;
+    const customRows = getState().risks.custom.map(r => el('tr', {},
+      el('td', {}, r.id),
+      el('td', {}, assetName(r.asset_id)),
+      el('td', {}, el('span', { title: r.vulnerability }, r.threat)),
+      el('td', {}, String(r.impact)),
+      el('td', {}, `${r.likelihood_label} / ${r.likelihood}`),
+      el('td', {}, el('span', { class: `badge lvl-${r.level.replace(/ /g, '-')}` }, r.level)),
+      el('td', {}, el('select', { class: 'cell-edit',
+        onchange: (e) => patchCustomRisk(r.id, { treatment_strategy: e.target.value }) },
+        ...STRATEGY_OPTIONS.map(v => option(v, v, v === r.treatment_strategy)))),
+      el('td', {}, el('input', { type: 'text', class: 'cell-edit', value: r.treatment_plan ?? '',
+        placeholder: 'опишіть заходи обробки…',
+        oninput: (e) => patchCustomRisk(r.id, { treatment_plan: e.target.value }) })),
+      el('td', {}, el('input', { type: 'text', class: 'cell-edit', value: r.responsible ?? '',
+        placeholder: 'відповідальний…',
+        oninput: (e) => patchCustomRisk(r.id, { responsible: e.target.value }) })),
+      el('td', {}, el('select', { class: 'cell-edit',
+        onchange: (e) => patchCustomRisk(r.id, { residual_risk: e.target.value }) },
+        ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (r.residual_risk ?? ''))))),
+      el('td', {}, el('button', { type: 'button', onclick: () => {
         setState(s => ({ ...s, risks: { ...s.risks, custom: s.risks.custom.filter(x => x.id !== r.id) } }));
         container.replaceChildren();
         step.render(container);
-      } }, '✕')));
+      } }, '✕'))));
+    const customTable = customRows.length
+      ? el('table', { class: 'risk-table' },
+          el('tr', {}, ...['ID', 'Актив', 'Загроза', 'Вплив', 'Ймовірність', 'Рівень', 'Стратегія', 'Заходи обробки', 'Відповідальний', 'Залишковий', '']
+            .map(h => el('th', {}, h))),
+          ...customRows)
+      : el('p', { class: 'hint' }, 'Додані вручну ризики зʼявляться тут таблицею з полями для дозаповнення.');
     const infoRadios = INFO_OPTIONS.map(o => el('label', { class: 'radio' },
       el('input', { type: 'radio', name: 'info_type', value: o.value,
         ...(o.disabled ? { disabled: '' } : {}),
@@ -78,7 +110,7 @@ export const step = {
         el('label', { class: 'checkbox' }, allThreatsChk, 'усі загрози'),
         el('label', {}, 'Ймовірність: ', likSel), el('label', {}, 'Вплив: ', impSel),
         el('label', {}, 'Рівень: ', preview), addBtn),
-      el('ul', { class: 'custom-list' }, ...customList),
+      customTable,
       el('div', { class: 'actions' }, saveRisksBtn),
       el('h3', {}, 'Тип інформації, що обробляється (обовʼязково)'),
       ...infoRadios));
