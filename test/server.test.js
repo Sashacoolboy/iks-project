@@ -10,7 +10,12 @@ before(async () => {
   proc = spawn('node', ['server.js'], { env: { ...process.env, PORT: '34567' } });
   await new Promise((res) => proc.stdout.on('data', (d) => d.toString().includes('listening') && res()));
 });
-after(() => { proc.kill(); rmSync('templates/ics/тест-шаблон.json', { force: true }); });
+after(() => {
+  proc.kill();
+  rmSync('templates/ics/тест-шаблон.json', { force: true });
+  rmSync('templates/cpb/тест-дск.json', { force: true });
+  rmSync('templates/cpb/тест-відкрита.json', { force: true });
+});
 
 test('віддає index.html', async () => {
   const r = await fetch(BASE + '/');
@@ -36,4 +41,14 @@ test('шаблони: POST → список → GET', async () => {
 test('відхиляє небезпечні імена', async () => {
   const r = await fetch(BASE + '/api/templates/ics/..%2Fevil', { method: 'POST', body: '{}' });
   assert.equal(r.status, 400);
+});
+
+test('список cpb-шаблонів містить info_type для фільтрації', async () => {
+  const mk = (info_type) => ({ kind: 'cpb', info_type, profile: { param_overrides: {}, enhancements: [], excluded: [], exemption_overrides: [] } });
+  await fetch(BASE + '/api/templates/cpb/тест-дск', { method: 'POST', body: JSON.stringify(mk('service')) });
+  await fetch(BASE + '/api/templates/cpb/тест-відкрита', { method: 'POST', body: JSON.stringify(mk('open_confidential')) });
+  const list = await (await fetch(BASE + '/api/templates/cpb')).json();
+  const byName = Object.fromEntries(list.items.map(i => [i.name, i.info_type]));
+  assert.equal(byName['тест-дск'], 'service');
+  assert.equal(byName['тест-відкрита'], 'open_confidential');
 });

@@ -26,8 +26,13 @@ export const step = {
     const genBtn = el('button', { type: 'button', onclick: showSummary }, 'Згенерувати профіль');
     const tplSelect = el('select', {});
     (async () => {
-      const { names } = await (await fetch('/api/templates/cpb')).json();
-      tplSelect.replaceChildren(option('', '— шаблон ЦПБ —'), ...names.map(n => option(n, n)));
+      const { items, names } = await (await fetch('/api/templates/cpb')).json();
+      // Лише шаблони, що відповідають обраному типу інформації
+      const matching = (items ?? (names ?? []).map(n => ({ name: n, info_type: null })))
+        .filter(i => i.info_type === getState().info_type);
+      tplSelect.replaceChildren(
+        option('', matching.length ? '— шаблон ЦПБ —' : '— немає шаблонів для цього типу інформації —'),
+        ...matching.map(i => option(i.name, i.name)));
     })();
     const tplBtn = el('button', { type: 'button', onclick: async () => {
       if (!tplSelect.value) return;

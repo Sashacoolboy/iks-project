@@ -47,8 +47,15 @@ createServer(async (req, res) => {
         if (!KINDS.has(kind)) return json(res, 400, { error: 'невідомий тип шаблону' });
         const dir = join(ROOT, 'templates', kind);
         if (parts.length === 3 && req.method === 'GET') {
-          const names = (await readdir(dir)).filter(f => f.endsWith('.json')).map(f => f.slice(0, -5));
-          return json(res, 200, { names });
+          const files = (await readdir(dir)).filter(f => f.endsWith('.json'));
+          const items = [];
+          for (const f of files) {
+            const name = f.slice(0, -5);
+            let info_type = null;
+            try { info_type = JSON.parse(await readFile(join(dir, f), 'utf8')).info_type ?? null; } catch { /* пошкоджений файл — без метаданих */ }
+            items.push({ name, info_type });
+          }
+          return json(res, 200, { names: items.map(i => i.name), items });
         }
         const name = parts[3];
         if (!name || !NAME_RE.test(name)) return json(res, 400, { error: 'некоректне ім\u02BCя шаблону' });
