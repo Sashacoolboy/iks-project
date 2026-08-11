@@ -30,11 +30,20 @@ export const step = {
             selected_assets: s.selected_assets.filter(id =>
               catalogs.assets.find(a => a.id === id)?.min_as_class <= c) })) }),
         `АС-${c}`));
-    // Картка глобальних політик — генерується з policy_mapping.json
-    const policyFields = catalogs.policyMapping.global_constants.map(gc =>
-      el('label', { class: 'field' }, gc.label,
-        el('input', { type: 'text', placeholder: gc.example, value: state.global_constants[gc.key] ?? '',
-          oninput: (e) => setState(s => ({ ...s, global_constants: { ...s.global_constants, [gc.key]: e.target.value } })) })));
+    // Картка глобальних політик — генерується з policy_mapping.json, згруповано
+    const groups = new Map();
+    for (const gc of catalogs.policyMapping.global_constants) {
+      const g = gc.group ?? 'Інше';
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(gc);
+    }
+    const policyFields = [...groups.entries()].flatMap(([groupName, constants]) => [
+      el('fieldset', {}, el('legend', {}, groupName),
+        ...constants.map(gc =>
+          el('label', { class: 'field' }, gc.label,
+            el('input', { type: 'text', placeholder: gc.example, value: state.global_constants[gc.key] ?? '',
+              oninput: (e) => setState(s => ({ ...s, global_constants: { ...s.global_constants, [gc.key]: e.target.value } })) })))),
+    ]);
     // Завантаження шаблону ІКС
     const tplSelect = el('select', {});
     loadTemplateList(tplSelect);

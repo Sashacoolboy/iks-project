@@ -4,12 +4,14 @@
       "key": "organization_policy_id",
       "label": "Розпорядчий документ організації",
       "example": "Внутрішній Наказ № 45 від 10.08.2026",
+      "group": "Організація та відповідальні",
       "odp_params": []
     },
     {
       "key": "security_officer_role",
-      "label": "Відповідальний за інформаційну безпеку",
+      "label": "Відповідальний за інформаційну безпеку (поширення політик)",
       "example": "Начальник ІБ (майор Петренко І.В.)",
+      "group": "Організація та відповідальні",
       "odp_params": [
         "ac-1_odp.01",
         "at-1_odp.01",
@@ -32,32 +34,259 @@
       ]
     },
     {
-      "key": "crypto_hardware_token",
-      "label": "Апаратний засіб КЗІ (токен)",
-      "example": "Апаратний токен Алмаз-1К",
-      "odp_params": []
+      "key": "responsible_official",
+      "label": "Посадова особа, відповідальна за управління політиками та процедурами",
+      "example": "Начальник відділу ІБ",
+      "group": "Організація та відповідальні",
+      "odp_params": [
+        "ac-1_odp.03",
+        "at-1_odp.03",
+        "au-1_odp.03",
+        "ca-1_odp.03",
+        "cm-1_odp.02",
+        "ia-1_odp.03",
+        "ir-1_odp.03",
+        "ma-1_odp.02",
+        "mp-1_odp.02",
+        "pe-1_odp.02",
+        "pl-1_odp.03",
+        "ps-1_odp.03",
+        "ra-1_odp.02",
+        "sa-1_odp.03",
+        "sc-1_odp.02",
+        "si-1_odp.02",
+        "sr-1_odp.03"
+      ]
+    },
+    {
+      "key": "security_personnel_roles",
+      "label": "Персонал/ролі для безпекових сповіщень, погоджень та доступу",
+      "example": "адміністратор безпеки, начальник відділу ІБ",
+      "group": "Організація та відповідальні",
+      "odp_params": [
+        "ac-2_odp.01",
+        "ac-6.1_odp.01",
+        "ac-6.5_odp.01",
+        "au-6_odp.03",
+        "au-9_odp.01",
+        "au-12_odp.02",
+        "ca-2_odp.02",
+        "ca-7_odp.04",
+        "ia-4_odp.01",
+        "ir-8_odp.01",
+        "ir-8_odp.02",
+        "ma-3.3_odp.01",
+        "mp-2_odp.02",
+        "ps-5_odp.03",
+        "ra-3_odp.03",
+        "ra-5_odp.03"
+      ]
+    },
+    {
+      "key": "policy_level",
+      "label": "Рівень розроблення політик безпеки",
+      "example": "рівень системи",
+      "group": "Організація та відповідальні",
+      "odp_params": [
+        "ac-1_odp.02",
+        "at-1_odp.02",
+        "au-1_odp.02",
+        "ca-1_odp.02",
+        "cm-1_odp.01",
+        "ia-1_odp.02",
+        "ir-1_odp.02",
+        "sr-1_odp.02"
+      ]
+    },
+    {
+      "key": "policy_review_frequency",
+      "label": "Періодичність перегляду політик і процедур безпеки",
+      "example": "щорічно",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "ac-1_odp.04",
+        "at-1_odp.04",
+        "at-1_odp.06",
+        "au-1_odp.04",
+        "ca-1_odp.04",
+        "cm-1_odp.03",
+        "ia-1_odp.04",
+        "ir-1_odp.04",
+        "ma-1_odp.03",
+        "mp-1_odp.03",
+        "pe-1_odp.03",
+        "pl-1_odp.04",
+        "ps-1_odp.04",
+        "ra-1_odp.03",
+        "sa-1_odp.04",
+        "sc-1_odp.03",
+        "si-1_odp.03",
+        "si-1_odp.04",
+        "sr-1_odp.04",
+        "sr-1_odp.06"
+      ]
+    },
+    {
+      "key": "policy_review_events",
+      "label": "Події для позачергового перегляду політик і процедур",
+      "example": "зміна законодавства, реорганізація, інцидент безпеки",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "ac-1_odp.05",
+        "at-1_odp.05",
+        "at-1_odp.07",
+        "au-1_odp.05",
+        "ca-1_odp.05",
+        "cm-1_odp.04",
+        "ir-1_odp.05",
+        "ma-1_odp.04",
+        "pl-1_odp.05",
+        "sr-1_odp.05",
+        "sr-1_odp.07"
+      ]
+    },
+    {
+      "key": "review_frequency_security",
+      "label": "Періодичність безпекових оглядів, переоцінок та перевірок",
+      "example": "щоквартально",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "ac-6.7_odp.01",
+        "au-2_odp.03",
+        "ca-5_odp.01",
+        "ca-7_odp.02",
+        "ca-7_odp.03",
+        "ca-7_odp.05",
+        "cm-7.1_odp.01",
+        "cm-7.5_odp.02",
+        "ia-5.1_odp.01",
+        "ir-3_odp.01",
+        "pe-3_odp.07",
+        "pe-3_odp.08",
+        "ra-3_odp.02",
+        "ra-3.1_odp.02",
+        "si-4.4_odp.01",
+        "sr-6_odp.01"
+      ]
+    },
+    {
+      "key": "training_frequency",
+      "label": "Періодичність навчань з питань безпеки",
+      "example": "щорічно",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "at-2_odp.04",
+        "at-3_odp.03"
+      ]
+    },
+    {
+      "key": "training_events",
+      "label": "Події для позачергового навчання персоналу",
+      "example": "прийняття на роботу, суттєві зміни в системі",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "at-2_odp.02",
+        "at-2_odp.05",
+        "at-3_odp.04"
+      ]
+    },
+    {
+      "key": "malware_scan_frequency",
+      "label": "Періодичність антивірусного сканування",
+      "example": "щоденно",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "si-3_odp.02"
+      ]
+    },
+    {
+      "key": "hr_action_period",
+      "label": "Строк виконання кадрових/організаційних дій безпеки",
+      "example": "10 робочих днів",
+      "group": "Періодичність та строки",
+      "odp_params": [
+        "ir-2_odp.01",
+        "ps-5_odp.04"
+      ]
     },
     {
       "key": "password_rotation_days",
       "label": "Періодичність зміни паролів",
       "example": "90 днів",
+      "group": "Доступ та сеанси",
       "odp_params": [
         "ia-5_odp.01"
       ]
     },
     {
       "key": "session_timeout_minutes",
-      "label": "Тайм-аут сеансу (блокування)",
+      "label": "Тайм-аут сеансу (блокування пристрою)",
       "example": "30 хвилин",
+      "group": "Доступ та сеанси",
       "odp_params": [
         "ac-11_odp.01",
         "sc-10_odp.01"
       ]
     },
     {
+      "key": "session_logout_condition",
+      "label": "Умова обов'язкового виходу із системи",
+      "example": "бездіяльність понад 30 хвилин або завершення робочого дня",
+      "group": "Доступ та сеанси",
+      "odp_params": [
+        "ac-2.5_odp.01",
+        "ac-12_odp.01"
+      ]
+    },
+    {
+      "key": "account_inactivity_period",
+      "label": "Період неактивності до деактивації облікового запису",
+      "example": "45 днів",
+      "group": "Доступ та сеанси",
+      "odp_params": [
+        "ac-2.3_odp.01"
+      ]
+    },
+    {
+      "key": "account_notification_period",
+      "label": "Строк сповіщення/дій за обліковими записами",
+      "example": "24 години",
+      "group": "Доступ та сеанси",
+      "odp_params": [
+        "ac-2_odp.03",
+        "ac-2.13_odp.01"
+      ]
+    },
+    {
+      "key": "failed_login_attempts",
+      "label": "Максимальна кількість невдалих спроб входу",
+      "example": "5 спроб",
+      "group": "Доступ та сеанси",
+      "odp_params": [
+        "ac-7_odp.01"
+      ]
+    },
+    {
+      "key": "failed_login_window",
+      "label": "Часове вікно підрахунку невдалих спроб входу",
+      "example": "15 хвилин",
+      "group": "Доступ та сеанси",
+      "odp_params": [
+        "ac-7_odp.02"
+      ]
+    },
+    {
+      "key": "crypto_hardware_token",
+      "label": "Апаратний засіб КЗІ (токен)",
+      "example": "Апаратний токен Алмаз-1К",
+      "group": "Захист інформації",
+      "odp_params": []
+    },
+    {
       "key": "log_retention_months",
       "label": "Строк зберігання журналів аудиту",
       "example": "6 місяців",
+      "group": "Захист інформації",
       "odp_params": [
         "au-4_odp.01",
         "au-11.1_odp.01"
@@ -67,6 +296,7 @@
       "key": "incident_response_time",
       "label": "Час реагування на інцидент",
       "example": "2 години",
+      "group": "Захист інформації",
       "odp_params": [
         "ir-6_odp.01"
       ]
