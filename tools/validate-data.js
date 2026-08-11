@@ -37,5 +37,13 @@ for (const gc of pm.global_constants)
   for (const pid of gc.odp_params)
     if (!knownParams.has(pid)) errors.push(`policy_mapping ${gc.key}: невідомий param ${pid}`);
 
+// Валідація as_class_exemptions.json
+const ex = read('as_class_exemptions.json');
+for (const e of ex.exemptions) {
+  if (!knownControls.has(e.control_ref)) errors.push(`exemption: невідомий control_ref ${e.control_ref}`);
+  if (!e.reason_note || e.reason_note.length < 30) errors.push(`exemption ${e.control_ref}: примітка закоротка`);
+  if (!e.applies_to_classes.every(c => c === 1 || c === 2)) errors.push(`exemption ${e.control_ref}: класи лише 1/2`);
+}
+
 if (errors.length) { console.error(errors.join('\n')); process.exit(1); }
-console.log(`OK: ${tr.risks.length} ризиків, покриття всіх ${assets.length} класів, ${pm.global_constants.length} глобальних констант`);
+console.log(`OK: ${tr.risks.length} ризиків, покриття всіх ${assets.length} класів, ${pm.global_constants.length} глобальних констант, ${ex.exemptions.length} архітектурних винятків`);
