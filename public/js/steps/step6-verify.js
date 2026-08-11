@@ -1,7 +1,7 @@
 import { el } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
-import { buildProfile, STATUS } from '/core/profile-engine.js';
+import { buildProfile, STATUS, indexNdParams } from '/core/profile-engine.js';
 import { enhancementsForControl, suggestionsFromRisks } from '/core/enhancement-engine.js';
 import { baseRisksFor, annotateRisk } from '/core/risk-engine.js';
 
@@ -11,6 +11,23 @@ function acceptedAnnotatedRisks(state) {
     ...baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class).filter(r => accepted.has(r.id)),
     ...state.risks.custom.map(r => annotateRisk(r, catalogs.threatsRisks.scale)),
   ];
+}
+
+// Персистентна історія значень за семантикою ODP (ключ — стемізована мітка параметра)
+const DICT_KEY = 'offline-profile-param-dict';
+// Префікс-стемінг (4 символи) зводить словоформи ("частотою"/"частота", "визначеною"/"визначена") до одного ключа
+const labelKey = (label) => [...new Set((label ?? '').toLowerCase()
+  .replace(/[^а-яіїєґa-z\s]/g, ' ')
+  .split(/\s+/)
+  .filter(w => w.length >= 4)
+  .map(w => w.slice(0, 4)))].sort().join(' ');
+const loadDict = () => { try { return JSON.parse(localStorage.getItem(DICT_KEY)) ?? {}; } catch { return {}; } };
+function rememberValue(label, value) {
+  const key = labelKey(label);
+  if (!key || !value.trim()) return;
+  const dict = loadDict();
+  dict[key] = [value.trim(), ...(dict[key] ?? []).filter(v => v !== value.trim())].slice(0, 10);
+  localStorage.setItem(DICT_KEY, JSON.stringify(dict));
 }
 
 export const step = {
@@ -28,15 +45,27 @@ export const step = {
     const suggestions = suggestionsFromRisks(acceptedAnnotatedRisks(state));
     const rerender = () => { container.replaceChildren(); step.render(container); };
 
-    // Словник дозаповнених значень: override-значення + глобальні політики
-    const dictValues = [...new Set([
-      ...Object.values(state.profile.param_overrides ?? {}),
-      ...Object.values(state.global_constants ?? {}),
-    ].filter(v => v && v.trim()))].sort((a, b) => a.localeCompare(b, 'uk'));
-    const dictList = el('datalist', { id: 'param-dict' },
-      ...dictValues.map(v => el('option', { value: v })));
+    // Сегментований словник: підказки лише для параметрів з такою самою міткою ODP
+    const paramInfo = indexNdParams(catalogs.ndTzi);
+    const overridesByLabel = new Map();
+    for (const [pid, value] of Object.entries(state.profile.param_overrides ?? {})) {
+      const key = labelKey(paramInfo.get(pid)?.label);
+      if (!key || !value?.trim()) continue;
+      if (!overridesByLabel.has(key)) overridesByLabel.set(key, new Set());
+      overridesByLabel.get(key).add(value.trim());
+    }
+    const historyDict = loadDict();
+    const suggestionsFor = (part) => {
+      const key = labelKey(part.info?.label);
+      return [...new Set([
+        ...(overridesByLabel.get(key) ?? []),
+        ...(historyDict[key] ?? []),
+      ])];
+    };
+    const dictList = el('datalist', { id: 'param-dict' });
 
-    const commitOverride = (paramId, raw) => {
+    const commitOverride = (paramId, label, raw) => {
+      rememberValue(label, raw);
       setState(s => {
         const overrides = { ...s.profile.param_overrides };
         if (raw.trim()) overrides[paramId] = raw.trim(); else delete overrides[paramId];
@@ -55,16 +84,18 @@ export const step = {
       span.addEventListener('click', (ev) => {
         ev.stopPropagation();
         if (span.querySelector('input')) return;
+        // Наповнити datalist підказками саме цього ODP
+        dictList.replaceChildren(...suggestionsFor(part).map(v => el('option', { value: v })));
         const current = getState().profile.param_overrides[part.paramId] ?? (part.source === 'empty' ? '' : part.value);
         const input = el('input', {
           type: 'text', class: 'param-editor', list: 'param-dict', value: current,
           placeholder: part.info?.label ?? 'значення…',
         });
         input.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') commitOverride(part.paramId, input.value);
+          if (e.key === 'Enter') commitOverride(part.paramId, part.info?.label, input.value);
           if (e.key === 'Escape') rerender();
         });
-        input.addEventListener('blur', () => commitOverride(part.paramId, input.value));
+        input.addEventListener('blur', () => commitOverride(part.paramId, part.info?.label, input.value));
         span.replaceChildren(input);
         input.focus();
         input.select();
