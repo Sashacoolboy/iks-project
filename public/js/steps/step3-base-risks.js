@@ -26,7 +26,7 @@ export const step = {
       el('td', {}, r.id), el('td', {}, assetName(r.asset_id)), el('td', {}, r.threat),
       el('td', {}, r.vulnerability), el('td', {}, String(r.impact)),
       el('td', {}, `${r.likelihood_label} / ${r.likelihood}`),
-      el('td', {}, el('span', { class: `badge lvl-${r.level}` }, r.level)),
+      el('td', {}, el('span', { class: `badge lvl-${r.level.replace(/ /g, '-')}` }, r.level)),
       el('td', {}, r.treatment_strategy), el('td', {}, r.responsible), el('td', {}, r.residual_risk ?? '')));
     container.replaceChildren(el('section', {},
       el('h2', {}, `Крок 3. Первинна матриця загроз (${risks.length} ризиків за обраними активами)`),

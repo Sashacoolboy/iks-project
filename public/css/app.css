@@ -30,7 +30,7 @@ th { background: #edf2f7; }
 .lvl-Критичний { background: #c53030; color: #fff; }
 .lvl-Високий { background: #dd6b20; color: #fff; }
 .lvl-Середній { background: #d69e2e; color: #fff; }
-.lvl-Низький, .lvl-Дуже\ низький { background: #2f855a; color: #fff; }
+.lvl-Низький, .lvl-Дуже-низький { background: #2f855a; color: #fff; }
 .badge-exempt { background: #d69e2e; color: #fff; }
 .badge-excluded { background: #718096; color: #fff; }
 .badge-applied { background: #2f855a; color: #fff; }
