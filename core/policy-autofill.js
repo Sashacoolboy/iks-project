@@ -25,9 +25,9 @@ export function renderText(text, resolveFn) {
   let last = 0;
   for (const m of text.matchAll(PARAM_RE)) {
     if (m.index > last) { const t = text.slice(last, m.index); parts.push({ type: 'text', value: t }); out += t; }
-    const { value, source } = resolveFn(m[1]);
-    const shown = value || EMPTY_TEXT;
-    parts.push({ type: 'param', value: shown, paramId: m[1], source });
+    const r = resolveFn(m[1]);
+    const shown = r.value || EMPTY_TEXT;
+    parts.push({ type: 'param', value: shown, paramId: m[1], source: r.source, info: r.info });
     out += shown;
     last = m.index + m[0].length;
   }

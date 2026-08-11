@@ -36,6 +36,10 @@ th { background: #edf2f7; }
 .badge-applied { background: #2f855a; color: #fff; }
 
 .param { padding: 0 0.2rem; border-radius: 3px; cursor: pointer; }
+.param-editor { font-size: 0.85rem; padding: 0.15rem 0.35rem; border: 1px solid #3182ce; border-radius: 3px; min-width: 16rem; }
+.param-info { cursor: help; color: #c53030; font-weight: 700; }
+.note-editor { display: block; width: 100%; font-size: 0.85rem; padding: 0.4rem; border: 1px solid #cbd5e0; border-radius: 4px; margin-bottom: 0.4rem; }
+.enh-subtitle { font-weight: 600; color: #2c5282; margin: 0.6rem 0 0.2rem; border-top: 1px dashed #cbd5e0; padding-top: 0.5rem; }
 .src-policy { background: #c6f6d5; }
 .src-bpb, .src-generic { background: #e2e8f0; }
 .src-empty { background: #fed7d7; font-weight: 600; }
@@ -48,7 +52,8 @@ th { background: #edf2f7; }
 .enh-list { display: flex; flex-direction: column; gap: 0.3rem; margin: 0.4rem 0; }
 .enh { text-align: left; font-size: 0.8rem; }
 .enh.recommended { border-color: #dd6b20; background: #fffaf0; }
-.enh-applied { font-size: 0.85rem; color: #2c5282; }
+.enh-applied { font-size: 0.85rem; color: #2c5282; border-left: 3px solid #2c5282; padding-left: 0.6rem; margin: 0.5rem 0; }
+.enh-applied .stmt { color: #1a202c; }
 .custom-list li { margin: 0.3rem 0; }
 .summary p { margin: 0.25rem 0; }
 .warn { color: #c53030; font-weight: 600; }

@@ -61,3 +61,53 @@ test('emptyParams не містить дублікатів', () => {
     for (const c of item.controls)
       assert.equal(new Set(c.emptyParams).size, c.emptyParams.length);
 });
+
+test('контролі пункту не дублюються (AC:1 — база один раз + посилення власними текстами)', () => {
+  const doc = buildProfile(baseState, catalogs);
+  for (const item of doc.items) {
+    const ids = item.controls.map(c => c.id);
+    assert.equal(new Set(ids).size, ids.length, `дублікати у ${item.key}: ${ids}`);
+  }
+  const ac1 = doc.items.find(i => i.key === 'AC:1');
+  assert.equal(ac1.controls.filter(c => c.id === 'AC-2').length, 1);
+  const mandated = ac1.controls.filter(c => c.isEnhancement);
+  assert.ok(mandated.length >= 1);
+  assert.ok(mandated.every(c => c.statementLines.length > 0 && c.title.length > 0));
+});
+
+test('додане користувачем посилення має рендерені рядки тексту', () => {
+  const state = { ...baseState, profile: { ...baseState.profile, enhancements: ['AC-2(1)'] } };
+  const doc = buildProfile(state, catalogs);
+  const ac1 = doc.items.find(i => i.key === 'AC:1');
+  const enh = ac1.enhancements.find(e => e.id === 'AC-2(1)');
+  assert.ok(enh, 'посилення відсутнє');
+  assert.ok(enh.lines.length > 0 && enh.lines[0].text.length > 0);
+});
+
+test('BPB-обов’язкове посилення не дублюється в user-посиленнях', () => {
+  const state = { ...baseState, profile: { ...baseState.profile, enhancements: ['AC-2(3)'] } };
+  const doc = buildProfile(state, catalogs);
+  const ac1 = doc.items.find(i => i.key === 'AC:1');
+  assert.equal(ac1.enhancements.filter(e => e.id === 'AC-2(3)').length, 0);
+  assert.equal(ac1.controls.filter(c => c.id === 'AC-2(3)').length, 1);
+});
+
+test('exemption_note_overrides замінює текст примітки', () => {
+  const doc1 = buildProfile(baseState, catalogs);
+  const key = doc1.items.find(i => i.status === 'Виконано архітектурно').key;
+  const state = { ...baseState, profile: { ...baseState.profile,
+    exemption_note_overrides: { [key]: 'Власне обґрунтування організації.' } } };
+  const doc2 = buildProfile(state, catalogs);
+  assert.equal(doc2.items.find(i => i.key === key).exemptionNote, 'Власне обґрунтування організації.');
+});
+
+test('порожній параметр несе info з source_text для тултіпа', () => {
+  const doc = buildProfile(baseState, catalogs);
+  let found = false;
+  for (const item of doc.items)
+    for (const c of item.controls)
+      for (const l of c.statementLines)
+        for (const p of l.parts)
+          if (p.type === 'param' && p.source === 'empty' && p.info?.source_text) found = true;
+  assert.ok(found, 'жоден порожній параметр не має info.source_text');
+});
