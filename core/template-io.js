@@ -1,0 +1,50 @@
+export function defaultState() {
+  return {
+    passport: { ics_name: '', cert_body: '', as_class: 1 },
+    global_constants: {},
+    selected_assets: [],
+    risks: { accepted_base: [], custom: [] },
+    info_type: null,
+    profile: { param_overrides: {}, enhancements: [], excluded: [], exemption_overrides: [] },
+  };
+}
+
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+export function makeIcsTemplate(state) {
+  return { kind: 'ics', saved_at: new Date().toISOString(),
+    passport: clone(state.passport), global_constants: clone(state.global_constants),
+    selected_assets: clone(state.selected_assets) };
+}
+
+export function applyIcsTemplate(state, tpl) {
+  return { ...clone(state), passport: clone(tpl.passport),
+    global_constants: clone(tpl.global_constants), selected_assets: clone(tpl.selected_assets) };
+}
+
+export function makeCpbTemplate(state) {
+  return { kind: 'cpb', saved_at: new Date().toISOString(),
+    info_type: state.info_type, profile: clone(state.profile) };
+}
+
+export function applyCpbTemplate(state, tpl) {
+  return { ...clone(state), info_type: tpl.info_type, profile: clone(tpl.profile) };
+}
+
+const INFO_TYPE_VALUES = ['open_confidential', 'service', 'state_secret'];
+
+export function validateTemplate(kind, obj) {
+  const errors = [];
+  if (!obj || typeof obj !== 'object') return ['Шаблон не є об\u02BCєктом'];
+  if (obj.kind !== kind) errors.push(`Невірний тип шаблону: очікується "${kind}", отримано "${obj.kind}"`);
+  if (kind === 'ics') {
+    if (!obj.passport || typeof obj.passport.as_class !== 'number') errors.push('Відсутній паспорт або клас АС');
+    if (!Array.isArray(obj.selected_assets)) errors.push('selected_assets має бути масивом');
+    if (typeof obj.global_constants !== 'object') errors.push('global_constants має бути об\u02BCєктом');
+  }
+  if (kind === 'cpb') {
+    if (!INFO_TYPE_VALUES.includes(obj.info_type)) errors.push('Невірний info_type');
+    if (!obj.profile || typeof obj.profile !== 'object') errors.push('Відсутній блок profile');
+  }
+  return errors;
+}
