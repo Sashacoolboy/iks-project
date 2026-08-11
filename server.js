@@ -85,9 +85,9 @@ createServer(async (req, res) => {
       return json(res, 404, { error: 'not found' });
     }
 
-    // Статика: public/ + data/ (read-only)
+    // Статика: public/ + data/ та core/ (read-only)
     let filePath = url.pathname === '/' ? '/index.html' : url.pathname;
-    const base = filePath.startsWith('/data/') ? ROOT : join(ROOT, 'public');
+    const base = (filePath.startsWith('/data/') || filePath.startsWith('/core/')) ? ROOT : join(ROOT, 'public');
     const resolved = normalize(join(base, filePath));
     if (!resolved.startsWith(base)) { res.writeHead(403); return res.end(); }
     try {
