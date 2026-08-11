@@ -66,6 +66,8 @@ th { background: #edf2f7; }
 .custom-list li { margin: 0.3rem 0; }
 .cell-edit { width: 100%; min-width: 7rem; font-size: 0.8rem; padding: 0.2rem 0.3rem; border: 1px solid #cbd5e0; border-radius: 3px; }
 .hint { color: #718096; font-size: 0.85rem; }
+.tpl-name { max-width: 24rem; }
+.save-status { min-height: 1.2rem; font-size: 0.9rem; }
 
 /* Крок 6: табличний формат верифікації */
 .summary-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; position: sticky; top: 0; background: #f7fafc; padding: 0.5rem 0; z-index: 5; }
