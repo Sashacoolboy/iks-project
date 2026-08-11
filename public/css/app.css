@@ -6,6 +6,7 @@ main { flex: 1; padding: 1.5rem; max-width: 72rem; width: 100%; margin: 0 auto; 
 footer { padding: 0.75rem 1.5rem; background: #fff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
 button { cursor: pointer; padding: 0.4rem 0.9rem; border: 1px solid #cbd5e0; border-radius: 4px; background: #fff; font-size: 0.9rem; }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: #2c5282; color: #fff; border-color: #2c5282; font-weight: 600; }
 h2 { font-size: 1.15rem; } h3 { font-size: 1rem; margin-top: 1.25rem; }
 
 #stepper { display: flex; flex-wrap: wrap; gap: 0.35rem; }

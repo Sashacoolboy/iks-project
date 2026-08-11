@@ -1,48 +1,11 @@
 import { el, option } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
-import { applyIcsTemplate, applyApprovedRecord, validateTemplate } from '/core/template-io.js';
+import { applyIcsTemplate, validateTemplate } from '/core/template-io.js';
 
 async function loadTemplateList(select) {
   const { names } = await (await fetch('/api/templates/ics')).json();
   select.replaceChildren(option('', '— оберіть шаблон —'), ...names.map(n => option(n, n)));
-}
-
-const INFO_LABELS = { open_confidential: 'Відкрита/Конфіденційна', service: 'Службова (ДСК)', state_secret: 'Державна таємниця' };
-
-async function approvedPanel(rerender) {
-  const box = el('div', { class: 'approved-panel' });
-  const { items } = await (await fetch('/api/templates/approved')).json();
-  if (!items?.length) return box;
-  box.append(el('h3', {}, `Затверджені профілі (${items.length})`));
-  for (const it of items) {
-    const details = el('div', { class: 'approved-details', hidden: '' });
-    const viewBtn = el('button', { type: 'button', onclick: () => {
-      if (!details.hidden) { details.hidden = true; return; }
-      const s = it.summary ?? {};
-      details.replaceChildren(
-        el('p', {}, `Тип інформації: ${INFO_LABELS[it.info_type] ?? '—'}`),
-        el('p', {}, `Пунктів БПБ: ${s.total ?? '—'}, автозаповнено: ${s.autofilled ?? '—'}, порожніх: ${s.empty ?? '—'}`),
-        el('p', {}, `Архітектурних винятків: ${s.exempted ?? '—'}, виключено: ${s.excluded ?? '—'}`),
-        el('p', {}, `Ризиків у реєстрі: ${s.risks_count ?? '—'}, посилень: ${s.enhancements_count ?? '—'}`));
-      details.hidden = false;
-    } }, 'Інфо');
-    const loadBtn = el('button', { type: 'button', onclick: async () => {
-      if (!confirm(`Завантажити затверджений профіль «${it.name}»? Поточний стан майстра буде замінено.`)) return;
-      const rec = await (await fetch(`/api/templates/approved/${encodeURIComponent(it.name)}`)).json();
-      if (validateTemplate('approved', rec).length) { alert('Запис пошкоджено'); return; }
-      setState(() => applyApprovedRecord(rec));
-      rerender();
-    } }, 'Завантажити в майстер');
-    box.append(el('article', { class: 'approved-item' },
-      el('header', {},
-        el('strong', {}, it.ics_name || it.name),
-        el('span', { class: 'badge badge-applied' }, `АС-${it.as_class ?? '?'}`),
-        el('span', { class: 'approved-date' }, it.approved_at ? new Date(it.approved_at).toLocaleDateString('uk-UA') : ''),
-        viewBtn, loadBtn),
-      details));
-  }
-  return box;
 }
 
 export const step = {
@@ -92,13 +55,9 @@ export const step = {
       container.replaceChildren();
       step.render(container);
     } }, 'Завантажити шаблон ІКС');
-    const approvedBox = el('div', {});
-    const rerender = () => { container.replaceChildren(); step.render(container); };
-    approvedPanel(rerender).then(panel => approvedBox.append(panel));
     container.replaceChildren(
       el('section', {},
         el('h2', {}, 'Крок 1. Паспорт ІКС та Глобальні політики'),
-        approvedBox,
         el('div', { class: 'tpl-row' }, tplSelect, tplBtn),
         el('label', { class: 'field' }, 'Назва ІКС', nameInput),
         el('label', { class: 'field' }, 'Орган сертифікації', certInput),

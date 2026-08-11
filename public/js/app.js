@@ -20,14 +20,22 @@ export async function loadCatalogs() {
 let current = 0;
 export let catalogs = null;
 
+// Перехід уперед дозволено, якщо всі проміжні кроки валідні (перегляд затверджених)
+function canJump(target) {
+  for (let k = current; k < target; k++) {
+    if ((steps[k].validate?.(getState()) ?? []).length) return false;
+  }
+  return true;
+}
+
 function renderStepper() {
   const nav = document.getElementById('stepper');
   nav.replaceChildren(...steps.map((s, i) =>
     el('button', {
       class: `step-tab${i === current ? ' active' : ''}${i < current ? ' done' : ''}`,
       type: 'button',
-      onclick: () => { if (i <= current) go(i); },
-    }, `${i + 1}. ${s.title}`)));
+      onclick: () => { if (i <= current || canJump(i)) go(i); },
+    }, i === 0 ? s.title : `${i}. ${s.title}`)));
 }
 
 function go(index) {
@@ -40,6 +48,8 @@ function go(index) {
   document.getElementById('btn-next').style.display = current === steps.length - 1 ? 'none' : '';
 }
 
+export const goToStep = (i) => go(i);
+
 document.getElementById('btn-back').addEventListener('click', () => current > 0 && go(current - 1));
 document.getElementById('btn-next').addEventListener('click', () => {
   const errors = steps[current].validate?.(getState()) ?? [];
@@ -50,6 +60,7 @@ document.getElementById('btn-next').addEventListener('click', () => {
 (async () => {
   catalogs = await loadCatalogs();
   const modules = await Promise.all([
+    import('./steps/step0-registry.js'),
     import('./steps/step1-passport.js'), import('./steps/step2-assets.js'),
     import('./steps/step3-base-risks.js'), import('./steps/step4-custom-risks.js'),
     import('./steps/step5-generate.js'), import('./steps/step6-verify.js'),
