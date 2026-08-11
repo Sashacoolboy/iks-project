@@ -139,6 +139,7 @@ export function buildProfile(state, catalogs) {
       items.push({
         key, classId: sc.security_class.class_id, className: sc.security_class.name_from_profile,
         actionNumber: action.number, actionName: action.name,
+        bpbRequirements: action.content_raw ?? '',
         controls, status, exemptionNote, enhancements,
       });
     }

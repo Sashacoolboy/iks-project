@@ -25,6 +25,14 @@ test('threatDirectory повертає унікальні пари', () => {
   assert.equal(new Set(keys).size, keys.length);
 });
 
+test('threatDirectory фільтрується за активом', () => {
+  const all = threatDirectory(tr);
+  const forA02 = threatDirectory(tr, 'A-02');
+  assert.ok(forA02.length > 0 && forA02.length < all.length);
+  const a02Threats = new Set(tr.risks.filter(r => r.asset_id === 'A-02').map(r => r.threat));
+  assert.ok(forA02.every(t => a02Threats.has(t.threat)));
+});
+
 test('buildCustomRisk генерує послідовний id та обчислює рівень', () => {
   const c = buildCustomRisk(
     { asset_id: 'A-01', threat: 'Т', vulnerability: 'В', impact: 5, likelihood: 0.7 },

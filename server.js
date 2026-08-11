@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildDocx } from './core/docx/docx-writer.js';
+import { buildDocx, buildRisksDocx } from './core/docx/docx-writer.js';
 import { buildProfile } from './core/profile-engine.js';
 import { baseRisksFor, annotateRisk } from './core/risk-engine.js';
 import { validateTemplate } from './core/template-io.js';
@@ -62,18 +62,25 @@ createServer(async (req, res) => {
           return json(res, 200, { ok: true });
         }
       }
-      if (parts[1] === 'export' && parts[2] === 'docx' && req.method === 'POST') {
+      if (parts[1] === 'export' && (parts[2] === 'docx' || parts[2] === 'risks-docx') && req.method === 'POST') {
         const { state } = JSON.parse((await readBody(req)).toString('utf8'));
         const catalogs = await catalogsPromise;
-        const profileDoc = buildProfile(state, catalogs);
         const accepted = new Set(state.risks.accepted_base);
         const annotatedRisks = [
           ...baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class).filter(r => accepted.has(r.id)),
           ...state.risks.custom.map(r => annotateRisk(r, catalogs.threatsRisks.scale)),
         ];
-        const buf = buildDocx({ state, profileDoc, annotatedRisks, assets: catalogs.assets, policyMapping: catalogs.policyMapping });
+        let buf, prefix;
+        if (parts[2] === 'risks-docx') {
+          buf = buildRisksDocx({ state, annotatedRisks, assets: catalogs.assets });
+          prefix = 'Реєстр ризиків';
+        } else {
+          const profileDoc = buildProfile(state, catalogs);
+          buf = buildDocx({ state, profileDoc, assets: catalogs.assets, policyMapping: catalogs.policyMapping });
+          prefix = 'ЦПБ';
+        }
         const safeName = (state.passport.ics_name || 'профіль').replace(/[^a-zа-яіїєґ0-9_\- ]/gi, '').trim() || 'профіль';
-        const fileName = `${safeName}_${new Date().toISOString().slice(0, 10)}.docx`;
+        const fileName = `${prefix} ${safeName}_${new Date().toISOString().slice(0, 10)}.docx`;
         await mkdir(join(ROOT, 'exports'), { recursive: true });
         await writeFile(join(ROOT, 'exports', fileName), buf);
         res.writeHead(200, {

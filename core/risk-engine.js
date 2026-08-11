@@ -19,10 +19,11 @@ export function baseRisksFor(catalog, selectedAssetIds, asClass) {
     .map(r => annotateRisk(r, catalog.scale));
 }
 
-export function threatDirectory(catalog) {
+export function threatDirectory(catalog, assetId = null) {
   const seen = new Set();
   const out = [];
   for (const r of catalog.risks) {
+    if (assetId && r.asset_id !== assetId) continue;
     const key = r.threat + '|' + r.vulnerability;
     if (!seen.has(key)) { seen.add(key); out.push({ threat: r.threat, vulnerability: r.vulnerability }); }
   }
