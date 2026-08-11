@@ -40,6 +40,14 @@ th { background: #edf2f7; }
 .param-info { cursor: help; color: #c53030; font-weight: 700; }
 .note-editor { display: block; width: 100%; font-size: 0.85rem; padding: 0.4rem; border: 1px solid #cbd5e0; border-radius: 4px; margin-bottom: 0.4rem; }
 .enh-subtitle { font-weight: 600; color: #2c5282; margin: 0.6rem 0 0.2rem; border-top: 1px dashed #cbd5e0; padding-top: 0.5rem; }
+
+.approved-panel { background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 6px; padding: 0.6rem 1rem; margin-bottom: 1rem; }
+.approved-panel h3 { margin: 0.2rem 0 0.5rem; }
+.approved-item { border-top: 1px solid #c6f6d5; padding: 0.4rem 0; }
+.approved-item header { background: none; color: inherit; padding: 0; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.approved-date { font-size: 0.8rem; color: #4a5568; }
+.approved-details { font-size: 0.85rem; margin: 0.3rem 0 0 0.5rem; }
+.approved-details p { margin: 0.15rem 0; }
 .src-policy { background: #c6f6d5; }
 .src-bpb, .src-generic { background: #e2e8f0; }
 .src-empty { background: #fed7d7; font-weight: 600; }

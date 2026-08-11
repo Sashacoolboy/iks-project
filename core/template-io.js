@@ -31,6 +31,16 @@ export function applyCpbTemplate(state, tpl) {
   return { ...clone(state), info_type: tpl.info_type, profile: clone(tpl.profile) };
 }
 
+/** Затверджений профіль — повний знімок стану + підсумки на момент затвердження */
+export function makeApprovedRecord(state, summary = {}) {
+  return { kind: 'approved', approved_at: new Date().toISOString(),
+    summary: clone(summary), state: clone(state) };
+}
+
+export function applyApprovedRecord(record) {
+  return { ...defaultState(), ...clone(record.state) };
+}
+
 const INFO_TYPE_VALUES = ['open_confidential', 'service', 'state_secret'];
 
 export function validateTemplate(kind, obj) {
@@ -45,6 +55,15 @@ export function validateTemplate(kind, obj) {
   if (kind === 'cpb') {
     if (!INFO_TYPE_VALUES.includes(obj.info_type)) errors.push('Невірний info_type');
     if (!obj.profile || typeof obj.profile !== 'object') errors.push('Відсутній блок profile');
+  }
+  if (kind === 'approved') {
+    const st = obj.state;
+    if (!st || typeof st !== 'object') errors.push('Відсутній знімок стану');
+    else {
+      if (typeof st.passport?.as_class !== 'number') errors.push('Відсутній паспорт або клас АС');
+      if (!INFO_TYPE_VALUES.includes(st.info_type)) errors.push('Невірний info_type');
+      if (!st.profile || typeof st.profile !== 'object') errors.push('Відсутній блок profile');
+    }
   }
   return errors;
 }

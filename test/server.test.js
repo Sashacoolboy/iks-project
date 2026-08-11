@@ -15,6 +15,7 @@ after(() => {
   rmSync('templates/ics/тест-шаблон.json', { force: true });
   rmSync('templates/cpb/тест-дск.json', { force: true });
   rmSync('templates/cpb/тест-відкрита.json', { force: true });
+  rmSync('templates/approved/тест-затверджений.json', { force: true });
 });
 
 test('віддає index.html', async () => {
@@ -51,4 +52,20 @@ test('список cpb-шаблонів містить info_type для філь
   const byName = Object.fromEntries(list.items.map(i => [i.name, i.info_type]));
   assert.equal(byName['тест-дск'], 'service');
   assert.equal(byName['тест-відкрита'], 'open_confidential');
+});
+
+test('затверджені профілі: POST → список з метаданими', async () => {
+  const rec = { kind: 'approved', approved_at: '2026-08-11T10:00:00Z',
+    summary: { total: 100, autofilled: 40, risks_count: 9 },
+    state: { passport: { ics_name: 'ІКС-Затв', cert_body: 'X', as_class: 2 }, global_constants: {},
+      selected_assets: ['A-01'], risks: { accepted_base: [], custom: [] }, info_type: 'service',
+      profile: { param_overrides: {}, enhancements: [], excluded: [], exemption_overrides: [] } } };
+  const p = await fetch(BASE + '/api/templates/approved/тест-затверджений', { method: 'POST', body: JSON.stringify(rec) });
+  assert.equal(p.status, 200);
+  const list = await (await fetch(BASE + '/api/templates/approved')).json();
+  const it = list.items.find(i => i.name === 'тест-затверджений');
+  assert.equal(it.ics_name, 'ІКС-Затв');
+  assert.equal(it.as_class, 2);
+  assert.equal(it.info_type, 'service');
+  assert.equal(it.summary.total, 100);
 });

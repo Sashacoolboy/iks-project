@@ -1,7 +1,7 @@
 import { el } from '../render/dom.js';
 import { getState } from '../state.js';
 import { catalogs } from '../app.js';
-import { makeIcsTemplate, makeCpbTemplate } from '/core/template-io.js';
+import { makeIcsTemplate, makeCpbTemplate, makeApprovedRecord } from '/core/template-io.js';
 import { buildProfile } from '/core/profile-engine.js';
 
 async function saveTemplate(kind, tpl) {
@@ -44,6 +44,13 @@ export const step = {
       el('div', { class: 'actions' },
         el('button', { type: 'button', onclick: () => saveTemplate('ics', makeIcsTemplate(getState())) }, '💾 Зберегти як шаблон ІКС'),
         el('button', { type: 'button', ...(canExport ? {} : { disabled: '' }), onclick: () => saveTemplate('cpb', makeCpbTemplate(getState())) }, '💾 Зберегти як шаблон ЦПБ'),
-        exportBtn)));
+        exportBtn,
+        el('button', { type: 'button', ...(canExport ? {} : { disabled: '' }), onclick: () => {
+          const doc = buildProfile(getState(), catalogs);
+          const summary = { ...doc.summary,
+            risks_count: getState().risks.accepted_base.length + getState().risks.custom.length,
+            enhancements_count: getState().profile.enhancements.length };
+          saveTemplate('approved', makeApprovedRecord(getState(), summary));
+        } }, '✅ Затвердити профіль (в реєстр)'))));
   },
 };

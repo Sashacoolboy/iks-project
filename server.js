@@ -11,7 +11,7 @@ const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT ?? 3000);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
 const NAME_RE = /^[a-zа-яіїєґ0-9_\-]+$/i;
-const KINDS = new Set(['ics', 'cpb']);
+const KINDS = new Set(['ics', 'cpb', 'approved']);
 
 const readBody = (req, limit = 5_000_000) => new Promise((resolve, reject) => {
   let size = 0; const chunks = [];
@@ -47,13 +47,23 @@ createServer(async (req, res) => {
         if (!KINDS.has(kind)) return json(res, 400, { error: 'невідомий тип шаблону' });
         const dir = join(ROOT, 'templates', kind);
         if (parts.length === 3 && req.method === 'GET') {
+          await mkdir(dir, { recursive: true });
           const files = (await readdir(dir)).filter(f => f.endsWith('.json'));
           const items = [];
           for (const f of files) {
             const name = f.slice(0, -5);
-            let info_type = null;
-            try { info_type = JSON.parse(await readFile(join(dir, f), 'utf8')).info_type ?? null; } catch { /* пошкоджений файл — без метаданих */ }
-            items.push({ name, info_type });
+            let meta = { name, info_type: null };
+            try {
+              const obj = JSON.parse(await readFile(join(dir, f), 'utf8'));
+              if (kind === 'approved') {
+                meta = { name, info_type: obj.state?.info_type ?? null,
+                  ics_name: obj.state?.passport?.ics_name ?? '', as_class: obj.state?.passport?.as_class ?? null,
+                  approved_at: obj.approved_at ?? null, summary: obj.summary ?? {} };
+              } else {
+                meta.info_type = obj.info_type ?? null;
+              }
+            } catch { /* пошкоджений файл — без метаданих */ }
+            items.push(meta);
           }
           return json(res, 200, { names: items.map(i => i.name), items });
         }
@@ -64,8 +74,7 @@ createServer(async (req, res) => {
         if (req.method === 'POST') {
           const body = JSON.parse((await readBody(req)).toString('utf8'));
           const errors = validateTemplate(kind, body);
-          if (errors.length) return json(res, 400, { error: errors.join('; ') });
-          await writeFile(file, JSON.stringify(body, null, 2));
+          if (errors.length) return json(res, 400, { error: errors.join('; ') });          await mkdir(dir, { recursive: true });          await writeFile(file, JSON.stringify(body, null, 2));
           return json(res, 200, { ok: true });
         }
       }
