@@ -107,20 +107,29 @@ export const step = {
       el('p', { class: 'stmt', style: `margin-left:${line.depth * 1.5}em` },
         `${line.label} `, ...line.parts.map(paramSpan)));
 
-    const sections = [];
-    let currentClass = null;
+    // Групування пунктів за класами для карточок-таблиць
+    const byClass = new Map();
     for (const item of doc.items) {
-      if (item.classId !== currentClass) {
-        currentClass = item.classId;
-        sections.push(el('h3', {}, `${item.classId} — ${item.className}`));
-      }
-      const statusBadge = el('span', {
-        class: item.status === STATUS.EXEMPT ? 'badge badge-exempt' :
-               item.status === STATUS.EXCLUDED ? 'badge badge-excluded' : 'badge badge-applied' }, item.status);
-      const body = [];
+      if (!byClass.has(item.classId)) byClass.set(item.classId, { className: item.className, items: [] });
+      byClass.get(item.classId).items.push(item);
+    }
+
+    const itemRows = (item) => {
+      const rows = [];
+      const excludeBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
+        setState(s => ({ ...s, profile: { ...s.profile,
+          excluded: s.profile.excluded.includes(item.key)
+            ? s.profile.excluded.filter(k => k !== item.key)
+            : [...s.profile.excluded, item.key] } }));
+        rerender();
+      } }, item.status === STATUS.EXCLUDED ? 'Повернути' : 'Не застосовується');
+      const reqCell = (rowSpan) => el('td', { class: 'req-cell', ...(rowSpan > 1 ? { rowspan: String(rowSpan) } : {}) },
+        el('div', {}, item.actionName), excludeBtn);
+      const numCell = (rowSpan) => el('td', { class: 'num-cell', ...(rowSpan > 1 ? { rowspan: String(rowSpan) } : {}) }, item.actionNumber);
+
       if (item.status === STATUS.EXEMPT) {
-        const noteBox = el('p', { class: 'exemption-note' }, item.exemptionNote);
-        const editNoteBtn = el('button', { type: 'button', onclick: () => {
+        const noteBox = el('div', { class: 'exemption-note' }, item.exemptionNote);
+        const editNoteBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
           const area = el('textarea', { class: 'note-editor', rows: '3' });
           area.value = item.exemptionNote;
           const save = el('button', { type: 'button', onclick: () => {
@@ -131,68 +140,96 @@ export const step = {
           const cancel = el('button', { type: 'button', onclick: rerender }, 'Скасувати');
           noteBox.replaceChildren(area, el('div', { class: 'actions' }, save, cancel));
         } }, 'Редагувати примітку');
-        body.push(noteBox);
-        body.push(el('div', { class: 'actions' }, editNoteBtn,
-          el('button', { type: 'button', onclick: () => {
-            setState(s => ({ ...s, profile: { ...s.profile, exemption_overrides: [...s.profile.exemption_overrides, item.key] } }));
-            rerender();
-          } }, 'Застосовувати попри виняток')));
-      } else if (item.status === STATUS.APPLIED) {
-        for (const c of item.controls) {
-          if (c.isEnhancement)
-            body.push(el('p', { class: 'enh-subtitle' }, `Посилення за БПБ: ${c.id} — ${c.title}`));
-          body.push(...renderLines(c.statementLines));
-        }
-        // Додавання посилень (один блок на базовий контроль)
-        const presentIds = new Set([
-          ...item.controls.map(c => c.id),
-          ...item.enhancements.map(e => e.id),
-        ]);
-        const seenBases = new Set();
-        for (const c of item.controls) {
-          const baseId = c.id.includes('(') ? c.id.slice(0, c.id.indexOf('(')) : c.id;
-          if (seenBases.has(baseId)) continue;
-          seenBases.add(baseId);
-          const available = enhancementsForControl(catalogs.ndTzi, baseId)
-            .filter(e => !presentIds.has(e.id));
-          const recommended = suggestions.get(baseId) ?? [];
-          if (available.length) {
-            const list = el('div', { class: 'enh-list', hidden: '' },
-              ...available.map(e => {
-                const rec = recommended.find(r => r.enhancementId === e.id);
-                return el('button', { type: 'button', class: rec ? 'enh recommended' : 'enh', onclick: () => {
-                  setState(s => ({ ...s, profile: { ...s.profile, enhancements: [...s.profile.enhancements, e.id] } }));
-                  rerender();
-                } }, rec ? `★ ${e.id} ${e.title} (рекомендовано ризиком ${rec.riskId})` : `${e.id} ${e.title}`);
-              }));
-            body.push(el('button', { type: 'button', onclick: () => { list.hidden = !list.hidden; } },
-              `+ Додати посилення (${available.length})`), list);
-          }
-        }
-        for (const e of item.enhancements) {
-          body.push(el('div', { class: 'enh-applied' },
-            el('p', {}, el('strong', {}, `Посилення: ${e.id} ${e.title} `),
-              el('button', { type: 'button', onclick: () => {
-                setState(s => ({ ...s, profile: { ...s.profile, enhancements: s.profile.enhancements.filter(x => x !== e.id) } }));
-                rerender();
-              } }, '✕')),
-            ...renderLines(e.lines)));
-        }
+        const applyBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
+          setState(s => ({ ...s, profile: { ...s.profile, exemption_overrides: [...s.profile.exemption_overrides, item.key] } }));
+          rerender();
+        } }, 'Застосовувати попри виняток');
+        rows.push(el('tr', { class: 'row-exempt' }, numCell(1), reqCell(1),
+          el('td', { class: 'ctrl-cell' }, '—'),
+          el('td', {}, el('span', { class: 'badge badge-exempt' }, 'Виконано архітектурно'), noteBox,
+            el('div', { class: 'actions' }, editNoteBtn, applyBtn))));
+        return rows;
       }
-      const toggleExclude = el('button', { type: 'button', onclick: () => {
-        setState(s => ({ ...s, profile: { ...s.profile,
-          excluded: s.profile.excluded.includes(item.key)
-            ? s.profile.excluded.filter(k => k !== item.key)
-            : [...s.profile.excluded, item.key] } }));
-        rerender();
-      } }, item.status === STATUS.EXCLUDED ? 'Повернути' : 'Не застосовується');
-      sections.push(el('article', { class: 'profile-item' },
-        el('header', {}, el('strong', {}, `${item.actionNumber}. ${item.actionName}`), statusBadge, toggleExclude),
-        ...body));
+      if (item.status === STATUS.EXCLUDED) {
+        rows.push(el('tr', { class: 'row-excluded' }, numCell(1), reqCell(1),
+          el('td', { class: 'ctrl-cell' }, '—'),
+          el('td', {}, el('span', { class: 'badge badge-excluded' }, 'Не застосовується (вручну)'))));
+        return rows;
+      }
+
+      // APPLIED: рядок на кожен контроль/посилення + рядок «+ Посилення»
+      const presentIds = new Set([...item.controls.map(c => c.id), ...item.enhancements.map(e => e.id)]);
+      const seenBases = new Set();
+      const enhButtons = [];
+      for (const c of item.controls) {
+        const baseId = c.id.includes('(') ? c.id.slice(0, c.id.indexOf('(')) : c.id;
+        if (seenBases.has(baseId)) continue;
+        seenBases.add(baseId);
+        const available = enhancementsForControl(catalogs.ndTzi, baseId).filter(e => !presentIds.has(e.id));
+        const recommended = suggestions.get(baseId) ?? [];
+        if (!available.length) continue;
+        const list = el('div', { class: 'enh-list', hidden: '' },
+          ...available.map(e => {
+            const rec = recommended.find(r => r.enhancementId === e.id);
+            return el('button', { type: 'button', class: rec ? 'enh recommended' : 'enh', onclick: () => {
+              setState(s => ({ ...s, profile: { ...s.profile, enhancements: [...s.profile.enhancements, e.id] } }));
+              rerender();
+            } }, rec ? `★ ${e.id} ${e.title} (рекомендовано ризиком ${rec.riskId})` : `${e.id} ${e.title}`);
+          }));
+        enhButtons.push(el('div', {},
+          el('button', { type: 'button', class: 'link-btn', onclick: () => { list.hidden = !list.hidden; } },
+            `+ Посилення (${available.length})`), list));
+      }
+      const totalRows = item.controls.length + item.enhancements.length + (enhButtons.length ? 1 : 0);
+      let first = true;
+      for (const c of item.controls) {
+        const cells = [];
+        if (first) { cells.push(numCell(totalRows), reqCell(totalRows)); first = false; }
+        cells.push(
+          el('td', { class: 'ctrl-cell' }, c.id),
+          el('td', {}, ...renderLines(c.statementLines)));
+        rows.push(el('tr', {}, ...cells));
+      }
+      for (const e of item.enhancements) {
+        rows.push(el('tr', { class: 'row-enh' },
+          el('td', { class: 'ctrl-cell' }, e.id, el('div', { class: 'ctrl-note' }, '(додано)'),
+            el('button', { type: 'button', class: 'link-btn', onclick: () => {
+              setState(s => ({ ...s, profile: { ...s.profile, enhancements: s.profile.enhancements.filter(x => x !== e.id) } }));
+              rerender();
+            } }, '✕')),
+          el('td', {}, ...renderLines(e.lines))));
+      }
+      if (enhButtons.length)
+        rows.push(el('tr', { class: 'row-enh-add' }, el('td', { colspan: '2' }, ...enhButtons)));
+      return rows;
+    };
+
+    const cards = [];
+    for (const [classId, group] of byClass) {
+      const tbl = el('table', { class: 'verify-table' },
+        el('tr', {}, ...['№', 'Вимога', 'Захід', 'Налаштований зміст заходу захисту'].map(h => el('th', {}, h))),
+        ...group.items.flatMap(itemRows));
+      const toggle = el('span', { class: 'collapse-mark' }, '▲');
+      const header = el('header', { class: 'class-card-header', onclick: () => {
+        tbl.hidden = !tbl.hidden;
+        toggle.textContent = tbl.hidden ? '▼' : '▲';
+      } },
+        el('strong', {}, `${group.className} (${classId})`),
+        el('span', { class: 'req-count' }, `${group.items.length} вимог `, toggle));
+      cards.push(el('div', { class: 'class-card' }, header, tbl));
     }
+
+    const summaryBar = el('div', { class: 'summary-bar' },
+      el('span', { class: 'badge badge-applied' }, `Пунктів ${doc.summary.total}`),
+      el('span', { class: 'badge stat-auto' }, `Автозаповнено ${doc.summary.autofilled}`),
+      el('span', { class: 'badge stat-empty' }, `Порожні ${doc.summary.empty}`),
+      el('span', { class: 'badge badge-exempt' }, `Винятків ${doc.summary.exempted}`),
+      el('span', { class: 'badge badge-excluded' }, `Виключено ${doc.summary.excluded}`));
+
     container.replaceChildren(el('section', {},
-      el('h2', {}, `Крок 6. Верифікація (${doc.summary.total} пунктів, порожніх: ${doc.summary.empty})`),
+      el('h2', {}, 'Крок 6. Верифікація та посилення'),
+      summaryBar,
       dictList,
-      ...sections));
+      ...cards));
   },
 };

@@ -66,6 +66,28 @@ th { background: #edf2f7; }
 .custom-list li { margin: 0.3rem 0; }
 .cell-edit { width: 100%; min-width: 7rem; font-size: 0.8rem; padding: 0.2rem 0.3rem; border: 1px solid #cbd5e0; border-radius: 3px; }
 .hint { color: #718096; font-size: 0.85rem; }
+
+/* Крок 6: табличний формат верифікації */
+.summary-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; position: sticky; top: 0; background: #f7fafc; padding: 0.5rem 0; z-index: 5; }
+.stat-auto { background: #c6f6d5; color: #22543d; }
+.stat-empty { background: #fed7d7; color: #822727; }
+.class-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin: 0.9rem 0; overflow: hidden; }
+.class-card-header { background: #f7fafc; color: inherit; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid #e2e8f0; }
+.req-count { font-size: 0.8rem; color: #4a5568; }
+.collapse-mark { color: #a0aec0; }
+.verify-table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+.verify-table th { background: #fff; border-bottom: 2px solid #e2e8f0; text-align: left; padding: 0.45rem 0.6rem; font-size: 0.78rem; color: #4a5568; }
+.verify-table td { border-top: 1px solid #edf2f7; padding: 0.5rem 0.6rem; vertical-align: top; }
+.num-cell { width: 2.2rem; text-align: center; color: #4a5568; }
+.req-cell { width: 11rem; font-weight: 600; }
+.ctrl-cell { width: 5rem; font-family: ui-monospace, monospace; font-size: 0.78rem; color: #4a5568; }
+.ctrl-note { font-size: 0.72rem; font-style: italic; color: #805ad5; }
+.link-btn { border: none; background: none; color: #3182ce; padding: 0.15rem 0; font-size: 0.8rem; text-align: left; }
+.link-btn:hover { text-decoration: underline; }
+.row-enh td { background: #fbfaff; }
+.row-enh-add td { border-top: none; }
+.row-exempt td { background: #fffdf0; }
+.row-excluded td { background: #f7fafc; color: #718096; }
 .summary p { margin: 0.25rem 0; }
 .warn { color: #c53030; font-weight: 600; }
 .ok { color: #2f855a; font-weight: 600; }
