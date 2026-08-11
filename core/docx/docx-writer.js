@@ -48,16 +48,26 @@ function headerXml(infoType) {
     `<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${stamp}</w:hdr>`;
 }
 
-export function buildDocx({ state, profileDoc, annotatedRisks, assets }) {
+export function buildDocx({ state, profileDoc, annotatedRisks, assets, policyMapping }) {
+  const constantMeta = new Map(
+    (policyMapping?.global_constants ?? []).map(gc => [gc.key, gc.label]));
   const body = [];
   // 1. Титул
   body.push(par('ЦІЛЬОВИЙ ПРОФІЛЬ БЕЗПЕКИ', { bold: true, align: 'center' }));
   body.push(par(state.passport.ics_name, { bold: true, align: 'center' }));
   body.push(par(`Орган сертифікації: ${state.passport.cert_body}`, { align: 'center' }));
   body.push(par(`Клас автоматизованої системи: АС-${state.passport.as_class}`, { align: 'center' }));
-  // 2. Глобальні політики
+  if (state.global_constants.organization_policy_id)
+    body.push(par(`Введено в дію: ${state.global_constants.organization_policy_id}`, { align: 'center' }));
+  // 2. Глобальні політики (людські назви з мапінгу, лише заповнені)
   body.push(par('1. Глобальні політики безпеки організації', { bold: true }));
-  body.push(table(Object.entries(state.global_constants).map(([k, v]) => row([cell(k), cell(v)]))));
+  const policyRows = Object.entries(state.global_constants)
+    .filter(([, v]) => v && String(v).trim())
+    .map(([k, v]) => row([cell(constantMeta.get(k) ?? k), cell(v)]));
+  body.push(table([
+    row([cell('Політика', { bold: true }), cell('Значення', { bold: true })]),
+    ...policyRows,
+  ]));
   // 3. Активи
   body.push(par('2. Реєстр активів', { bold: true }));
   body.push(table([

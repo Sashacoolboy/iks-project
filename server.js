@@ -71,7 +71,7 @@ createServer(async (req, res) => {
           ...baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class).filter(r => accepted.has(r.id)),
           ...state.risks.custom.map(r => annotateRisk(r, catalogs.threatsRisks.scale)),
         ];
-        const buf = buildDocx({ state, profileDoc, annotatedRisks, assets: catalogs.assets });
+        const buf = buildDocx({ state, profileDoc, annotatedRisks, assets: catalogs.assets, policyMapping: catalogs.policyMapping });
         const safeName = (state.passport.ics_name || 'профіль').replace(/[^a-zа-яіїєґ0-9_\- ]/gi, '').trim() || 'профіль';
         const fileName = `${safeName}_${new Date().toISOString().slice(0, 10)}.docx`;
         await mkdir(join(ROOT, 'exports'), { recursive: true });

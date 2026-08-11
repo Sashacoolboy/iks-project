@@ -9,11 +9,15 @@ import { escapeXml, buildDocx } from '../core/docx/docx-writer.js';
 const input = {
   state: {
     passport: { ics_name: 'Тест & <ІКС>', cert_body: 'Орган', as_class: 1 },
-    global_constants: { password_rotation_days: '90 днів' },
+    global_constants: { password_rotation_days: '90 днів', organization_policy_id: 'Наказ № 45 від 10.08.2026', crypto_hardware_token: '' },
     selected_assets: ['A-01'],
     info_type: 'service',
     profile: { param_overrides: {}, enhancements: [], excluded: [], exemption_overrides: [] },
   },
+  policyMapping: { global_constants: [
+    { key: 'password_rotation_days', label: 'Періодичність зміни паролів', example: '', odp_params: [] },
+    { key: 'organization_policy_id', label: 'Розпорядчий документ організації', example: '', odp_params: [] },
+  ] },
   assets: [{ id: 'A-01', name: 'АРМ', category: 'Фізичні активи', min_as_class: 1 }],
   annotatedRisks: [{ id: 'R-001', asset_id: 'A-01', threat: 'Загроза', vulnerability: 'Вразливість',
     impact: 4, likelihood: 0.5, likelihood_label: 'Середня', level: 'Високий', score: 2,
@@ -39,6 +43,10 @@ test('buildDocx повертає валідний docx з грифом та на
   const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
   assert.match(xml, /Тест &amp; &lt;ІКС&gt;/);
   assert.match(xml, /Times New Roman/);
+  assert.match(xml, /Введено в дію: Наказ № 45 від 10.08.2026/);
+  assert.match(xml, /Періодичність зміни паролів/);
+  assert.doesNotMatch(xml, /password_rotation_days/);
+  assert.doesNotMatch(xml, /crypto_hardware_token/);
   const header = execFileSync('unzip', ['-p', file, 'word/header1.xml'], { encoding: 'utf8' });
   assert.match(header, /Для службового користування/);
 });
