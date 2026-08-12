@@ -95,3 +95,4 @@ th { background: #edf2f7; }
 .ok { color: #2f855a; font-weight: 600; }
 .constructor { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; background: #fff; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; }
 .constructor label { font-size: 0.82rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.req-cell button {background: #ddd; border: 1px solid #cbd5e0; border-radius: 4px; padding: 0.2rem 0.4rem; font-size: 0.75rem; color: #2c5282; margin-top: 10px;}
