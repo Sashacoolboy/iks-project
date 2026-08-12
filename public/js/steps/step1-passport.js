@@ -10,7 +10,7 @@ async function loadTemplateList(select) {
 }
 
 export const step = {
-  id: 'passport', title: 'Паспорт та політики',
+  id: 'passport', title: 'Проект та політики',
   validate(state) {
     const errors = [];
     if (!state.passport.ics_name.trim()) errors.push('Вкажіть назву ІКС');

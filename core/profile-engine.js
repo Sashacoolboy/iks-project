@@ -29,12 +29,21 @@ export function indexNdParams(ndTzi) {
   return map;
 }
 
-function flattenStatement(items, prefix = []) {
+// Нормалізація сегмента мітки/локатора: 'a.' → 'a', '(a)' → 'a', 'b)' → 'b'
+const normSeg = (s) => String(s ?? '').replace(/[^\p{L}\p{N}.]/gu, '').replace(/\.+$/, '');
+
+const paramsIn = (text) => [...String(text ?? '').matchAll(PARAM_RE)].map(m => m[1]);
+
+// Плоский statement; рядок без власних параметрів успадковує параметри найближчого предка
+function flattenStatement(items, prefix = [], inherited = []) {
   const out = [];
   for (const it of items ?? []) {
-    const label = [...prefix, (it.label ?? '').replace(/\.$/, '')].filter(Boolean).join('.');
-    out.push({ label, text: it.text ?? '' });
-    out.push(...flattenStatement(it.children, [...prefix, (it.label ?? '').replace(/\.$/, '')].filter(Boolean)));
+    const seg = normSeg(it.label);
+    const path = [...prefix, seg].filter(Boolean);
+    const own = paramsIn(it.text);
+    const effective = own.length ? own : inherited;
+    out.push({ label: path.join('.'), text: it.text ?? '', params: effective });
+    out.push(...flattenStatement(it.children, path, effective));
   }
   return out;
 }
@@ -42,10 +51,22 @@ function flattenStatement(items, prefix = []) {
 export function bpbValuesFor(ndControl, securityAction) {
   const values = new Map();
   const flat = flattenStatement(ndControl?.catalog?.statement?.items);
+  const allParams = [...new Set(flat.flatMap(l => paramsIn(l.text)))];
   for (const item of securityAction.security_params?.items ?? []) {
-    const target = flat.find(l => l.label === item.locator);
-    if (!target) continue;
-    for (const m of target.text.matchAll(PARAM_RE)) values.set(m[1], item.value);
+    const loc = normSeg(item.locator);
+    let assigned = false;
+    if (loc) {
+      const target = flat.find(l => l.label === loc || l.label.endsWith('.' + loc));
+      if (target)
+        for (const pid of target.params) { values.set(pid, item.value); assigned = true; }
+      // Числовий локатор без збігу мітки — позиційний номер параметра контролю
+      if (!assigned && /^\d+$/.test(loc) && allParams[Number(loc) - 1]) {
+        values.set(allParams[Number(loc) - 1], item.value);
+        assigned = true;
+      }
+    }
+    // Локатор відсутній/не знайдений, але параметр у statement один — значення точно його
+    if (!assigned && allParams.length === 1) values.set(allParams[0], item.value);
   }
   return values;
 }

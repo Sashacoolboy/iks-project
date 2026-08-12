@@ -14,31 +14,38 @@ export function emptyDictionary() {
   return { entries: {} };
 }
 
-/** Додає факт заповнення параметра; повертає НОВИЙ словник (count++, макс 15 значень) */
-export function mergeRecord(dict, { paramId, label, source_text, value }) {
+/** Додає факт заповнення параметра (з типом інформації); повертає НОВИЙ словник */
+export function mergeRecord(dict, { paramId, label, source_text, value, info_type }) {
   const v = (value ?? '').trim();
   if (!paramId || !v) return dict;
   const entries = { ...(dict?.entries ?? {}) };
   const prev = entries[paramId] ?? { label: label ?? '', source_text: source_text ?? '', values: [] };
   const values = [...prev.values];
-  const hit = values.find(x => x.value === v);
+  const hit = values.find(x => x.value === v && (x.info_type ?? null) === (info_type ?? null));
   if (hit) { hit.count += 1; hit.last_used = new Date().toISOString(); }
-  else values.unshift({ value: v, count: 1, last_used: new Date().toISOString() });
+  else values.unshift({ value: v, count: 1, last_used: new Date().toISOString(), ...(info_type ? { info_type } : {}) });
   values.sort((a, b) => b.count - a.count);
   entries[paramId] = { label: prev.label || label || '', source_text: prev.source_text || source_text || '', values: values.slice(0, 15) };
   return { entries };
 }
 
-/** Підказки для конкретного параметра: власні значення + значення кластера */
-export function suggestionsFor(dict, paramId, label) {
+/** Підказки: власні значення + кластер; спочатку значення цього ж типу інформації */
+export function suggestionsFor(dict, paramId, label, infoType = null) {
   const key = labelKey(label);
-  const own = dict?.entries?.[paramId]?.values?.map(v => v.value) ?? [];
-  const cluster = [];
+  const same = [];
+  const other = [];
+  const push = (vals) => {
+    for (const v of vals) {
+      const sameType = !infoType || !v.info_type || v.info_type === infoType;
+      (sameType ? same : other).push(v.value);
+    }
+  };
+  push(dict?.entries?.[paramId]?.values ?? []);
   for (const [pid, e] of Object.entries(dict?.entries ?? {})) {
     if (pid === paramId || labelKey(e.label) !== key) continue;
-    cluster.push(...e.values.map(v => v.value));
+    push(e.values);
   }
-  return [...new Set([...own, ...cluster])];
+  return [...new Set([...same, ...other])];
 }
 
 /**

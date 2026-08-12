@@ -30,6 +30,21 @@ test('suggestionsFor віддає власні значення + кластер
   assert.ok(!s.includes('начальник ІБ'));
 });
 
+test('значення тегуються типом інформації; підказки свого типу — перші, чужого — фолбеком', () => {
+  let d = emptyDictionary();
+  d = mergeRecord(d, { paramId: 'p', label: 'частота', value: 'дск-значення', info_type: 'service' });
+  d = mergeRecord(d, { paramId: 'p', label: 'частота', value: 'відкрите-значення', info_type: 'open_confidential' });
+  // однакове значення різних типів — окремі записи
+  d = mergeRecord(d, { paramId: 'p', label: 'частота', value: 'дск-значення', info_type: 'open_confidential' });
+  assert.equal(d.entries['p'].values.length, 3);
+  const s = suggestionsFor(d, 'p', 'частота', 'service');
+  assert.equal(s[0], 'дск-значення');
+  assert.ok(s.includes('відкрите-значення')); // фолбек наприкінці
+  // без-типові (старі) записи вважаються сумісними з будь-яким типом
+  let d2 = mergeRecord(emptyDictionary(), { paramId: 'q', label: 'частота', value: 'без-типу' });
+  assert.equal(suggestionsFor(d2, 'q', 'частота', 'service')[0], 'без-типу');
+});
+
 test('clusterQuestions пропускає параметри, покриті policy_mapping', () => {
   let d = emptyDictionary();
   d = mergeRecord(d, { paramId: 'covered_odp.01', label: 'тайм-аут сеансу', value: '30 хв' });

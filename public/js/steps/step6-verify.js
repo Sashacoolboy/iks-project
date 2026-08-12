@@ -14,10 +14,11 @@ function acceptedAnnotatedRisks(state) {
   ];
 }
 
-// Запис факту заповнення у серверний словник + локальна копія для миттєвих підказок
+// Запис факту заповнення у серверний словник (з типом інформації) + локальна копія
 function recordToDictionary(paramId, info, value) {
   if (!value?.trim()) return;
-  const rec = { paramId, label: info?.label ?? '', source_text: info?.source_text ?? '', value: value.trim() };
+  const rec = { paramId, label: info?.label ?? '', source_text: info?.source_text ?? '',
+    value: value.trim(), info_type: getState().info_type };
   catalogs.odpDictionary = mergeRecord(catalogs.odpDictionary, rec);
   fetch('/api/dictionary/record', { method: 'POST', body: JSON.stringify(rec) }).catch(() => {});
 }
@@ -37,9 +38,9 @@ export const step = {
     const suggestions = suggestionsFromRisks(acceptedAnnotatedRisks(state));
     const rerender = () => { container.replaceChildren(); step.render(container); };
 
-    // Сегментований словник: підказки з серверного словника ODP (власні + кластер)
+    // Сегментований словник: підказки з серверного словника ODP (спочатку — цього типу інформації)
     const suggestionsForPart = (part) =>
-      dictSuggestions(catalogs.odpDictionary, part.paramId, part.info?.label);
+      dictSuggestions(catalogs.odpDictionary, part.paramId, part.info?.label, state.info_type);
     const dictList = el('datalist', { id: 'param-dict' });
 
     const commitOverride = (paramId, info, raw) => {
