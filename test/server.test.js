@@ -16,6 +16,7 @@ after(() => {
   rmSync('templates/cpb/тест-дск.json', { force: true });
   rmSync('templates/cpb/тест-відкрита.json', { force: true });
   rmSync('templates/approved/тест-затверджений.json', { force: true });
+  rmSync('dictionary/odp_dictionary.json', { force: true });
 });
 
 test('віддає index.html', async () => {
@@ -52,6 +53,18 @@ test('список cpb-шаблонів містить info_type для філь
   const byName = Object.fromEntries(list.items.map(i => [i.name, i.info_type]));
   assert.equal(byName['тест-дск'], 'service');
   assert.equal(byName['тест-відкрита'], 'open_confidential');
+});
+
+test('словник ODP: record → GET накопичує значення', async () => {
+  const rec = { paramId: 'test_odp.01', label: 'тестова частота', source_text: '[П]', value: 'щорічно' };
+  const p1 = await fetch(BASE + '/api/dictionary/record', { method: 'POST', body: JSON.stringify(rec) });
+  assert.equal(p1.status, 200);
+  await fetch(BASE + '/api/dictionary/record', { method: 'POST', body: JSON.stringify(rec) });
+  const dict = await (await fetch(BASE + '/api/dictionary')).json();
+  assert.equal(dict.entries['test_odp.01'].values[0].value, 'щорічно');
+  assert.equal(dict.entries['test_odp.01'].values[0].count, 2);
+  const bad = await fetch(BASE + '/api/dictionary/record', { method: 'POST', body: JSON.stringify({ value: 'x' }) });
+  assert.equal(bad.status, 400);
 });
 
 test('затверджені профілі: POST → список з метаданими', async () => {

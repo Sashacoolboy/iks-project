@@ -1,4 +1,5 @@
 import { buildPolicyParamIndex, resolveParamValue, renderText, PARAM_RE } from './policy-autofill.js';
+import { dynamicPolicyIndex } from './odp-dictionary.js';
 
 export const INFO_TYPES = { open_confidential: 'bpb_open_confidential', service: 'bpb_service', state_secret: null };
 
@@ -69,6 +70,10 @@ export function buildProfile(state, catalogs) {
   const nd = indexNdControls(catalogs.ndTzi);
   const paramInfo = indexNdParams(catalogs.ndTzi);
   const policyIndex = buildPolicyParamIndex(catalogs.policyMapping, state.global_constants);
+  // Відповіді на динамічні питання (зі словника ODP) — теж політики, але не перекривають основні
+  if (catalogs.odpDictionary)
+    for (const [pid, v] of dynamicPolicyIndex(catalogs.odpDictionary, state.global_constants))
+      if (!policyIndex.has(pid)) policyIndex.set(pid, v);
   const noteOverrides = state.profile.exemption_note_overrides ?? {};
   const exemptByControl = new Map();
   for (const e of catalogs.exemptions.exemptions)

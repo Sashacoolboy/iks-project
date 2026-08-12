@@ -14,6 +14,7 @@ export async function loadCatalogs() {
     genericDefaults: await get('generic_parameter_defaults.json'),
     assets: (await get('assets_catalog.json')).assets,
     threatsRisks: await get('threats_risks.json'),
+    odpDictionary: await (await fetch('/api/dictionary')).json(),
   };
 }
 

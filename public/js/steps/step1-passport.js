@@ -2,6 +2,7 @@ import { el, option } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { applyIcsTemplate, validateTemplate } from '/core/template-io.js';
+import { clusterQuestions } from '/core/odp-dictionary.js';
 
 async function loadTemplateList(select) {
   const { names } = await (await fetch('/api/templates/ics')).json();
@@ -55,6 +56,21 @@ export const step = {
       container.replaceChildren();
       step.render(container);
     } }, 'Завантажити шаблон ІКС');
+    // Динамічні питання зі словника ODP: кластери, не покриті базовими константами
+    const dynQuestions = clusterQuestions(catalogs.odpDictionary, catalogs.policyMapping);
+    const dynFields = dynQuestions.length ? [
+      el('fieldset', { class: 'dyn-questions' },
+        el('legend', {}, 'Додаткові питання (з практики заповнення)'),
+        el('p', { class: 'hint' }, 'Сформовано зі словника ваших відповідей на Кроці 6 — заповнення тут автоматично підставить значення в усі відповідні пункти ЦПБ.'),
+        ...dynQuestions.map(q => {
+          const listId = `dynlist-${q.key.replace(/[^a-z0-9]/gi, '')}`;
+          return el('label', { class: 'field' },
+            `${q.label} (параметрів: ${q.paramIds.length})`,
+            el('input', { type: 'text', list: listId, placeholder: q.values[0] ?? '',
+              value: state.global_constants[q.key] ?? '',
+              oninput: (e) => setState(s => ({ ...s, global_constants: { ...s.global_constants, [q.key]: e.target.value } })) }),
+            el('datalist', { id: listId }, ...q.values.map(v => el('option', { value: v }))));
+        }))] : [];
     container.replaceChildren(
       el('section', {},
         el('h2', {}, 'Крок 1. Паспорт ІКС та Глобальні політики'),
@@ -63,6 +79,7 @@ export const step = {
         el('label', { class: 'field' }, 'Орган сертифікації', certInput),
         el('div', { class: 'field' }, 'Клас ІКС: ', ...classRadios),
         el('h3', {}, 'Картка глобальних політик'),
-        ...policyFields));
+        ...policyFields,
+        ...dynFields));
   },
 };

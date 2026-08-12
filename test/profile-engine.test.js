@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildProfile, INFO_TYPES } from '../core/profile-engine.js';
+import { labelKey } from '../core/odp-dictionary.js';
 
 const read = (p) => JSON.parse(readFileSync(new URL(`../data/${p}`, import.meta.url)));
 const catalogs = {
@@ -110,4 +111,23 @@ test('порожній параметр несе info з source_text для ту
         for (const p of l.parts)
           if (p.type === 'param' && p.source === 'empty' && p.info?.source_text) found = true;
   assert.ok(found, 'жоден порожній параметр не має info.source_text');
+});
+
+test('відповідь на динамічне питання (словник ODP) підставляється як політика', () => {
+  // знайти реально порожній параметр і його мітку
+  const doc0 = buildProfile(baseState, catalogs);
+  let target = null;
+  outer: for (const item of doc0.items)
+    for (const c of item.controls)
+      for (const l of c.statementLines)
+        for (const p of l.parts)
+          if (p.type === 'param' && p.source === 'empty' && p.info?.label) { target = p; break outer; }
+  assert.ok(target, 'немає порожнього параметра для тесту');
+  const odpDictionary = {
+    entries: { [target.paramId]: { label: target.info.label, source_text: '', values: [{ value: 'x', count: 1 }] } } };
+  const dynKey = 'dyn:' + labelKey(target.info.label);
+  const state = { ...baseState, global_constants: { [dynKey]: 'ДИНАМІЧНЕ-42' } };
+  const doc = buildProfile(state, { ...catalogs, odpDictionary });
+  const hit = doc.items.some(i => i.controls.some(c => c.statementLines.some(l => l.text.includes('ДИНАМІЧНЕ-42'))));
+  assert.ok(hit, 'динамічна відповідь не потрапила у текст');
 });

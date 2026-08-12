@@ -2,3 +2,4 @@ node_modules/
 exports/*.docx
 .DS_Store
 tools/params_dump.tsv
+dictionary/odp_dictionary.json

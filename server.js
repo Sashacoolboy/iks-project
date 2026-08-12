@@ -6,6 +6,7 @@ import { buildDocx, buildRisksDocx } from './core/docx/docx-writer.js';
 import { buildProfile } from './core/profile-engine.js';
 import { baseRisksFor, annotateRisk } from './core/risk-engine.js';
 import { validateTemplate } from './core/template-io.js';
+import { mergeRecord, emptyDictionary } from './core/odp-dictionary.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT ?? 3000);
@@ -42,6 +43,25 @@ createServer(async (req, res) => {
     const parts = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
 
     if (parts[0] === 'api') {
+      if (parts[1] === 'dictionary') {
+        const dictFile = join(ROOT, 'dictionary', 'odp_dictionary.json');
+        if (req.method === 'GET') {
+          try { return json(res, 200, JSON.parse(await readFile(dictFile, 'utf8'))); }
+          catch { return json(res, 200, emptyDictionary()); }
+        }
+        if (parts[2] === 'record' && req.method === 'POST') {
+          const rec = JSON.parse((await readBody(req)).toString('utf8'));
+          if (typeof rec?.paramId !== 'string' || typeof rec?.value !== 'string')
+            return json(res, 400, { error: 'потрібні paramId та value' });
+          let dict;
+          try { dict = JSON.parse(await readFile(dictFile, 'utf8')); } catch { dict = emptyDictionary(); }
+          dict = mergeRecord(dict, rec);
+          await mkdir(join(ROOT, 'dictionary'), { recursive: true });
+          await writeFile(dictFile, JSON.stringify(dict, null, 2));
+          return json(res, 200, { ok: true });
+        }
+        return json(res, 404, { error: 'not found' });
+      }
       if (parts[1] === 'templates') {
         const kind = parts[2];
         if (!KINDS.has(kind)) return json(res, 400, { error: 'невідомий тип шаблону' });
