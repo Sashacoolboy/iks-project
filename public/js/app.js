@@ -1,5 +1,5 @@
 import { el } from './render/dom.js';
-import { getState, setState } from './state.js';
+import { getState } from './state.js';
 
 const steps = [];
 export function registerStep(step) { steps.push(step); }
@@ -39,16 +39,6 @@ function renderStepper() {
     }, i === 0 ? s.title : `${i}. ${s.title}`)));
 }
 
-// Дублікат затвердженого профілю: розблокований стан із новим імʼям ІКС
-export function duplicateCurrent() {
-  setState(s => {
-    const copy = JSON.parse(JSON.stringify(s));
-    delete copy.approved_view;
-    copy.passport.ics_name = `${copy.passport.ics_name || 'ІКС'}-копія`;
-    return copy;
-  });
-}
-
 function go(index) {
   current = index;
   renderStepper();
@@ -57,9 +47,7 @@ function go(index) {
   const locked = Boolean(getState().approved_view) && current > 0;
   if (locked) {
     const banner = el('div', { class: 'view-banner' },
-      el('span', {}, `🔒 Затверджений профіль «${getState().approved_view}» — лише перегляд.`),
-      el('button', { type: 'button', class: 'primary', onclick: () => { duplicateCurrent(); go(current); } },
-        'Створити дублікат для змін'),
+      el('span', {}, `🔒 Затверджений профіль «${getState().approved_view}» — лише перегляд. Для змін створіть дублікат у Реєстрі.`),
       el('button', { type: 'button', onclick: () => go(0) }, 'До реєстру'));
     const body = el('div', { class: 'locked' });
     steps[current].render(body);
