@@ -35,8 +35,26 @@ export const step = {
       return;
     }
     const doc = buildProfile(state, catalogs);
-    const suggestions = suggestionsFromRisks(acceptedAnnotatedRisks(state));
+    const acceptedRisks = acceptedAnnotatedRisks(state);
+    const suggestions = suggestionsFromRisks(acceptedRisks);
     const rerender = () => { container.replaceChildren(); step.render(container); };
+
+    // Мапа «захід → ризики, які він покриває» — лише для екрана, у DOCX не потрапляє
+    const risksByRef = new Map();
+    for (const r of acceptedRisks)
+      for (const ref of [...(r.control_refs ?? []), ...(r.enhancement_suggestions ?? [])]) {
+        if (!risksByRef.has(ref)) risksByRef.set(ref, []);
+        risksByRef.get(ref).push(r);
+      }
+    const riskChips = (ctrlId) => {
+      const covered = risksByRef.get(ctrlId) ?? [];
+      if (!covered.length) return null;
+      return el('div', { class: 'risk-chips' },
+        ...covered.map(r => el('span', {
+          class: `risk-chip lvl-${r.level.replaceAll(' ', '-')}`,
+          title: `Покриває ризик ${r.id} (${r.level}): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
+        }, r.id)));
+    };
 
     // Сегментований словник: підказки з серверного словника ODP (спочатку — цього типу інформації)
     const suggestionsForPart = (part) =>
@@ -165,13 +183,13 @@ export const step = {
         const cells = [];
         if (first) { cells.push(numCell(totalRows), reqCell(totalRows)); first = false; }
         cells.push(
-          el('td', { class: 'ctrl-cell' }, c.id),
+          el('td', { class: 'ctrl-cell' }, c.id, riskChips(c.id)),
           el('td', {}, ...renderLines(c.statementLines)));
         rows.push(el('tr', {}, ...cells));
       }
       for (const e of item.enhancements) {
         rows.push(el('tr', { class: 'row-enh' },
-          el('td', { class: 'ctrl-cell' }, e.id, el('div', { class: 'ctrl-note' }, '(додано)'),
+          el('td', { class: 'ctrl-cell' }, e.id, riskChips(e.id), el('div', { class: 'ctrl-note' }, '(додано)'),
             el('button', { type: 'button', class: 'link-btn', onclick: () => {
               setState(s => ({ ...s, profile: { ...s.profile, enhancements: s.profile.enhancements.filter(x => x !== e.id) } }));
               rerender();
