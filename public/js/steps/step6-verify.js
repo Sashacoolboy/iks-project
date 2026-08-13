@@ -75,7 +75,7 @@ export const step = {
       return el('div', { class: 'risk-chips' },
         ...typical.map(r => el('span', {
           class: 'risk-chip chip-catalog',
-          'data-tip': `Типово покриває ризик ${r.id} (не у вашому реєстрі): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
+          'data-tip': `Сімейство заходів типово покриває ризик ${r.id}: ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
         }, r.id)));
     };
 
@@ -143,8 +143,19 @@ export const step = {
             : [...s.profile.excluded, item.key] } }));
         rerender();
       } }, item.status === STATUS.EXCLUDED ? 'Повернути' : 'Не застосовується');
+      // Лічильники параметрів пункту: заповнені (policy/bpb/generic/override) та порожні
+      let filled = 0, empty = 0;
+      const allLines = [...item.controls.flatMap(c => c.statementLines), ...item.enhancements.flatMap(e => e.lines)];
+      for (const line of allLines)
+        for (const part of line.parts) {
+          if (part.type !== 'param') continue;
+          if (part.source === 'empty') empty++; else filled++;
+        }
+      const paramStats = (filled || empty) ? el('div', { class: 'param-stats' },
+        filled ? el('span', { class: 'badge stat-auto' }, `Заповнено ${filled}`) : null,
+        empty ? el('span', { class: 'badge stat-empty' }, `Порожні ${empty}`) : null) : null;
       const reqCell = (rowSpan) => el('td', { class: 'req-cell', ...(rowSpan > 1 ? { rowspan: String(rowSpan) } : {}) },
-        el('div', {}, item.actionName), excludeBtn);
+        el('div', {}, item.actionName), paramStats, excludeBtn);
       const numCell = (rowSpan) => el('td', { class: 'num-cell', ...(rowSpan > 1 ? { rowspan: String(rowSpan) } : {}) }, item.actionNumber);
 
       if (item.status === STATUS.EXEMPT) {
@@ -197,8 +208,8 @@ export const step = {
             } }, rec ? `★ ${e.id} ${e.title} (рекомендовано ризиком ${rec.riskId})` : `${e.id} ${e.title}`);
           }));
         enhButtons.push(el('div', {},
-          el('button', { type: 'button', class: 'link-btn', onclick: () => { list.hidden = !list.hidden; } },
-            `+ Посилення (${available.length})`), list));
+          el('button', { type: 'button', class: 'add link-btn', onclick: () => { list.hidden = !list.hidden; } },
+            `Виберіть додаткові посилення для заходу (${available.length})`), list));
       }
       const totalRows = item.controls.length + item.enhancements.length + (enhButtons.length ? 1 : 0);
       let first = true;

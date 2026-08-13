@@ -1,0 +1,18 @@
+{
+  "kind": "ics",
+  "saved_at": "2026-08-11T08:22:19.767Z",
+  "passport": {
+    "ics_name": "АРМ спецзв'язку №1",
+    "cert_body": "ДССЗЗІ України",
+    "as_class": 1
+  },
+  "global_constants": {
+    "password_rotation_days": "90 днів",
+    "security_officer_role": "Начальник ІБ майор Петренко І.В."
+  },
+  "selected_assets": [
+    "A-01",
+    "A-02",
+    "A-04"
+  ]
+}
