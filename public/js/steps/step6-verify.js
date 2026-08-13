@@ -65,17 +65,17 @@ export const step = {
       if (covered.length) return el('div', { class: 'risk-chips' },
         ...covered.map(r => el('span', {
           class: `risk-chip lvl-${r.level.replaceAll(' ', '-')}`,
-          title: `Покриває ризик ${r.id} (${r.level}): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
+          'data-tip': `Покриває ризик ${r.id} (${r.level}): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
         }, r.id)));
       // Контролі-політики (XX-1) — організаційна основа всього класу, а не окремих ризиків
       if (/^[A-ZА-Я]{2}-1$/.test(ctrlId)) return el('div', { class: 'risk-chips' },
-        el('span', { class: 'risk-chip chip-policy', title: 'Політика та процедури — організаційна основа всіх заходів цього класу' }, 'основа класу'));
+        el('span', { class: 'risk-chip chip-policy', 'data-tip': 'Політика та процедури — організаційна основа всіх заходів цього класу' }, 'основа класу'));
       const typical = lookup(catalogByRef, ctrlId);
       if (!typical.length) return null;
       return el('div', { class: 'risk-chips' },
         ...typical.map(r => el('span', {
           class: 'risk-chip chip-catalog',
-          title: `Типово покриває ризик ${r.id} (не у вашому реєстрі): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
+          'data-tip': `Типово покриває ризик ${r.id} (не у вашому реєстрі): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
         }, r.id)));
     };
 

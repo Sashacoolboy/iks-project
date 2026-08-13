@@ -84,9 +84,23 @@ th { background: #edf2f7; }
 .req-cell { width: 11rem; font-weight: 600; }
 .ctrl-cell { width: 5rem; font-family: ui-monospace, monospace; font-size: 0.78rem; color: #4a5568; }
 .risk-chips { display: flex; flex-wrap: wrap; gap: 0.2rem; margin-top: 0.3rem; }
-.risk-chip { display: inline-block; padding: 0 0.35rem; border-radius: 999px; font-size: 0.68rem; font-weight: 600; cursor: help; }
+.risk-chip { display: inline-block; padding: 0 0.35rem; border-radius: 999px; font-size: 0.68rem; font-weight: 600; cursor: help; position: relative; }
 .chip-policy { background: #e2e8f0; color: #4a5568; font-weight: 500; }
 .chip-catalog { background: #fff; color: #718096; border: 1px dashed #a0aec0; font-weight: 500; }
+/* Миттєвий тултіп із текстом ризику при наведенні */
+.risk-chip[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; left: 0; bottom: calc(100% + 0.35rem); z-index: 20;
+  width: max-content; max-width: 26rem; white-space: normal;
+  background: #1a202c; color: #f7fafc; font-weight: 400; font-size: 0.78rem; line-height: 1.35;
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  padding: 0.45rem 0.6rem; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.risk-chip[data-tip]:hover::before {
+  content: ''; position: absolute; left: 0.6rem; bottom: 100%; z-index: 20;
+  border: 0.35rem solid transparent; border-top-color: #1a202c; pointer-events: none;
+}
 .ctrl-note { font-size: 0.72rem; font-style: italic; color: #805ad5; }
 .link-btn { border: none; background: none; color: #3182ce; padding: 0.15rem 0; font-size: 0.8rem; text-align: left; }
 .link-btn:hover { text-decoration: underline; }
