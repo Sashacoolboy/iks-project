@@ -46,13 +46,36 @@ export const step = {
         if (!risksByRef.has(ref)) risksByRef.set(ref, []);
         risksByRef.get(ref).push(r);
       }
+    // Довідкова мапа з усього каталогу — коли захід не покриває жодного з ризиків реєстру
+    const catalogByRef = new Map();
+    for (const r of catalogs.threatsRisks.risks)
+      for (const ref of [...(r.control_refs ?? []), ...(r.enhancement_suggestions ?? [])]) {
+        if (!catalogByRef.has(ref)) catalogByRef.set(ref, []);
+        catalogByRef.get(ref).push(r);
+      }
+    const lookup = (map, ctrlId) => {
+      let found = map.get(ctrlId) ?? [];
+      // Посилення без власних посилань успадковує ризики базового контролю
+      if (!found.length && ctrlId.includes('('))
+        found = map.get(ctrlId.slice(0, ctrlId.indexOf('('))) ?? [];
+      return found;
+    };
     const riskChips = (ctrlId) => {
-      const covered = risksByRef.get(ctrlId) ?? [];
-      if (!covered.length) return null;
-      return el('div', { class: 'risk-chips' },
+      const covered = lookup(risksByRef, ctrlId);
+      if (covered.length) return el('div', { class: 'risk-chips' },
         ...covered.map(r => el('span', {
           class: `risk-chip lvl-${r.level.replaceAll(' ', '-')}`,
           title: `Покриває ризик ${r.id} (${r.level}): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
+        }, r.id)));
+      // Контролі-політики (XX-1) — організаційна основа всього класу, а не окремих ризиків
+      if (/^[A-ZА-Я]{2}-1$/.test(ctrlId)) return el('div', { class: 'risk-chips' },
+        el('span', { class: 'risk-chip chip-policy', title: 'Політика та процедури — організаційна основа всіх заходів цього класу' }, 'основа класу'));
+      const typical = lookup(catalogByRef, ctrlId);
+      if (!typical.length) return null;
+      return el('div', { class: 'risk-chips' },
+        ...typical.map(r => el('span', {
+          class: 'risk-chip chip-catalog',
+          title: `Типово покриває ризик ${r.id} (не у вашому реєстрі): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
         }, r.id)));
     };
 

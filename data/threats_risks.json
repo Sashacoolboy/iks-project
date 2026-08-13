@@ -1,29 +1,86 @@
 {
   "scale": {
     "levels": [
-      { "label": "Дуже низький", "max": 0.3 },
-      { "label": "Низький", "max": 0.5 },
-      { "label": "Середній", "max": 1.5 },
-      { "label": "Високий", "max": 3.0 },
-      { "label": "Критичний", "max": 5.0 }
+      {
+        "label": "Дуже низький",
+        "max": 0.3
+      },
+      {
+        "label": "Низький",
+        "max": 0.5
+      },
+      {
+        "label": "Середній",
+        "max": 1.5
+      },
+      {
+        "label": "Високий",
+        "max": 3
+      },
+      {
+        "label": "Критичний",
+        "max": 5
+      }
     ],
     "likelihood_options": [
-      { "value": 0.1, "label": "Дуже низька" },
-      { "value": 0.2, "label": "Дуже низька" },
-      { "value": 0.3, "label": "Низька" },
-      { "value": 0.4, "label": "Середня" },
-      { "value": 0.5, "label": "Середня" },
-      { "value": 0.6, "label": "Висока" },
-      { "value": 0.7, "label": "Висока" },
-      { "value": 0.8, "label": "Висока" },
-      { "value": 0.9, "label": "Дуже висока" }
+      {
+        "value": 0.1,
+        "label": "Дуже низька"
+      },
+      {
+        "value": 0.2,
+        "label": "Дуже низька"
+      },
+      {
+        "value": 0.3,
+        "label": "Низька"
+      },
+      {
+        "value": 0.4,
+        "label": "Середня"
+      },
+      {
+        "value": 0.5,
+        "label": "Середня"
+      },
+      {
+        "value": 0.6,
+        "label": "Висока"
+      },
+      {
+        "value": 0.7,
+        "label": "Висока"
+      },
+      {
+        "value": 0.8,
+        "label": "Висока"
+      },
+      {
+        "value": 0.9,
+        "label": "Дуже висока"
+      }
     ],
     "impact_options": [
-      { "value": 1, "label": "Дуже низький" },
-      { "value": 2, "label": "Середній" },
-      { "value": 3, "label": "Помітний" },
-      { "value": 4, "label": "Високий" },
-      { "value": 5, "label": "Критичний" }
+      {
+        "value": 1,
+        "label": "Дуже низький"
+      },
+      {
+        "value": 2,
+        "label": "Середній"
+      },
+      {
+        "value": 3,
+        "label": "Помітний"
+      },
+      {
+        "value": 4,
+        "label": "Високий"
+      },
+      {
+        "value": 5,
+        "label": "Критичний"
+      }
     ]
   },
   "risks": [
@@ -41,8 +98,15 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["SC-28", "MP-6"],
-      "enhancement_suggestions": ["SC-28(1)"]
+      "control_refs": [
+        "SC-28",
+        "MP-6",
+        "AC-19",
+        "SC-13"
+      ],
+      "enhancement_suggestions": [
+        "SC-28(1)"
+      ]
     },
     {
       "id": "R-002",
@@ -58,8 +122,20 @@
       "responsible": "HR, Начальник ІБ",
       "residual_risk": "Середній",
       "priority": "Середній",
-      "control_refs": ["AT-2", "PS-6"],
-      "enhancement_suggestions": ["AT-2(3)"]
+      "control_refs": [
+        "AT-2",
+        "PS-6",
+        "AC-2",
+        "IA-4",
+        "IR-2",
+        "IR-4",
+        "IR-6",
+        "IR-7",
+        "IR-8"
+      ],
+      "enhancement_suggestions": [
+        "AT-2(3)"
+      ]
     },
     {
       "id": "R-003",
@@ -75,7 +151,18 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["MP-7", "SI-3"],
+      "control_refs": [
+        "MP-7",
+        "SI-3",
+        "IR-3",
+        "IR-4",
+        "IR-5",
+        "IR-6",
+        "IR-8",
+        "MA-3",
+        "MP-2",
+        "SC-18"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -92,7 +179,11 @@
       "responsible": "Керівник відділу",
       "residual_risk": "Середній",
       "priority": "Високий",
-      "control_refs": ["MP-6", "PE-5"],
+      "control_refs": [
+        "MP-6",
+        "PE-5",
+        "SC-4"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -109,7 +200,10 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Дуже низький",
       "priority": "Низький",
-      "control_refs": ["AC-18", "SC-40"],
+      "control_refs": [
+        "AC-18",
+        "SC-40"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -126,8 +220,14 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["SC-7", "AC-3"],
-      "enhancement_suggestions": ["SC-7(21)"]
+      "control_refs": [
+        "SC-7",
+        "AC-3",
+        "SI-4"
+      ],
+      "enhancement_suggestions": [
+        "SC-7(21)"
+      ]
     },
     {
       "id": "R-007",
@@ -143,8 +243,30 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["AC-6", "IA-2", "AU-6"],
-      "enhancement_suggestions": ["IA-2(1)", "AC-6(5)"]
+      "control_refs": [
+        "AC-6",
+        "IA-2",
+        "AU-6",
+        "AC-2",
+        "AC-5",
+        "AC-7",
+        "AU-2",
+        "AU-3",
+        "AU-5",
+        "AU-7",
+        "AU-8",
+        "AU-9",
+        "AU-11",
+        "CM-5",
+        "IA-4",
+        "IR-4",
+        "IR-5",
+        "SI-4"
+      ],
+      "enhancement_suggestions": [
+        "IA-2(1)",
+        "AC-6(5)"
+      ]
     },
     {
       "id": "R-008",
@@ -160,8 +282,19 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Дуже низький",
       "priority": "Високий",
-      "control_refs": ["SC-8", "SC-12"],
-      "enhancement_suggestions": ["SC-8(1)"]
+      "control_refs": [
+        "SC-8",
+        "SC-12",
+        "AC-17",
+        "MA-4",
+        "PE-4",
+        "SC-10",
+        "SC-13",
+        "SC-23"
+      ],
+      "enhancement_suggestions": [
+        "SC-8(1)"
+      ]
     },
     {
       "id": "R-009",
@@ -177,8 +310,22 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["IA-2", "SA-9", "AC-20"],
-      "enhancement_suggestions": ["IA-2(1)"]
+      "control_refs": [
+        "IA-2",
+        "SA-9",
+        "AC-20",
+        "AC-7",
+        "AC-12",
+        "AC-17",
+        "IA-6",
+        "IA-11",
+        "MA-4",
+        "SC-10",
+        "SC-23"
+      ],
+      "enhancement_suggestions": [
+        "IA-2(1)"
+      ]
     },
     {
       "id": "R-010",
@@ -194,7 +341,13 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["SI-2", "CM-6"],
+      "control_refs": [
+        "SI-2",
+        "CM-6",
+        "CM-3",
+        "CM-7",
+        "SI-5"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -211,7 +364,12 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["MP-4", "MP-5"],
+      "control_refs": [
+        "MP-4",
+        "MP-5",
+        "MP-2",
+        "SI-12"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -228,7 +386,10 @@
       "responsible": "Керівник відділу",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["PE-5", "MP-3"],
+      "control_refs": [
+        "PE-5",
+        "MP-3"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -245,7 +406,21 @@
       "responsible": "HR, Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["PS-3", "PS-6", "AC-6"],
+      "control_refs": [
+        "PS-3",
+        "PS-6",
+        "AC-6",
+        "AC-2",
+        "AC-5",
+        "AC-8",
+        "AU-2",
+        "AU-7",
+        "AU-9",
+        "AU-11",
+        "MA-5",
+        "PS-4",
+        "PS-5"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -262,7 +437,11 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["AT-3", "PL-4"],
+      "control_refs": [
+        "AT-3",
+        "PL-4",
+        "PL-2"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -279,7 +458,12 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["SI-6", "SI-7"],
+      "control_refs": [
+        "SI-6",
+        "SI-7",
+        "AU-5",
+        "CA-7"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -296,7 +480,11 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["SC-12", "IA-5"],
+      "control_refs": [
+        "SC-12",
+        "IA-5",
+        "SC-13"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -313,8 +501,13 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["CP-9", "CP-10"],
-      "enhancement_suggestions": ["CP-9(1)"]
+      "control_refs": [
+        "CP-9",
+        "CP-10"
+      ],
+      "enhancement_suggestions": [
+        "CP-9(1)"
+      ]
     },
     {
       "id": "R-018",
@@ -330,7 +523,11 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["AC-3", "SI-7"],
+      "control_refs": [
+        "AC-3",
+        "SI-7",
+        "CM-5"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -347,7 +544,12 @@
       "responsible": "Комендант, Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["PE-2", "PE-3"],
+      "control_refs": [
+        "PE-2",
+        "PE-3",
+        "MA-5",
+        "PE-6"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -364,7 +566,11 @@
       "responsible": "Комендант",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["PE-13", "PE-15"],
+      "control_refs": [
+        "PE-13",
+        "PE-15",
+        "PE-17"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -381,7 +587,14 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["AC-3", "CM-8"],
+      "control_refs": [
+        "AC-3",
+        "CM-8",
+        "IA-3",
+        "MA-3",
+        "PE-4",
+        "SI-4"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -398,7 +611,10 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Середній",
       "priority": "Середній",
-      "control_refs": ["CP-2", "MA-2"],
+      "control_refs": [
+        "CP-2",
+        "MA-2"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -415,7 +631,10 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["CP-9", "CP-10"],
+      "control_refs": [
+        "CP-9",
+        "CP-10"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -432,7 +651,11 @@
       "responsible": "Комендант",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["PE-2", "PE-3"],
+      "control_refs": [
+        "PE-2",
+        "PE-3",
+        "PE-6"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -449,7 +672,17 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["SI-2", "RA-5"],
+      "control_refs": [
+        "SI-2",
+        "RA-5",
+        "CA-2",
+        "CA-5",
+        "CA-7",
+        "RA-3",
+        "RA-7",
+        "SA-22",
+        "SI-5"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -466,7 +699,16 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["CM-2", "CM-6"],
+      "control_refs": [
+        "CM-2",
+        "CM-6",
+        "CA-2",
+        "CA-5",
+        "CM-3",
+        "CM-4",
+        "CM-7",
+        "SA-8"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -483,7 +725,12 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["CP-2", "SA-9"],
+      "control_refs": [
+        "CP-2",
+        "SA-9",
+        "SR-2",
+        "SR-6"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -500,8 +747,17 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["SA-9", "SC-8"],
-      "enhancement_suggestions": ["SC-8(1)"]
+      "control_refs": [
+        "SA-9",
+        "SC-8",
+        "SR-2",
+        "SR-3",
+        "SR-5",
+        "SR-6"
+      ],
+      "enhancement_suggestions": [
+        "SC-8(1)"
+      ]
     },
     {
       "id": "R-029",
@@ -517,7 +773,10 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["CA-3", "SC-7"],
+      "control_refs": [
+        "CA-3",
+        "SC-7"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -534,7 +793,12 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["AC-4", "AU-12"],
+      "control_refs": [
+        "AC-4",
+        "AU-12",
+        "AC-22",
+        "CM-12"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -551,8 +815,14 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Високий",
-      "control_refs": ["AC-6", "IA-2", "SA-9"],
-      "enhancement_suggestions": ["IA-2(1)"]
+      "control_refs": [
+        "AC-6",
+        "IA-2",
+        "SA-9"
+      ],
+      "enhancement_suggestions": [
+        "IA-2(1)"
+      ]
     },
     {
       "id": "R-032",
@@ -568,7 +838,10 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["CP-9", "SA-9"],
+      "control_refs": [
+        "CP-9",
+        "SA-9"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -585,7 +858,12 @@
       "responsible": "ІТ-відділ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["SC-7", "SA-9"],
+      "control_refs": [
+        "SC-7",
+        "SA-9",
+        "SA-8",
+        "SC-4"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -602,7 +880,12 @@
       "responsible": "Користувач",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["AC-11", "PE-5"],
+      "control_refs": [
+        "AC-11",
+        "PE-5",
+        "IA-6",
+        "SC-15"
+      ],
       "enhancement_suggestions": []
     },
     {
@@ -619,7 +902,10 @@
       "responsible": "Начальник ІБ",
       "residual_risk": "Низький",
       "priority": "Середній",
-      "control_refs": ["MP-6"],
+      "control_refs": [
+        "MP-6",
+        "SI-12"
+      ],
       "enhancement_suggestions": []
     }
   ]
