@@ -22076,7 +22076,7 @@
                         "label": "2.",
                         "marker": "2",
                         "marker_type": "numeric",
-                        "text": "управління входом та виходом на об’єкт за допомогою {{ insert: param, pe-3_odp.02 }}; охорони].",
+                        "text": "управління входом та виходом на об’єкт за допомогою {{ insert: param, pe-3_odp.02 }};.",
                         "children": []
                       }
                     ]
@@ -38681,7 +38681,7 @@
                         "label": "2.",
                         "marker": "2",
                         "marker_type": "numeric",
-                        "text": "{{ insert: param, si-3_odp.04 }}] у відповідь на виявлення шкідливого коду.",
+                        "text": "{{ insert: param, si-3_odp.04 }} у відповідь на виявлення шкідливого коду.",
                         "children": []
                       }
                     ]
@@ -39090,7 +39090,7 @@
                         "label": "1.",
                         "marker": "1",
                         "marker_type": "numeric",
-                        "text": "атактаіндикаторівпотенційнихатаквідповіднодо{{ insert: param, si-4_odp.01 }};",
+                        "text": "атак та індикаторів потенційних атак відповідно до{{ insert: param, si-4_odp.01 }};",
                         "children": []
                       },
                       {
@@ -39165,7 +39165,7 @@
                     "label": "g.",
                     "marker": "g",
                     "marker_type": "alpha",
-                    "text": "Надавати {{ insert: param, si-4_odp.03 }} до {{ insert: param, si-4_odp.04 }}].",
+                    "text": "Надавати {{ insert: param, si-4_odp.03 }} до {{ insert: param, si-4_odp.04 }}.",
                     "children": []
                   }
                 ]
@@ -39942,7 +39942,7 @@
                         "label": null,
                         "marker": null,
                         "marker_type": "unlabeled",
-                        "text": "Виявляти послуги мережі, які не були дозволені або схвалені {{ insert: param, si-4.22_odp.01 }} та здійснити {{ insert: param, si-4.22_odp.02 }}].",
+                        "text": "Виявляти послуги мережі, які не були дозволені або схвалені {{ insert: param, si-4.22_odp.01 }} та здійснити {{ insert: param, si-4.22_odp.02 }}.",
                         "children": []
                       }
                     ]
@@ -40103,7 +40103,7 @@
                     "label": "c.",
                     "marker": "c",
                     "marker_type": "alpha",
-                    "text": "Поширювати попередження, рекомендації та директиви безпеки для: {{ insert: param, si-5_odp.02 }}].",
+                    "text": "Поширювати попередження, рекомендації та директиви безпеки для: {{ insert: param, si-5_odp.02 }}.",
                     "children": []
                   },
                   {
@@ -40187,7 +40187,7 @@
                     "label": "b.",
                     "marker": "b",
                     "marker_type": "alpha",
-                    "text": "Виконувати перевірку {{ insert: param, si-6_odp.02 }}; за командою користувача з відповідними повноваженнями; {{ insert: param, si-6_odp.03 }}].",
+                    "text": "Виконувати перевірку {{ insert: param, si-6_odp.02 }}; за командою користувача з відповідними повноваженнями; {{ insert: param, si-6_odp.03 }}.",
                     "children": []
                   },
                   {
