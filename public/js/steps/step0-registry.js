@@ -18,19 +18,28 @@ function approvedItem(it) {
     details.hidden = false;
   } }, 'Інфо');
   const loadBtn = el('button', { type: 'button', onclick: async () => {
-    if (!confirm(`Відкрити затверджений профіль «${it.name}»? Поточний стан майстра буде замінено.`)) return;
+    if (!confirm(`Відкрити затверджений профіль «${it.name}» для перегляду? Поточний стан майстра буде замінено.`)) return;
     const rec = await (await fetch(`/api/templates/approved/${encodeURIComponent(it.name)}`)).json();
     if (validateTemplate('approved', rec).length) { alert('Запис пошкоджено'); return; }
-    setState(() => applyApprovedRecord(rec));
+    setState(() => ({ ...applyApprovedRecord(rec), approved_view: it.name }));
     goToStep(1);
-  } }, 'Переглянути кроки');
+  } }, 'Переглянути (без змін)');
+  const dupBtn = el('button', { type: 'button', onclick: async () => {
+    if (!confirm(`Створити дублікат профілю «${it.name}» для редагування? Поточний стан майстра буде замінено.`)) return;
+    const rec = await (await fetch(`/api/templates/approved/${encodeURIComponent(it.name)}`)).json();
+    if (validateTemplate('approved', rec).length) { alert('Запис пошкоджено'); return; }
+    const st = applyApprovedRecord(rec);
+    st.passport.ics_name = `${st.passport.ics_name || 'ІКС'}-копія`;
+    setState(() => st);
+    goToStep(1);
+  } }, '⇆ Дублювати');
   return el('article', { class: 'approved-item' },
     el('header', {},
       el('strong', {}, it.ics_name || it.name),
       el('span', { class: 'badge badge-applied' }, `АС-${it.as_class ?? '?'}`),
       el('span', { class: 'badge' }, INFO_LABELS[it.info_type] ?? '—'),
       el('span', { class: 'approved-date' }, it.approved_at ? new Date(it.approved_at).toLocaleDateString('uk-UA') : ''),
-      infoBtn, loadBtn),
+      infoBtn, loadBtn, dupBtn),
     details);
 }
 

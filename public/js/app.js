@@ -1,5 +1,5 @@
 import { el } from './render/dom.js';
-import { getState } from './state.js';
+import { getState, setState } from './state.js';
 
 const steps = [];
 export function registerStep(step) { steps.push(step); }
@@ -39,12 +39,36 @@ function renderStepper() {
     }, i === 0 ? s.title : `${i}. ${s.title}`)));
 }
 
+// Дублікат затвердженого профілю: розблокований стан із новим імʼям ІКС
+export function duplicateCurrent() {
+  setState(s => {
+    const copy = JSON.parse(JSON.stringify(s));
+    delete copy.approved_view;
+    copy.passport.ics_name = `${copy.passport.ics_name || 'ІКС'}-копія`;
+    return copy;
+  });
+}
+
 function go(index) {
   current = index;
   renderStepper();
   const container = document.getElementById('step-container');
   container.replaceChildren();
-  steps[current].render(container);
+  const locked = Boolean(getState().approved_view) && current > 0;
+  if (locked) {
+    const banner = el('div', { class: 'view-banner' },
+      el('span', {}, `🔒 Затверджений профіль «${getState().approved_view}» — лише перегляд.`),
+      el('button', { type: 'button', class: 'primary', onclick: () => { duplicateCurrent(); go(current); } },
+        'Створити дублікат для змін'),
+      el('button', { type: 'button', onclick: () => go(0) }, 'До реєстру'));
+    const body = el('div', { class: 'locked' });
+    steps[current].render(body);
+    // Формені елементи вимикаємо; клікабельні span (редагування параметрів) блокує CSS
+    for (const c of body.querySelectorAll('input, textarea, select, button:not(.collapse-safe)')) c.disabled = true;
+    container.replaceChildren(banner, body);
+  } else {
+    steps[current].render(container);
+  }
   document.getElementById('btn-back').disabled = current === 0;
   document.getElementById('btn-next').style.display = current === steps.length - 1 ? 'none' : '';
 }

@@ -33,8 +33,10 @@ export function applyCpbTemplate(state, tpl) {
 
 /** Затверджений профіль — повний знімок стану + підсумки на момент затвердження */
 export function makeApprovedRecord(state, summary = {}) {
+  const st = clone(state);
+  delete st.approved_view; // службовий прапорець режиму перегляду не зберігаємо
   return { kind: 'approved', approved_at: new Date().toISOString(),
-    summary: clone(summary), state: clone(state) };
+    summary: clone(summary), state: st };
 }
 
 export function applyApprovedRecord(record) {

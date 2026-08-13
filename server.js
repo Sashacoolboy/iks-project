@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, readdir, mkdir, stat } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDocx, buildRisksDocx } from './core/docx/docx-writer.js';
@@ -94,7 +94,14 @@ createServer(async (req, res) => {
         if (req.method === 'POST') {
           const body = JSON.parse((await readBody(req)).toString('utf8'));
           const errors = validateTemplate(kind, body);
-          if (errors.length) return json(res, 400, { error: errors.join('; ') });          await mkdir(dir, { recursive: true });          await writeFile(file, JSON.stringify(body, null, 2));
+          if (errors.length) return json(res, 400, { error: errors.join('; ') });
+          // Затверджені записи незмінні — редагування лише через дублікат під новим імʼям
+          if (kind === 'approved') {
+            let exists = false;
+            try { await stat(file); exists = true; } catch { /* немає — можна писати */ }
+            if (exists) return json(res, 409, { error: `запис «${name}» вже затверджено і не підлягає змінам — збережіть під новим імʼям` });
+          }
+          await mkdir(dir, { recursive: true });          await writeFile(file, JSON.stringify(body, null, 2));
           return json(res, 200, { ok: true });
         }
       }
