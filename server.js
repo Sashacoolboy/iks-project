@@ -7,12 +7,17 @@ import { buildProfile } from './core/profile-engine.js';
 import { baseRisksFor, annotateRisk } from './core/risk-engine.js';
 import { validateTemplate } from './core/template-io.js';
 import { mergeRecord, emptyDictionary } from './core/odp-dictionary.js';
+import { buildAssessmentPlan } from './core/assessment/assessment-plan.js';
+import { makeAssessment, serializeAssessment, deserializeAssessment, validateAssessmentSchema, nextAssessmentId } from './core/assessment/assessment-io.js';
+import { buildAssessmentDocx } from './core/docx/assessment-docx-writer.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT ?? 3000);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
 const NAME_RE = /^[a-zа-яіїєґ0-9_\-]+$/i;
 const KINDS = new Set(['ics', 'cpb', 'approved']);
+const ASSESSMENT_ID_RE = /^ASSESS-\d{4}-\d{3}$/;
+const EVIDENCE_EXT_ALLOWLIST = new Set(['.pdf', '.png', '.jpg', '.jpeg', '.txt', '.log', '.json']);
 
 const readBody = (req, limit = 5_000_000) => new Promise((resolve, reject) => {
   let size = 0; const chunks = [];
@@ -104,6 +109,93 @@ createServer(async (req, res) => {
           await mkdir(dir, { recursive: true });          await writeFile(file, JSON.stringify(body, null, 2));
           return json(res, 200, { ok: true });
         }
+      }
+      if (parts[1] === 'assessments') {
+        const assessDir = join(ROOT, 'assessments');
+        if (parts.length === 2 && req.method === 'GET') {
+          await mkdir(assessDir, { recursive: true });
+          const dirs = await readdir(assessDir, { withFileTypes: true });
+          const items = [];
+          for (const d of dirs) {
+            if (!d.isDirectory()) continue;
+            try {
+              const a = JSON.parse(await readFile(join(assessDir, d.name, 'assessment.json'), 'utf8'));
+              items.push({ id: a.id, ics_name: a.metadata?.ics_name, as_class: a.metadata?.as_class,
+                info_type: a.metadata?.info_type, status: a.status, created_at: a.created_at, updated_at: a.updated_at });
+            } catch { /* пошкоджений запис — пропустити */ }
+          }
+          return json(res, 200, { items });
+        }
+        if (parts.length === 2 && req.method === 'POST') {
+          const body = JSON.parse((await readBody(req)).toString('utf8'));
+          const approvedName = body.approved_name;
+          if (!approvedName || !NAME_RE.test(approvedName)) return json(res, 400, { error: 'некоректне ім\u02BCя затвердженого запису' });
+          let approvedRecord;
+          try { approvedRecord = JSON.parse(await readFile(join(ROOT, 'templates', 'approved', approvedName + '.json'), 'utf8')); }
+          catch { return json(res, 404, { error: 'затверджений запис не знайдено' }); }
+          if (validateTemplate('approved', approvedRecord).length) return json(res, 400, { error: 'затверджений запис пошкоджено' });
+          const catalogs = await catalogsPromise;
+          const assessmentCatalog = JSON.parse(await readFile(join(ROOT, 'data', 'assessment_catalog.json'), 'utf8'));
+          const { items, warnings } = buildAssessmentPlan({ approvedState: approvedRecord.state, catalogs, assessmentCatalog });
+          await mkdir(assessDir, { recursive: true });
+          const existing = (await readdir(assessDir, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => d.name);
+          const id = nextAssessmentId(existing);
+          const assessment = makeAssessment({ approvedRecord, approvedName, items, warnings, id });
+          const dir = join(assessDir, id);
+          await mkdir(join(dir, 'evidence'), { recursive: true });
+          await writeFile(join(dir, 'assessment.json'), serializeAssessment(assessment));
+          await writeFile(join(dir, 'cpb-snapshot.json'), JSON.stringify(approvedRecord, null, 2));
+          return json(res, 201, { id });
+        }
+        const id = parts[2];
+        if (id && !ASSESSMENT_ID_RE.test(id)) return json(res, 400, { error: 'некоректний assessment id' });
+        const dir = id ? join(assessDir, id) : null;
+        if (parts.length === 3 && req.method === 'GET') {
+          try { return json(res, 200, JSON.parse(await readFile(join(dir, 'assessment.json'), 'utf8'))); }
+          catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
+        }
+        if (parts.length === 3 && req.method === 'PUT') {
+          let body;
+          try { body = deserializeAssessment((await readBody(req)).toString('utf8')); }
+          catch { return json(res, 400, { error: 'некоректний JSON' }); }
+          const errors = validateAssessmentSchema(body);
+          if (errors.length) return json(res, 400, { error: errors.join('; ') });
+          body.updated_at = new Date().toISOString();
+          await writeFile(join(dir, 'assessment.json'), serializeAssessment(body));
+          return json(res, 200, { ok: true });
+        }
+        if (parts[3] === 'evidence' && parts.length === 4 && req.method === 'POST') {
+          const filename = url.searchParams.get('filename');
+          if (!filename || filename.includes('/') || filename.includes('..'))
+            return json(res, 400, { error: 'некоректне ім\u02BCя файлу' });
+          if (!EVIDENCE_EXT_ALLOWLIST.has(extname(filename).toLowerCase()))
+            return json(res, 400, { error: 'заборонене розширення файлу' });
+          const buf = await readBody(req, 20_000_000);
+          const evDir = join(dir, 'evidence');
+          await mkdir(evDir, { recursive: true });
+          await writeFile(join(evDir, filename), buf);
+          return json(res, 200, { ok: true, filename });
+        }
+        if (parts[3] === 'evidence' && parts.length === 5 && req.method === 'DELETE') {
+          const filename = parts[4];
+          if (filename.includes('/') || filename.includes('..')) return json(res, 400, { error: 'некоректне ім\u02BCя файлу' });
+          try { await (await import('node:fs/promises')).unlink(join(dir, 'evidence', filename)); return json(res, 200, { ok: true }); }
+          catch { return json(res, 404, { error: 'файл не знайдено' }); }
+        }
+        if (parts[3] === 'export' && parts[4] === 'docx' && req.method === 'POST') {
+          let assessment;
+          try { assessment = JSON.parse(await readFile(join(dir, 'assessment.json'), 'utf8')); }
+          catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
+          const buf = buildAssessmentDocx({ assessment });
+          await mkdir(join(ROOT, 'exports', 'assessments'), { recursive: true });
+          await writeFile(join(ROOT, 'exports', 'assessments', `${assessment.id}.docx`), buf);
+          res.writeHead(200, {
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(assessment.id + '.docx')}`,
+          });
+          return res.end(buf);
+        }
+        return json(res, 404, { error: 'not found' });
       }
       if (parts[1] === 'export' && (parts[2] === 'docx' || parts[2] === 'risks-docx') && req.method === 'POST') {
         const { state } = JSON.parse((await readBody(req)).toString('utf8'));
