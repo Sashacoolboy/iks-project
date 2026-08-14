@@ -14,6 +14,9 @@ h2 { font-size: 1.15rem; } h3 { font-size: 1rem; margin-top: 1.25rem; }
 .step-tab.active { background: #fff; color: #1a365d; font-weight: 600; }
 .step-tab.done { background: #2f855a; color: #fff; }
 
+.mode-switch { display: flex; gap: 0.5rem; padding: 0.5rem 1rem; background: #edf2f7; }
+.mode-switch button.active { background: #2c5282; color: #fff; }
+
 .field { display: block; margin: 0.6rem 0; font-size: 0.9rem; }
 .field input, .field select { display: block; width: 100%; max-width: 28rem; margin-top: 0.2rem; padding: 0.35rem 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; }
 .radio, .checkbox { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 1rem; }

@@ -82,3 +82,23 @@ document.getElementById('btn-next').addEventListener('click', () => {
   for (const m of modules) registerStep(m.step);
   go(0);
 })();
+
+document.getElementById('mode-assessment').addEventListener('click', async () => {
+  document.getElementById('mode-assessment').classList.add('active');
+  document.getElementById('mode-cpb').classList.remove('active');
+  document.getElementById('step-container').hidden = true;
+  document.getElementById('stepper').hidden = true;
+  document.querySelector('footer').hidden = true;
+  const assessContainer = document.getElementById('assessment-container');
+  assessContainer.hidden = false;
+  const { mountAssessmentApp } = await import('./assessment/assessment-app.js');
+  mountAssessmentApp(assessContainer);
+});
+document.getElementById('mode-cpb').addEventListener('click', () => {
+  document.getElementById('mode-cpb').classList.add('active');
+  document.getElementById('mode-assessment').classList.remove('active');
+  document.getElementById('step-container').hidden = false;
+  document.getElementById('stepper').hidden = false;
+  document.querySelector('footer').hidden = false;
+  document.getElementById('assessment-container').hidden = true;
+});

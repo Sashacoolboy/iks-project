@@ -7,7 +7,12 @@
 </head>
 <body>
   <header><h1>Автономний комплекс «Офлайн-Профіль»</h1><nav id="stepper"></nav></header>
+  <nav class="mode-switch">
+    <button id="mode-cpb" type="button" class="active">Формування ЦПБ</button>
+    <button id="mode-assessment" type="button">Оцінювання ІКС</button>
+  </nav>
   <main id="step-container"></main>
+  <main id="assessment-container" hidden></main>
   <footer>
     <button id="btn-back" type="button">← Назад</button>
     <button id="btn-next" type="button">Далі →</button>
