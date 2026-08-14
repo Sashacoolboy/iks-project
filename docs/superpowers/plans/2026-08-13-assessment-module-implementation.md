@@ -845,6 +845,10 @@ git commit -m "feat(assessment): add assessment-io — assessment.json creation,
 // test/assessment-docx-writer.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { buildAssessmentDocx } from '../core/docx/assessment-docx-writer.js';
 
 function sampleAssessment() {
@@ -859,21 +863,43 @@ function sampleAssessment() {
         evidence: [{ method: 'EXAMINE', source_type: 'POLICY', title: 'Політика ІБ', reference: 'п.4.2', observation: 'Відповідає', comment: '' }],
         finding: null,
       },
+      {
+        id: 'AC-99.z', control_id: 'AC-99', family: 'AC', catalog_missing: true,
+        resolved_statement: '', conclusion: null, assessor_comment: '', evidence: [], finding: null,
+      },
     ],
   };
 }
 
-test('buildAssessmentDocx повертає валідний ZIP/DOCX буфер', () => {
+test('buildAssessmentDocx повертає валідний ZIP/DOCX, що проходить unzip -t', () => {
   const buf = buildAssessmentDocx({ assessment: sampleAssessment() });
-  assert.ok(Buffer.isBuffer(buf));
-  assert.equal(buf.slice(0, 2).toString('ascii'), 'PK');
+  const dir = mkdtempSync(join(tmpdir(), 'assess-docx-'));
+  const file = join(dir, 'a.docx');
+  writeFileSync(file, buf);
+  assert.match(execFileSync('unzip', ['-t', file], { encoding: 'utf8' }), /No errors detected/);
 });
 
-test('DOCX містить resolved_statement та висновок у document.xml', () => {
+test('document.xml містить control id, resolved statement, висновок та докази', () => {
   const buf = buildAssessmentDocx({ assessment: sampleAssessment() });
-  const text = buf.toString('latin1');
-  assert.ok(text.includes('AC-02.e') === false || true); // presence check happens via unzip in integration; ensure buffer non-trivial
-  assert.ok(buf.length > 500);
+  const dir = mkdtempSync(join(tmpdir(), 'assess-docx-'));
+  const file = join(dir, 'a.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.match(xml, /AC-02\.e/);
+  assert.match(xml, /Вимагати схвалення керівником СЗІ запитів/);
+  assert.match(xml, /Позитивно/);
+  assert.match(xml, /Дослідження/);
+  assert.match(xml, /Політика ІБ/);
+});
+
+test('UNMAPPED_CONTROL item друкує попередження замість resolved_statement', () => {
+  const buf = buildAssessmentDocx({ assessment: sampleAssessment() });
+  const dir = mkdtempSync(join(tmpdir(), 'assess-docx-'));
+  const file = join(dir, 'a.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.match(xml, /AC-99\.z/);
+  assert.match(xml, /Методика оцінювання для цього заходу не визначена у локальному каталозі/);
 });
 ```
 
@@ -964,7 +990,7 @@ export function buildAssessmentDocx({ assessment }) {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `node --test test/assessment-docx-writer.test.js`
-Expected: PASS (2 passing)
+Expected: PASS (3 passing)
 
 - [ ] **Step 5: Commit**
 
