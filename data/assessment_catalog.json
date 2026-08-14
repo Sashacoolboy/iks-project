@@ -1,0 +1,376 @@
+{
+  "schema": {
+    "id": "ua.ics.assessment.catalog",
+    "version": "2.0.0-ac02-reference",
+    "language": "uk",
+    "status": "reference_fixture"
+  },
+  "provenance": {
+    "control_source": "НД ТЗІ 3.6-006-24 / локальний data/nd_tzi.json",
+    "note": "Еталонний fixture схеми v2: єдиний namespace ODP (реальні ідентифікатори ac-2_odp.xx з nd_tzi.json, без окремого assessment-namespace). Каталог зберігає лише методику оцінювання (statement_path, odp_refs, методи, потенційні докази); source statement та resolved statement будуються в runtime з nd_tzi.json + значень ODP зі знімка затвердженого запису ЦПБ. Значення ODP тут не зберігаються."
+  },
+  "enums": {
+    "methods": ["EXAMINE", "INTERVIEW", "TEST", "OBSERVE"],
+    "evidence_types": [
+      "POLICY", "PROCEDURE", "ORDER", "DOCUMENT", "REGISTER", "LIST",
+      "ROLE_MATRIX", "ACCESS_REQUEST", "LOG", "SYSTEM_CONFIGURATION",
+      "SCREENSHOT", "INTERVIEW", "TEST_RESULT", "PHYSICAL_INSPECTION", "OTHER"
+    ],
+    "interview_roles": ["SECURITY_OFFICER", "ACCOUNT_ADMIN", "SYSTEM_ADMIN", "USER"],
+    "odp_types": ["assignment", "selection"]
+  },
+  "controls": [
+    {
+      "control_id": "AC-02",
+      "canonical_control_id": "AC-2",
+      "family": "AC",
+      "title": "УПРАВЛІННЯ ОБЛІКОВИМИ ЗАПИСАМИ",
+      "odp_registry": [
+        { "id": "ac-2_odp.01", "owner_control_id": "AC-02", "owner_statement_path": "e", "type": "assignment", "label": "визначеною організацією відповідальною особою або роллю" },
+        { "id": "ac-2_odp.02", "owner_control_id": "AC-02", "owner_statement_path": "f", "type": "assignment", "label": "визначених організацією політики, процедур та умов" },
+        { "id": "ac-2_odp.03", "owner_control_id": "AC-02", "owner_statement_path": "h", "type": "assignment", "label": "визначеного організацією часового періоду для кожної ситуації" },
+        { "id": "ac-2_odp.04", "owner_control_id": "AC-02", "owner_statement_path": "j", "type": "assignment", "label": "визначеною організацією частотою" },
+        { "id": "ac-2.2_odp.01", "owner_control_id": "AC-02(02)", "owner_statement_path": null, "type": "selection", "label": "Вибір: видаляти, деактивувати" },
+        { "id": "ac-2.2_odp.02", "owner_control_id": "AC-02(02)", "owner_statement_path": null, "type": "assignment", "label": "визначеного організацією часового періоду для кожного типу облікових записів" },
+        { "id": "ac-2.3_odp.01", "owner_control_id": "AC-02(03)", "owner_statement_path": "d", "type": "assignment", "label": "визначеного організацією періоду часу" },
+        { "id": "ac-2.5_odp.01", "owner_control_id": "AC-02(05)", "owner_statement_path": null, "type": "assignment", "label": "вичерпано визначений організацією періоду часу очікування або опис того, коли необхідно вийти із системи" },
+        { "id": "ac-2.6_odp.01", "owner_control_id": "AC-02(06)", "owner_statement_path": null, "type": "assignment", "label": "визначений організацією перелік можливостей динамічного управління привілеями" },
+        { "id": "ac-2.8_odp.01", "owner_control_id": "AC-02(08)", "owner_statement_path": null, "type": "assignment", "label": "системні облікові записи, визначені організацією" },
+        { "id": "ac-2.9_odp.01", "owner_control_id": "AC-02(09)", "owner_statement_path": null, "type": "assignment", "label": "визначеним організацією умовам для створення спільних та групових облікових записів" },
+        { "id": "ac-2.11_odp.01", "owner_control_id": "AC-02(11)", "owner_statement_path": null, "type": "assignment", "label": "обставин та/або умов використання, визначених організацією" },
+        { "id": "ac-2.11_odp.02", "owner_control_id": "AC-02(11)", "owner_statement_path": null, "type": "assignment", "label": "визначених організацією облікових записів системи" },
+        { "id": "ac-2.12_odp.01", "owner_control_id": "AC-02(12)", "owner_statement_path": "i", "type": "assignment", "label": "визначене організацією нетипове використання" },
+        { "id": "ac-2.12_odp.02", "owner_control_id": "AC-02(12)", "owner_statement_path": "j", "type": "assignment", "label": "визначеного організацією персоналу або ролей" },
+        { "id": "ac-2.13_odp.01", "owner_control_id": "AC-02(13)", "owner_statement_path": null, "type": "assignment", "label": "визначеного організацією періоду часу" }
+      ],
+      "entries": [
+        {
+          "id": "AC-02.a",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "a",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["POLICY", "PROCEDURE", "LIST", "SYSTEM_CONFIGURATION"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.b",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "b",
+          "odp_refs": [],
+          "methods": ["EXAMINE"],
+          "potential_evidence": ["ORDER", "POLICY", "LIST"]
+        },
+        {
+          "id": "AC-02.c",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "c",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["POLICY", "PROCEDURE", "ROLE_MATRIX"],
+          "interview_roles": ["SECURITY_OFFICER", "ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.d",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "d",
+          "odp_refs": [],
+          "methods": ["EXAMINE"],
+          "potential_evidence": ["ORDER", "LIST", "REGISTER", "ROLE_MATRIX"]
+        },
+        {
+          "id": "AC-02.e",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "e",
+          "odp_refs": ["ac-2_odp.01"],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["ACCESS_REQUEST", "ORDER", "PROCEDURE"],
+          "interview_roles": ["SECURITY_OFFICER"]
+        },
+        {
+          "id": "AC-02.f",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "f",
+          "odp_refs": ["ac-2_odp.02"],
+          "methods": ["EXAMINE", "INTERVIEW", "TEST"],
+          "potential_evidence": ["POLICY", "PROCEDURE", "ACCESS_REQUEST", "SYSTEM_CONFIGURATION"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.g",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "g",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["LOG", "SYSTEM_CONFIGURATION", "PROCEDURE"]
+        },
+        {
+          "id": "AC-02.h.1",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "h.1",
+          "odp_refs": ["ac-2_odp.03"],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["PROCEDURE", "ORDER", "LOG"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.h.2",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "h.2",
+          "odp_refs": ["ac-2_odp.03"],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["PROCEDURE", "ORDER", "LOG"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.h.3",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "h.3",
+          "odp_refs": ["ac-2_odp.03"],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["PROCEDURE", "ORDER", "LOG"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.i",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "i",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["POLICY", "SYSTEM_CONFIGURATION", "ACCESS_REQUEST"]
+        },
+        {
+          "id": "AC-02.j",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "j",
+          "odp_refs": ["ac-2_odp.04"],
+          "methods": ["EXAMINE"],
+          "potential_evidence": ["REGISTER", "LOG", "DOCUMENT"]
+        },
+        {
+          "id": "AC-02.k",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "k",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["PROCEDURE", "POLICY"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02.l",
+          "control_id": "AC-02",
+          "enhancement": false,
+          "statement_path": "l",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["PROCEDURE", "ORDER", "DOCUMENT"],
+          "interview_roles": ["SECURITY_OFFICER"]
+        },
+        {
+          "id": "AC-02(01)",
+          "control_id": "AC-02(01)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "SCREENSHOT"]
+        },
+        {
+          "id": "AC-02(02)",
+          "control_id": "AC-02(02)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.2_odp.01", "ac-2.2_odp.02"],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG", "SCREENSHOT"]
+        },
+        {
+          "id": "AC-02(03).a",
+          "control_id": "AC-02(03)",
+          "enhancement": true,
+          "statement_path": "a",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG", "SCREENSHOT"]
+        },
+        {
+          "id": "AC-02(03).b",
+          "control_id": "AC-02(03)",
+          "enhancement": true,
+          "statement_path": "b",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG", "SCREENSHOT"]
+        },
+        {
+          "id": "AC-02(03).c",
+          "control_id": "AC-02(03)",
+          "enhancement": true,
+          "statement_path": "c",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG", "SCREENSHOT"]
+        },
+        {
+          "id": "AC-02(03).d",
+          "control_id": "AC-02(03)",
+          "enhancement": true,
+          "statement_path": "d",
+          "odp_refs": ["ac-2.3_odp.01"],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG", "SCREENSHOT"]
+        },
+        {
+          "id": "AC-02(04)",
+          "control_id": "AC-02(04)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["LOG", "SYSTEM_CONFIGURATION"]
+        },
+        {
+          "id": "AC-02(05)",
+          "control_id": "AC-02(05)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.5_odp.01"],
+          "methods": ["EXAMINE", "TEST", "INTERVIEW"],
+          "potential_evidence": ["POLICY", "SYSTEM_CONFIGURATION", "SCREENSHOT"],
+          "interview_roles": ["USER", "SYSTEM_ADMIN"]
+        },
+        {
+          "id": "AC-02(06)",
+          "control_id": "AC-02(06)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.6_odp.01"],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "ROLE_MATRIX"]
+        },
+        {
+          "id": "AC-02(07).e",
+          "control_id": "AC-02(07)",
+          "enhancement": true,
+          "statement_path": "e",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["POLICY", "ROLE_MATRIX", "ORDER"],
+          "interview_roles": ["ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02(07).f",
+          "control_id": "AC-02(07)",
+          "enhancement": true,
+          "statement_path": "f",
+          "odp_refs": [],
+          "methods": ["EXAMINE"],
+          "potential_evidence": ["LOG", "REGISTER"]
+        },
+        {
+          "id": "AC-02(07).g",
+          "control_id": "AC-02(07)",
+          "enhancement": true,
+          "statement_path": "g",
+          "odp_refs": [],
+          "methods": ["EXAMINE"],
+          "potential_evidence": ["LOG", "REGISTER"]
+        },
+        {
+          "id": "AC-02(07).h",
+          "control_id": "AC-02(07)",
+          "enhancement": true,
+          "statement_path": "h",
+          "odp_refs": [],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG", "ACCESS_REQUEST"]
+        },
+        {
+          "id": "AC-02(08)",
+          "control_id": "AC-02(08)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.8_odp.01"],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG"]
+        },
+        {
+          "id": "AC-02(09)",
+          "control_id": "AC-02(09)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.9_odp.01"],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["POLICY", "LIST", "REGISTER"],
+          "interview_roles": ["SECURITY_OFFICER"]
+        },
+        {
+          "id": "AC-02(11)",
+          "control_id": "AC-02(11)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.11_odp.01", "ac-2.11_odp.02"],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["POLICY", "SYSTEM_CONFIGURATION"]
+        },
+        {
+          "id": "AC-02(12).i",
+          "control_id": "AC-02(12)",
+          "enhancement": true,
+          "statement_path": "i",
+          "odp_refs": ["ac-2.12_odp.01"],
+          "methods": ["EXAMINE", "TEST"],
+          "potential_evidence": ["SYSTEM_CONFIGURATION", "LOG"]
+        },
+        {
+          "id": "AC-02(12).j",
+          "control_id": "AC-02(12)",
+          "enhancement": true,
+          "statement_path": "j",
+          "odp_refs": ["ac-2.12_odp.02"],
+          "methods": ["EXAMINE", "INTERVIEW"],
+          "potential_evidence": ["PROCEDURE", "LOG", "ORDER"],
+          "interview_roles": ["SECURITY_OFFICER", "ACCOUNT_ADMIN"]
+        },
+        {
+          "id": "AC-02(13)",
+          "control_id": "AC-02(13)",
+          "enhancement": true,
+          "statement_path": null,
+          "odp_refs": ["ac-2.13_odp.01"],
+          "methods": ["EXAMINE", "INTERVIEW", "TEST"],
+          "potential_evidence": ["PROCEDURE", "ORDER", "LOG"],
+          "interview_roles": ["SECURITY_OFFICER"]
+        }
+      ],
+      "withdrawn": [
+        {
+          "control_id": "AC-02(10)",
+          "reason": "У nd_tzi.json позначено «[Вилучено до AC-2k.]» — не формує active assessment item; вимога покривається entry AC-02.k."
+        }
+      ],
+      "coverage": {
+        "odp_count": 16,
+        "base_odp_count": 4,
+        "enhancement_odp_count": 12,
+        "entry_count": 33,
+        "base_entry_count": 14,
+        "enhancement_entry_count": 19,
+        "note": "Statement paths відповідають структурі catalog.statement.items у nd_tzi.json (мітки нормалізуються: 'a.' → 'a', '(d)'/'d)' → 'd'). Entries для посилень потрапляють в Assessment Plan лише якщо посилення фактично включене у ЦПБ (profile.enhancements або контроль БПБ). AC-02(07) у nd_tzi має мітки e)–h) — збережено як у джерелі."
+      }
+    }
+  ]
+}
