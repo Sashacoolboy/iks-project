@@ -91,8 +91,8 @@ th { background: #edf2f7; }
 .param-stats .badge { font-size: 0.68rem; padding: 0 0.4rem; }
 
 /* Режим перегляду затвердженого профілю */
-.view-banner { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 10;
-  background: #fefcbf; border: 1px solid #d69e2e; border-radius: 6px; padding: 0.5rem 0.8rem; margin-bottom: 0.8rem; font-weight: 600; }
+.view-banner { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; top: 0; z-index: 10;
+  background: #fefcbf33; border: 1px solid #d69e2e; border-radius: 6px; padding: 0.5rem 0.8rem; margin-bottom: 0.8rem; font-weight: 500; font-size: 12px; }
 .locked .param { pointer-events: none; }
 .locked { opacity: 0.85; }
 /* Миттєвий тултіп із текстом ризику при наведенні */
