@@ -34,6 +34,8 @@ export function collectControlOdpValues(approvedState, catalogs, controlId) {
   const bpbKey = approvedState.info_type;
   const bpb = catalogs.bpb[bpbKey];
   const ndControls = indexNdControls(catalogs.ndTzi);
+  // Normalize control ID once for both nd_tzi and BPB lookups (AC-02 → AC-2)
+  const normalizedId = controlId.replace(/^([A-Z]+-)0+(\d+)/, '$1$2');
   const ndControl = findNdControl(ndControls, controlId);
   const values = new Map();
   if (!ndControl) return values;
@@ -46,7 +48,7 @@ export function collectControlOdpValues(approvedState, catalogs, controlId) {
     for (const sc of bpb.security_classes)
       for (const action of sc.actions)
         for (const sa of action.security_actions)
-          if (sa.control.id === controlId)
+          if (sa.control.id === normalizedId)
             for (const [k, v] of bpbValuesFor(ndControl, sa)) bpbValues.set(k, v);
   }
 
