@@ -60,3 +60,24 @@ test('control без запису в assessment_catalog отримує UNMAPPED_
   assert.ok(unmapped.length > 0, 'мають існувати непокриті каталогом контролі (лише AC-02 має методику)');
   assert.ok(unmapped.every(i => i.assessment_status === 'NOT_STARTED'));
 });
+
+test('normalizeControlId strips leading zeros from enhancement numbers (regression for AC-02(05) bug)', () => {
+  const state = approvedStateFixture();
+  state.info_type = 'open_confidential'; // AC-2(5) is BPB-mandated here
+  const plan = buildAssessmentPlan({ approvedState: state, catalogs, assessmentCatalog });
+  const ac205 = plan.items.find(i => i.control_id === 'AC-02(05)');
+  assert.ok(ac205, 'AC-02(05) має бути в плані (BPB-mandated in open_confidential)');
+  assert.equal(ac205.catalog_missing, false, 'AC-02(05) має знайти відповідність у каталозі');
+  assert.ok(ac205.resolved_statement.length > 0, 'resolved_statement має бути не порожнім');
+  assert.ok(!ac205.resolved_statement.includes('не визначена у локальному каталозі'), 'не має бути fallback-тексту');
+});
+
+test('normalizeControlId strips leading zeros for AC-02(01)', () => {
+  const state = approvedStateFixture();
+  state.profile.enhancements = ['AC-2(1)']; // canonical unpadded format
+  const plan = buildAssessmentPlan({ approvedState: state, catalogs, assessmentCatalog });
+  const ac201 = plan.items.find(i => i.control_id === 'AC-02(01)');
+  assert.ok(ac201, 'AC-02(01) має бути в плані');
+  assert.equal(ac201.catalog_missing, false, 'AC-02(01) має знайти відповідність у каталозі');
+  assert.ok(ac201.resolved_statement.length > 0, 'resolved_statement має бути не порожнім');
+});

@@ -17,9 +17,11 @@ function flattenStatementForCatalog(items, prefix = []) {
   return out;
 }
 
-// Normalize AC-02 → AC-2 (strip leading zeros)
+// Normalize AC-02 → AC-2, AC-02(05) → AC-2(5) (strip leading zeros)
 function normalizeControlId(id) {
-  return id.replace(/^([A-Z]+-)0+(\d+)/, '$1$2');
+  return id
+    .replace(/^([A-Z]+-)0+(\d+)/, '$1$2')
+    .replace(/\(0+(\d+)\)/, '($1)');
 }
 
 // Denormalize AC-2 → AC-02, AC-2(2) → AC-02(02) (add leading zeros for consistency with catalog)
