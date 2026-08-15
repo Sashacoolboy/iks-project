@@ -23,8 +23,11 @@ before(async () => {
 after(() => {
   proc.kill();
   rmSync('templates/approved/тест-оцінка-джерело.json', { force: true });
-  rmSync('assessments', { recursive: true, force: true });
-  rmSync('exports/assessments', { recursive: true, force: true });
+  // Прибираємо лише те, що створив цей тест — не весь assessments/, щоб не знищити реальні дані оцінювача
+  if (createdId) {
+    rmSync(`assessments/${createdId}`, { recursive: true, force: true });
+    rmSync(`exports/assessments/${createdId}.docx`, { force: true });
+  }
 });
 
 let createdId;
