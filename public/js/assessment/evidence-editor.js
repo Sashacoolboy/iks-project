@@ -1,4 +1,5 @@
 import { el } from '../render/dom.js';
+import { getAssessment } from './assessment-state.js';
 
 export function nextEvidenceId(existing) {
   const nums = existing.map(e => Number((e.id ?? '').replace('EV-', ''))).filter(n => !Number.isNaN(n));
@@ -23,15 +24,43 @@ export function renderEvidenceEditor(container, item, onChange) {
   const titleInput = el('input', { type: 'text', placeholder: 'Назва / джерело' });
   const refInput = el('input', { type: 'text', placeholder: 'Реквізити (розділ, пункт)' });
   const obsInput = el('textarea', { rows: '2', placeholder: 'Результат дослідження/опитування/випробування/спостереження' });
-  const addBtn = el('button', { type: 'button', onclick: () => {
+  const fileInput = el('input', { type: 'file' });
+  const addBtn = el('button', { type: 'button', onclick: async () => {
+    const file = fileInput.files?.[0];
+    let attachmentFilename = null;
+    if (file) {
+      if (file.size > 20_000_000) {
+        alert('Файл завеликий (макс. 20 МБ)');
+        return;
+      }
+      const sanitizedName = file.name.replace(/[\/\\]/g, '_');
+      const evId = nextEvidenceId(item.evidence);
+      const filename = `${evId}-${sanitizedName}`;
+      const assessment = getAssessment();
+      try {
+        const r = await fetch(`/api/assessments/${encodeURIComponent(assessment.id)}/evidence?filename=${encodeURIComponent(filename)}`, {
+          method: 'POST', body: await file.arrayBuffer()
+        });
+        if (!r.ok) {
+          const body = await r.json();
+          alert(`Помилка завантаження файлу: ${body.error ?? 'невідома помилка'}`);
+          return;
+        }
+        const result = await r.json();
+        attachmentFilename = result.filename;
+      } catch (err) {
+        alert(`Помилка мережі: ${err.message}`);
+        return;
+      }
+    }
     item.evidence.push({
       id: nextEvidenceId(item.evidence), method: methodSel.value, source_type: typeSel.value,
       title: titleInput.value, reference: refInput.value, source_date: '', observation: obsInput.value,
-      comment: '', attachment: null,
+      comment: '', attachment: attachmentFilename,
     });
-    titleInput.value = ''; refInput.value = ''; obsInput.value = '';
+    titleInput.value = ''; refInput.value = ''; obsInput.value = ''; fileInput.value = '';
     onChange();
   } }, '+ Додати доказ');
 
-  container.replaceChildren(list, el('div', { class: 'evidence-form' }, methodSel, typeSel, titleInput, refInput, obsInput, addBtn));
+  container.replaceChildren(list, el('div', { class: 'evidence-form' }, methodSel, typeSel, titleInput, refInput, obsInput, fileInput, addBtn));
 }

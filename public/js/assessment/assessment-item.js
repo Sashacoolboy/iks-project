@@ -38,6 +38,22 @@ export function renderDashboard(container, { onBack }) {
   const rerender = () => { container.replaceChildren(); renderDashboard(container, { onBack }); };
   const assessment = getAssessment();
   const backBtn = el('button', { type: 'button', onclick: onBack }, '← До реєстру оцінювань');
+  const exportBtn = el('button', { type: 'button', onclick: async () => {
+    try {
+      const r = await fetch(`/api/assessments/${encodeURIComponent(assessment.id)}/export/docx`, { method: 'POST' });
+      if (!r.ok) {
+        const body = await r.json();
+        alert(`Помилка експорту: ${body.error ?? 'невідома помилка'}`);
+        return;
+      }
+      const blob = await r.blob();
+      const a = el('a', { href: URL.createObjectURL(blob), download: `${assessment.id}.docx` });
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      alert(`Помилка мережі: ${err.message}`);
+    }
+  } }, '🖨️ Експорт звіту (DOCX)');
   const byFamily = new Map();
   for (const item of assessment.items) {
     if (!byFamily.has(item.family)) byFamily.set(item.family, []);
@@ -47,5 +63,5 @@ export function renderDashboard(container, { onBack }) {
     el('section', {}, el('h3', {}, family), ...items.map(item => itemDetail(item, rerender))));
   container.replaceChildren(el('section', {},
     el('h2', {}, `Оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
-    backBtn, ...groups));
+    backBtn, exportBtn, ...groups));
 }
