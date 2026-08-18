@@ -1,119 +1,165 @@
-import { collectControlOdpValues, resolveStatement } from './assessment-resolver.js';
 import { STATUS } from '../profile-engine.js';
+import { normalizeControlId, denormalizeControlId } from './control-id.js';
+import { indexAdapter } from './odp-adapter.js';
+import { resolveEffectiveValue, baselineValue } from './effective-value-resolver.js';
+import { resolveAssessmentObjective } from './objective-resolver.js';
 
-function normSeg(s) {
-  return String(s ?? '').replace(/[^\p{L}\p{N}.]/gu, '').replace(/\.+$/, '');
-}
-
-// Плоский перелік statement-рядків контролю з locator-шляхом ("h.1") та власним текстом
-function flattenStatementForCatalog(items, prefix = []) {
-  const out = [];
-  for (const it of items ?? []) {
-    const seg = normSeg(it.label);
-    const path = [...prefix, seg].filter(Boolean);
-    out.push({ path: path.join('.'), text: it.text ?? '' });
-    out.push(...flattenStatementForCatalog(it.children, path));
-  }
-  return out;
-}
-
-// Normalize AC-02 → AC-2, AC-02(05) → AC-2(5) (strip leading zeros)
-function normalizeControlId(id) {
-  return id
-    .replace(/^([A-Z]+-)0+(\d+)/, '$1$2')
-    .replace(/\(0+(\d+)\)/, '($1)');
-}
-
-// Denormalize AC-2 → AC-02, AC-2(2) → AC-02(02) (add leading zeros for consistency with catalog)
-function denormalizeControlId(id) {
-  return id.replace(/^([A-Z]+-)(\d+)/, (m, prefix, num) => prefix + num.padStart(2, '0'))
-    .replace(/\((\d+)\)/, (m, num) => `(${num.padStart(2, '0')})`);
-}
-
-function indexNdControls(ndTzi) {
-  const map = new Map();
-  for (const fam of ndTzi.document.security_families)
-    for (const c of fam.controls) {
-      map.set(c.canonical_id, c);
-      for (const ch of c.children ?? []) map.set(ch.canonical_id, ch);
-    }
-  return map;
-}
-
+/**
+ * Returns a map of all ЦПБ-applicable control IDs to their statuses.
+ * - APPLIED: selected, not exempt nor excluded
+ * - EXEMPT: ДСТЗІ exemption applies (unless overridden)
+ * - EXCLUDED: user explicitly excluded
+ */
 function cpbApplicableControlIds(approvedState, catalogs) {
   const bpb = catalogs.bpb[approvedState.info_type];
-  const ids = new Map(); // controlId -> 'APPLIED' | 'EXEMPT' | 'EXCLUDED'
+  const ids = new Map();
   if (!bpb) return ids;
+
   const exemptByControl = new Map();
-  for (const e of catalogs.exemptions.exemptions)
-    if (e.applies_to_classes.includes(approvedState.passport.as_class)) exemptByControl.set(e.control_ref, e);
+  for (const e of catalogs.exemptions.exemptions) {
+    if (e.applies_to_classes.includes(approvedState.passport.as_class)) {
+      exemptByControl.set(e.control_ref, e);
+    }
+  }
+
   for (const sc of bpb.security_classes) {
     for (const action of sc.actions) {
       const key = `${sc.security_class.class_id}:${action.number}`;
       let status = STATUS.APPLIED;
       const mandatedBaseIds = new Set(action.security_actions.map(sa => sa.control.base_id));
-      if ((approvedState.profile.excluded ?? []).includes(key)) status = STATUS.EXCLUDED;
-      else if ([...mandatedBaseIds].some(id => exemptByControl.has(id))
-        && !(approvedState.profile.exemption_overrides ?? []).includes(key)) status = STATUS.EXEMPT;
-      for (const sa of action.security_actions) ids.set(sa.control.id, status);
+
+      if ((approvedState.profile.excluded ?? []).includes(key)) {
+        status = STATUS.EXCLUDED;
+      } else if ([...mandatedBaseIds].some(id => exemptByControl.has(id))
+                 && !(approvedState.profile.exemption_overrides ?? []).includes(key)) {
+        status = STATUS.EXEMPT;
+      }
+
+      for (const sa of action.security_actions) {
+        ids.set(sa.control.id, status);
+      }
     }
   }
-  for (const enhId of approvedState.profile.enhancements ?? [])
+
+  for (const enhId of (approvedState.profile.enhancements ?? [])) {
     if (!ids.has(enhId)) ids.set(enhId, STATUS.APPLIED);
+  }
+
   return ids;
 }
 
 const CPB_STATUS_MAP = { [STATUS.APPLIED]: 'APPLIED', [STATUS.EXEMPT]: 'EXEMPT', [STATUS.EXCLUDED]: 'EXCLUDED' };
 
-export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog }) {
+/**
+ * buildAssessmentPlan (v3)
+ * @param {object} params
+ * @param {object} params.approvedState – { info_type, profile, passport }
+ * @param {object} params.catalogs – { ndTzi, bpb, exemptions, genericDefaults }
+ * @param {object} params.assessmentCatalog – v3 assessment catalog
+ * @param {object} params.adapter – ODP adapter document
+ * @returns {{ items: Array, warnings: Array }}
+ */
+export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter }) {
   const items = [];
   const warnings = [];
-  const ndControls = indexNdControls(catalogs.ndTzi);
+  const adapterIndex = indexAdapter(adapter);
+  const cpb = { info_type: approvedState.info_type, profile: approvedState.profile };
+  const genericDefaults = catalogs.genericDefaults;
   const applicable = cpbApplicableControlIds(approvedState, catalogs);
-  const catalogByControlId = new Map();
-  for (const ctrl of assessmentCatalog.controls)
-    for (const entry of ctrl.entries) {
-      // Normalize control_id from catalog (AC-02 → AC-2) to match BPB format
-      const normalizedId = normalizeControlId(entry.control_id);
-      if (!catalogByControlId.has(normalizedId)) catalogByControlId.set(normalizedId, []);
-      catalogByControlId.get(normalizedId).push({ ...entry, family: ctrl.family, canonical_control_id: ctrl.canonical_control_id, control_title: ctrl.title });
+
+  const catalogByNorm = new Map();
+  for (const ctrl of assessmentCatalog.controls) {
+    catalogByNorm.set(normalizeControlId(ctrl.control_id), ctrl);
+  }
+
+  const effCache = new Map();
+  const effectiveFor = (adapterEntry) => {
+    if (!effCache.has(adapterEntry.local_odp_id)) {
+      effCache.set(adapterEntry.local_odp_id, resolveEffectiveValue({ adapterEntry, cpb, genericDefaults }));
     }
+    return effCache.get(adapterEntry.local_odp_id);
+  };
+  const effectiveValueFor = (localOdpId) => {
+    const hit = adapterIndex.byLocalId.get(localOdpId)?.[0];
+    return hit ? effectiveFor(hit.entry) : { status: 'UNRESOLVED', value: null };
+  };
 
   for (const [controlId, statusKey] of applicable) {
-    const cpb_status = CPB_STATUS_MAP[statusKey];
-    const entries = catalogByControlId.get(controlId);
-    const ndControl = ndControls.get(controlId);
-    if (!entries) {
-      const denormalizedId = denormalizeControlId(controlId);
-      warnings.push({ code: 'CATALOG_MISSING', control_id: denormalizedId });
-      items.push({
-        id: denormalizedId, control_id: denormalizedId, canonical_control_id: ndControl?.canonical_id ?? controlId,
-        family: ndControl?.family ?? controlId.slice(0, 2), control_title: ndControl?.title ?? '',
-        enhancement: controlId.includes('('), statement_path: null,
-        source_statement: '', resolved_statement: '', odp_refs: [], odp_values: {},
-        cpb_status, catalog_missing: true, assessment_status: 'NOT_STARTED',
-        recommended_methods: [], evidence: [], conclusion: null, assessor_comment: '', finding: null,
+    const cpbStatus = CPB_STATUS_MAP[statusKey];
+    if (cpbStatus !== 'APPLIED') {
+      warnings.push({ 
+        code: cpbStatus === 'EXEMPT' ? 'CONTROL_EXEMPT' : 'CONTROL_EXCLUDED', 
+        control_id: denormalizeControlId(controlId) 
       });
       continue;
     }
-    const flat = ndControl ? flattenStatementForCatalog(ndControl.catalog?.statement?.items) : [];
-    const odpValues = collectControlOdpValues(approvedState, catalogs, controlId);
-    for (const entry of entries) {
-      const flatLine = entry.statement_path ? flat.find(l => l.path === entry.statement_path) : null;
-      const sourceStatement = flatLine ? flatLine.text : (ndControl?.catalog?.statement?.items?.[0]?.text ?? '');
-      const { text: resolved, unresolved } = resolveStatement(sourceStatement, odpValues);
-      for (const paramId of unresolved) warnings.push({ code: 'ODP_UNRESOLVED', assessment_item_id: entry.id, param_id: paramId });
-      const odp_values = {};
-      for (const ref of entry.odp_refs) if (odpValues.has(ref)) odp_values[ref] = odpValues.get(ref);
-      items.push({
-        id: entry.id, control_id: entry.control_id, canonical_control_id: entry.canonical_control_id,
-        family: entry.family, control_title: entry.control_title, enhancement: entry.enhancement,
-        statement_path: entry.statement_path, source_statement: sourceStatement, resolved_statement: resolved,
-        odp_refs: entry.odp_refs, odp_values, cpb_status, catalog_missing: false,
-        assessment_status: 'NOT_STARTED', recommended_methods: entry.methods,
-        evidence: [], conclusion: null, assessor_comment: '', finding: null,
+
+    const catCtrl = catalogByNorm.get(normalizeControlId(controlId));
+    if (!catCtrl) { 
+      warnings.push({ code: 'CATALOG_MISSING', control_id: denormalizeControlId(controlId) }); 
+      continue; 
+    }
+
+    const adapterCtrl = adapterIndex.controls.get(catCtrl.control_id);
+    const odpValues = (adapterCtrl?.assessment_odps ?? []).map(entry => {
+      const eff = effectiveFor(entry);
+      if (eff.status === 'UNRESOLVED') {
+        warnings.push({ 
+          code: 'ODP_UNRESOLVED', 
+          control_id: catCtrl.control_id, 
+          local_odp_id: entry.local_odp_id 
+        });
+      }
+      return { 
+        assessment_odp_id: entry.assessment_odp_id, 
+        local_odp_id: entry.local_odp_id,
+        baseline_value: baselineValue({ adapterEntry: entry, infoType: cpb.info_type }),
+        target_value: eff.value, 
+        effective_source: eff.source, 
+        status: eff.status 
+      };
+    });
+
+    for (const item of catCtrl.items) {
+      const { resolved_objective, placeholders } = resolveAssessmentObjective({
+        objectiveTemplate: item.objective_template, 
+        adapterIndex, 
+        effectiveValueFor 
       });
+
+      items.push({
+        assessment_source_id: item.assessment_source_id, 
+        control_id: catCtrl.control_id,
+        canonical_control_id: catCtrl.canonical_control_id, 
+        family: catCtrl.family,
+        family_title: catCtrl.family_title, 
+        control_title: catCtrl.title, 
+        enhancement: catCtrl.enhancement,
+        statement_path: item.statement_path, 
+        kind: item.kind, 
+        cpb_status: cpbStatus,
+        objective_template: item.objective_template, 
+        resolved_objective, 
+        placeholders,
+        odp_values: odpValues, 
+        available_methods: Object.keys(item.methods),
+      });
+
+      if (!Object.keys(item.methods).length) {
+        warnings.push({ code: 'NO_METHODS', assessment_source_id: item.assessment_source_id });
+      }
     }
   }
-  return { items, warnings };
+
+  // Deduplicate ODP_UNRESOLVED warnings (one per local_odp_id)
+  const seen = new Set();
+  const dedup = warnings.filter(w => {
+    if (w.code !== 'ODP_UNRESOLVED') return true;
+    const k = `${w.code}:${w.local_odp_id}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+
+  return { items, warnings: dedup };
 }

@@ -135,8 +135,9 @@ createServer(async (req, res) => {
           catch { return json(res, 404, { error: 'затверджений запис не знайдено' }); }
           if (validateTemplate('approved', approvedRecord).length) return json(res, 400, { error: 'затверджений запис пошкоджено' });
           const catalogs = await catalogsPromise;
-          const assessmentCatalog = JSON.parse(await readFile(join(ROOT, 'data', 'assessment_catalog.json'), 'utf8'));
-          const { items, warnings } = buildAssessmentPlan({ approvedState: approvedRecord.state, catalogs, assessmentCatalog });
+          const assessmentCatalog = JSON.parse(await readFile(join(ROOT, 'data', 'assessment', 'assessment_catalog.json'), 'utf8'));
+          const adapter = JSON.parse(await readFile(join(ROOT, 'data', 'assessment', 'assessment_odp_adapter.json'), 'utf8'));
+          const { items, warnings } = buildAssessmentPlan({ approvedState: approvedRecord.state, catalogs, assessmentCatalog, adapter });
           await mkdir(assessDir, { recursive: true });
           const existing = (await readdir(assessDir, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => d.name);
           const id = nextAssessmentId(existing);
