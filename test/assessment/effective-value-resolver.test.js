@@ -38,3 +38,13 @@ test('baselineValue не залежить від CPB override', () => {
   assert.equal(baselineValue({ adapterEntry: entry('AC-02_ODP[04]'), infoType: 'open_confidential' }), 'мінімум щоквартально');
   assert.equal(baselineValue({ adapterEntry: entry('AC-02_ODP[01]'), infoType: 'open_confidential' }), null);
 });
+
+test('BPB_INHERITED: порожнє значення binding не пропускається; кілька bindings → масив', () => {
+  // ac-1_odp.06: єдиний binding зі значенням '' → BPB_INHERITED, value ''
+  const r1 = resolveEffectiveValue({ adapterEntry: entry('AC-01_ODP[06]'), cpb: as2, genericDefaults });
+  assert.deepEqual([r1.status, r1.source, r1.value], ['RESOLVED', 'BPB_INHERITED', '']);
+  // at-1_odp.01: два bindings → масив значень у порядку
+  const r2 = resolveEffectiveValue({ adapterEntry: entry('AT-01_ODP[01]'), cpb: as2, genericDefaults });
+  assert.deepEqual([r2.status, r2.source], ['RESOLVED', 'BPB_INHERITED']);
+  assert.deepEqual(r2.value, ['весь персонал c.1,', 'щонайменше раз на рік']);
+});

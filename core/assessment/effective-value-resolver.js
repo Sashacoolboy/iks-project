@@ -1,8 +1,9 @@
 // Пріоритет ТЗ §7: CPB_OVERRIDE → BPB_INHERITED → GENERIC_DEFAULT → UNRESOLVED
 export function baselineValue({ adapterEntry, infoType }) {
   const bindings = adapterEntry.bpb_bindings?.[infoType] ?? [];
-  const hit = bindings.find(b => b.value != null && b.value !== '');
-  return hit ? hit.value : null;
+  if (!bindings.length) return null;
+  const values = bindings.map(b => b.value ?? '');
+  return values.length === 1 ? values[0] : values;
 }
 
 export function resolveEffectiveValue({ adapterEntry, cpb, genericDefaults }) {
@@ -13,9 +14,11 @@ export function resolveEffectiveValue({ adapterEntry, cpb, genericDefaults }) {
 
   const infoType = cpb?.info_type;
   const bindings = adapterEntry.bpb_bindings?.[infoType] ?? [];
-  const bpbHit = bindings.find(b => b.value != null && b.value !== '');
-  if (bpbHit)
-    return { status: 'RESOLVED', source: 'BPB_INHERITED', value: bpbHit.value, evidence: bindings };
+  if (bindings.length) {
+    const values = bindings.map(b => b.value ?? '');
+    return { status: 'RESOLVED', source: 'BPB_INHERITED',
+      value: values.length === 1 ? values[0] : values, evidence: bindings };
+  }
 
   const def = genericDefaults?.parameters?.[localOdpId];
   if (def && def.defaultValue != null && def.defaultValue !== '')
