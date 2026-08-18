@@ -34,16 +34,14 @@ test('AS-2: ac-2_odp.01 unresolved (немає target value), ac-2_odp.02 — CP
   assert.equal(r2.source, 'CPB_OVERRIDE');
 });
 
-test('BPB inheritance: statement_path bindings h.1/h.2/h.3 та j (AC-02_ODP[02]/[03])', () => {
-  // ac-2_odp.03 (AC-02_ODP[03]) має statement_usage з locator h та empty bpb_bindings
+test('AC-02_ODP[03]: statement_usage h, порожні BPB bindings, UNRESOLVED без override', () => {
   const e3 = idx.byAssessmentId.get('AC-02_ODP[03]').entry;
-  assert.ok(e3.statement_usage.length > 0, 'statement_usage має існувати');
-  assert.ok(e3.statement_usage.some(u => u.statement_path), 'statement_usage має мати statement_path');
-  // merged/multi-locator: один local ODP → декілька locators не ламає resolver
+  assert.equal(e3.statement_usage[0].statement_path, 'h');
+  assert.deepEqual(e3.bpb_bindings.open_confidential, []);
   const cpbNoOverride = { info_type: 'open_confidential', profile: { param_overrides: {} } };
   const r = resolveEffectiveValue({ adapterEntry: e3, cpb: cpbNoOverride, genericDefaults });
-  assert.ok(['RESOLVED', 'UNRESOLVED'].includes(r.status));
-  if (r.status === 'RESOLVED') assert.equal(r.source, 'BPB_INHERITED');
+  assert.equal(r.status, 'UNRESOLVED');
+  assert.equal(r.requires_input, true);
 });
 
 test('resolved objective: placeholder substitution і [НЕ ВИЗНАЧЕНО]', () => {
