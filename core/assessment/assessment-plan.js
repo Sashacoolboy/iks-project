@@ -4,47 +4,26 @@ import { indexAdapter } from './odp-adapter.js';
 import { resolveEffectiveValue, baselineValue } from './effective-value-resolver.js';
 import { resolveAssessmentObjective } from './objective-resolver.js';
 
-/**
- * Returns a map of all ЦПБ-applicable control IDs to their statuses.
- * - APPLIED: selected, not exempt nor excluded
- * - EXEMPT: ДСТЗІ exemption applies (unless overridden)
- * - EXCLUDED: user explicitly excluded
- */
 function cpbApplicableControlIds(approvedState, catalogs) {
   const bpb = catalogs.bpb[approvedState.info_type];
-  const ids = new Map();
+  const ids = new Map(); // controlId -> 'APPLIED' | 'EXEMPT' | 'EXCLUDED'
   if (!bpb) return ids;
-
   const exemptByControl = new Map();
-  for (const e of catalogs.exemptions.exemptions) {
-    if (e.applies_to_classes.includes(approvedState.passport.as_class)) {
-      exemptByControl.set(e.control_ref, e);
-    }
-  }
-
+  for (const e of catalogs.exemptions.exemptions)
+    if (e.applies_to_classes.includes(approvedState.passport.as_class)) exemptByControl.set(e.control_ref, e);
   for (const sc of bpb.security_classes) {
     for (const action of sc.actions) {
       const key = `${sc.security_class.class_id}:${action.number}`;
       let status = STATUS.APPLIED;
       const mandatedBaseIds = new Set(action.security_actions.map(sa => sa.control.base_id));
-
-      if ((approvedState.profile.excluded ?? []).includes(key)) {
-        status = STATUS.EXCLUDED;
-      } else if ([...mandatedBaseIds].some(id => exemptByControl.has(id))
-                 && !(approvedState.profile.exemption_overrides ?? []).includes(key)) {
-        status = STATUS.EXEMPT;
-      }
-
-      for (const sa of action.security_actions) {
-        ids.set(sa.control.id, status);
-      }
+      if ((approvedState.profile.excluded ?? []).includes(key)) status = STATUS.EXCLUDED;
+      else if ([...mandatedBaseIds].some(id => exemptByControl.has(id))
+        && !(approvedState.profile.exemption_overrides ?? []).includes(key)) status = STATUS.EXEMPT;
+      for (const sa of action.security_actions) ids.set(sa.control.id, status);
     }
   }
-
-  for (const enhId of (approvedState.profile.enhancements ?? [])) {
+  for (const enhId of approvedState.profile.enhancements ?? [])
     if (!ids.has(enhId)) ids.set(enhId, STATUS.APPLIED);
-  }
-
   return ids;
 }
 
