@@ -40,12 +40,13 @@ test('POST /api/assessments створює оцінювання зі затве�
   createdId = body.id;
 });
 
-test('GET /api/assessments/:id повертає повний assessment зі знімком items', async () => {
+test('GET /api/assessments/:id повертає повний assessment зі знімком plan.items', async () => {
   const r = await fetch(BASE + '/api/assessments/' + createdId);
   assert.equal(r.status, 200);
   const a = await r.json();
   assert.equal(a.kind, 'assessment');
-  assert.ok(a.items.length > 0);
+  assert.equal(a.schema_version, '3.0.0');
+  assert.ok(a.plan.items.length > 0);
 });
 
 test('GET /api/assessments містить створений запис у списку', async () => {

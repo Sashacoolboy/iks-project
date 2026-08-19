@@ -8,7 +8,7 @@ import { baseRisksFor, annotateRisk } from './core/risk-engine.js';
 import { validateTemplate } from './core/template-io.js';
 import { mergeRecord, emptyDictionary } from './core/odp-dictionary.js';
 import { buildAssessmentPlan } from './core/assessment/assessment-plan.js';
-import { makeAssessment, serializeAssessment, deserializeAssessment, validateAssessmentSchema, nextAssessmentId } from './core/assessment/assessment-io.js';
+import { makeAssessment, serializeAssessment, deserializeAssessment, validateAssessmentSchema, nextAssessmentId, migrateAssessment } from './core/assessment/assessment-io.js';
 import { buildAssessmentDocx } from './core/docx/assessment-docx-writer.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
@@ -141,7 +141,7 @@ createServer(async (req, res) => {
           await mkdir(assessDir, { recursive: true });
           const existing = (await readdir(assessDir, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => d.name);
           const id = nextAssessmentId(existing);
-          const assessment = makeAssessment({ approvedRecord, approvedName, items, warnings, id });
+          const assessment = makeAssessment({ approvedRecord, approvedName, plan: { items }, warnings, id });
           const dir = join(assessDir, id);
           await mkdir(join(dir, 'evidence'), { recursive: true });
           await writeFile(join(dir, 'assessment.json'), serializeAssessment(assessment));
@@ -152,8 +152,10 @@ createServer(async (req, res) => {
         if (id && !ASSESSMENT_ID_RE.test(id)) return json(res, 400, { error: 'некоректний assessment id' });
         const dir = id ? join(assessDir, id) : null;
         if (parts.length === 3 && req.method === 'GET') {
-          try { return json(res, 200, JSON.parse(await readFile(join(dir, 'assessment.json'), 'utf8'))); }
-          catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
+          try {
+            const raw = JSON.parse(await readFile(join(dir, 'assessment.json'), 'utf8'));
+            return json(res, 200, migrateAssessment(raw));
+          } catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
         }
         if (parts.length === 3 && req.method === 'PUT') {
           let body;
