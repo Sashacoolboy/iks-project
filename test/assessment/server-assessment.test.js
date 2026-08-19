@@ -131,6 +131,27 @@ test('PUT /api/assessments/:id оновлює результат і додає R
   assert.equal(resultUpdated[0].entity_id, createdId);
 });
 
+test('PUT server-owned fields: клієнт не може змінити status, cpb_snapshot тощо', async () => {
+  const a = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
+  const originalStatus = a.status;
+  const originalCpbHash = a.cpb_snapshot.hash;
+
+  // Спроба змінити server-owned поля
+  a.status = 'FINALIZED';
+  a.cpb_snapshot.hash = 'fake-modified-hash';
+
+  const r = await fetch(BASE + '/api/assessments/' + createdId, {
+    method: 'PUT',
+    body: JSON.stringify(a),
+  });
+  assert.equal(r.status, 200, 'PUT має пройти успішно');
+
+  // GET і перевірити, що server-owned поля не змінилися
+  const updated = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
+  assert.equal(updated.status, originalStatus, 'status має залишитися незмінним');
+  assert.equal(updated.cpb_snapshot.hash, originalCpbHash, 'cpb_snapshot.hash має залишитися незмінним');
+});
+
 test('POST /api/assessments/:id/finalize з невалідними results → 400 з errors', async () => {
   // Встановити SATISFIED без evidence_ids — невалідно
   const a = await (await fetch(BASE + '/api/assessments/' + createdId)).json();

@@ -194,6 +194,13 @@ createServer(async (req, res) => {
           catch { return json(res, 400, { error: 'некоректний JSON' }); }
           const errors = validateAssessmentSchema(body);
           if (errors.length) return json(res, 400, { error: errors.join('; ') });
+          // Примусове встановлення server-owned полів
+          body.id = existing.id;
+          body.status = existing.status;
+          body.finalized_at = existing.finalized_at;
+          body.finalized_by = existing.finalized_by;
+          body.created_at = existing.created_at;
+          body.cpb_snapshot = existing.cpb_snapshot;
           body.updated_at = new Date().toISOString();
           await writeFile(join(dir, 'assessment.json'), serializeAssessment(body));
           await appendAudit(dir, makeAuditEntry({ actor: body.actor_name ?? '', action: 'RESULT_UPDATED', entity_id: body.id,

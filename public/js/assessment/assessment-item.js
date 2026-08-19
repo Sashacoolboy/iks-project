@@ -1,5 +1,5 @@
 import { el } from '../render/dom.js';
-import { getAssessment, setAssessment, subscribe, loadAssessment } from './assessment-state.js';
+import { getAssessment, setAssessment, subscribe, loadAssessment, getLastSaveError } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
 import { renderAssessmentTable } from './assessment-table.js';
@@ -18,7 +18,7 @@ function renderItemDetailPanel(sourceId) {
 
   if (!planItem || !result) {
     return el('aside', { class: 'item-detail-panel' },
-      el('p', {}, 'Item not found'),
+      el('p', {}, 'Пункт не знайдено'),
       el('button', { type: 'button', onclick: () => { openItemSourceId = null; renderDashboard(document.querySelector('.assessment-container'), { onBack: () => {} }); } }, 'Закрити')
     );
   }
@@ -204,8 +204,14 @@ export function renderDashboard(container, { onBack }) {
     class: assessment.status === 'FINALIZED' ? 'badge badge-finalized' : 'badge badge-in-progress'
   }, assessment.status === 'FINALIZED' ? 'Фіналізовано' : 'В процесі');
 
+  const saveError = getLastSaveError();
+  const saveErrorBadge = saveError
+    ? el('span', { class: 'badge badge-error', title: saveError }, '⚠️ Не збережено')
+    : null;
+
   const summary = buildAssessmentSummary(assessment);
-  const progressText = `${summary.satisfied + summary.partially_satisfied} / ${summary.total} оцінено`;
+  const assessed = summary.total - summary.not_assessed;
+  const progressText = `${assessed} / ${summary.total} оцінено`;
 
   const backBtn = el('button', { type: 'button', onclick: onBack }, '← До реєстру оцінювань');
 
@@ -288,7 +294,7 @@ export function renderDashboard(container, { onBack }) {
 
   const header = el('section', { class: 'assessment-header' },
     el('h2', {}, `Оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
-    el('p', {}, statusBadge, ' ', progressText),
+    el('p', {}, statusBadge, saveErrorBadge ? [' ', saveErrorBadge] : [], ' ', progressText),
     el('div', { class: 'actions' }, backBtn, exportBtn),
     finalizeBtn
   );
