@@ -241,16 +241,20 @@ export function renderDashboard(container, { onBack }) {
             placeholder: 'ПІБ особи, що фіналізує'
           })
         ),
-        el('button', {
-          type: 'button',
-          class: 'primary',
-          onclick: async () => {
+        (() => {
+          const finalizeButton = el('button', {
+            type: 'button',
+            class: 'primary'
+          }, 'Фіналізувати');
+          
+          finalizeButton.onclick = async () => {
             const finalizedBy = document.getElementById('finalize-by-input')?.value || '';
             if (!finalizedBy.trim()) {
               alert('Введіть ПІБ особи, що фіналізує оцінювання');
               return;
             }
             try {
+              finalizeButton.disabled = true;
               const r = await fetch(`/api/assessments/${encodeURIComponent(assessment.id)}/finalize`, {
                 method: 'POST',
                 body: JSON.stringify({ finalized_by: finalizedBy })
@@ -272,10 +276,14 @@ export function renderDashboard(container, { onBack }) {
               }
               await loadAssessment(assessment.id);
             } catch (err) {
-              alert(`Помилка мережі: ${err.message}`);
+              alert(`Помилка мережи: ${err.message}`);
+            } finally {
+              finalizeButton.disabled = false;
             }
-          }
-        }, 'Фіналізувати')
+          };
+          
+          return finalizeButton;
+        })()
       );
 
   const header = el('section', { class: 'assessment-header' },
