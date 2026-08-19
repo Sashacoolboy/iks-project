@@ -1,8 +1,11 @@
 import { el } from '../render/dom.js';
-import { getAssessment, setAssessment, subscribe } from './assessment-state.js';
+import { getAssessment, setAssessment, subscribe, loadAssessment } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
 import { renderAssessmentTable } from './assessment-table.js';
+import { renderEvidenceEditor } from './evidence-editor.js';
+import { renderFindingDialog } from './finding-dialog.js';
+import { renderTraceabilityDrawer } from './traceability-drawer.js';
 
 let openItemSourceId = null;
 let isDashboardSubscribed = false;
@@ -86,9 +89,6 @@ function renderItemDetailPanel(sourceId) {
     setAssessment(updated);
   });
 
-  // Evidence count (full editor in Task 14)
-  const evidenceCount = result.evidence_ids?.length ?? 0;
-
   const closeBtn = el('button', {
     type: 'button',
     onclick: () => {
@@ -96,6 +96,18 @@ function renderItemDetailPanel(sourceId) {
       renderDashboard(document.querySelector('.assessment-container'), { onBack: () => {} });
     }
   }, 'Закрити');
+
+  // Evidence editor section
+  const evidenceSection = el('section', {});
+  renderEvidenceEditor(evidenceSection, { sourceId });
+
+  // Findings dialog section
+  const findingsSection = el('section', {});
+  renderFindingDialog(findingsSection, { sourceId });
+
+  // Traceability drawer section
+  const traceabilitySection = el('section', {});
+  renderTraceabilityDrawer(traceabilitySection, planItem);
 
   return el('aside', { class: 'item-detail-panel' },
     el('header', {},
@@ -124,11 +136,9 @@ function renderItemDetailPanel(sourceId) {
         conclusionArea
       )
     ),
-    el('section', {},
-      el('h4', {}, 'Докази'),
-      el('p', {}, `Кількість доказів: ${evidenceCount}`),
-      el('p', { class: 'note' }, '(Редактор доказів буде доданий у Task 14)')
-    )
+    evidenceSection,
+    findingsSection,
+    traceabilitySection
   );
 }
 
@@ -177,9 +187,9 @@ export function renderDashboard(container, { onBack }) {
   // Set up subscription for dashboard re-render (once only)
   if (!isDashboardSubscribed) {
     subscribe(() => {
-      // Skip re-render if user is typing in a detail panel textarea
+      // Skip re-render if user is typing in a detail panel input/select/textarea
       const activeEl = document.activeElement;
-      const isTypingInPanel = activeEl?.tagName === 'TEXTAREA' && 
+      const isTypingInPanel = ['INPUT', 'SELECT', 'TEXTAREA'].includes(activeEl?.tagName) && 
                                activeEl?.closest('.item-detail-panel');
       if (!isTypingInPanel && currentDashboardRerender) {
         currentDashboardRerender();
@@ -219,10 +229,60 @@ export function renderDashboard(container, { onBack }) {
     }
   }, '🖨️ Експорт звіту (DOCX)');
 
+  // Finalize button
+  const finalizeBtn = assessment.status === 'FINALIZED'
+    ? null
+    : el('div', { class: 'finalize-section' },
+        el('label', { class: 'field' },
+          'Фіналізувати оцінювання (введіть ПІБ):',
+          el('input', {
+            type: 'text',
+            id: 'finalize-by-input',
+            placeholder: 'ПІБ особи, що фіналізує'
+          })
+        ),
+        el('button', {
+          type: 'button',
+          class: 'primary',
+          onclick: async () => {
+            const finalizedBy = document.getElementById('finalize-by-input')?.value || '';
+            if (!finalizedBy.trim()) {
+              alert('Введіть ПІБ особи, що фіналізує оцінювання');
+              return;
+            }
+            try {
+              const r = await fetch(`/api/assessments/${encodeURIComponent(assessment.id)}/finalize`, {
+                method: 'POST',
+                body: JSON.stringify({ finalized_by: finalizedBy })
+              });
+              if (!r.ok) {
+                const body = await r.json();
+                if (r.status === 400 && body.errors) {
+                  const errorsBlock = el('div', { class: 'validation-errors' },
+                    el('h4', {}, 'Помилки валідації:'),
+                    el('ul', {}, ...body.errors.map(err => el('li', {}, err)))
+                  );
+                  const existingErrors = document.querySelector('.validation-errors');
+                  if (existingErrors) existingErrors.remove();
+                  document.querySelector('.finalize-section')?.after(errorsBlock);
+                } else {
+                  alert(`Помилка фіналізації: ${body.error ?? 'невідома помилка'}`);
+                }
+                return;
+              }
+              await loadAssessment(assessment.id);
+            } catch (err) {
+              alert(`Помилка мережі: ${err.message}`);
+            }
+          }
+        }, 'Фіналізувати')
+      );
+
   const header = el('section', { class: 'assessment-header' },
     el('h2', {}, `Оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
     el('p', {}, statusBadge, ' ', progressText),
-    el('div', { class: 'actions' }, backBtn, exportBtn)
+    el('div', { class: 'actions' }, backBtn, exportBtn),
+    finalizeBtn
   );
 
   // Warnings block

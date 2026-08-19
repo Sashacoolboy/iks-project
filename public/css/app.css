@@ -173,3 +173,29 @@ th { background: #edf2f7; }
 .odp-detail-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem; }
 .odp-detail-table th { background: #edf2f7; padding: 0.4rem 0.5rem; border: 1px solid #cbd5e0; font-size: 0.75rem; }
 .odp-detail-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.5rem; }
+
+/* Evidence editor */
+.evidence-list { margin-bottom: 1rem; }
+.evidence-form { margin-top: 1rem; }
+.link-btn { background: none; border: none; color: #c53030; cursor: pointer; padding: 0 0.3rem; font-weight: bold; }
+.link-btn:hover { color: #9b2c2c; }
+
+/* Finding dialog */
+.findings-list { margin-bottom: 1rem; }
+.finding-item { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 0.75rem; margin-bottom: 0.75rem; }
+.finding-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #e2e8f0; }
+.finding-form { margin-top: 1rem; }
+
+/* Traceability drawer */
+.traceability-drawer { margin-top: 1.5rem; }
+.traceability-drawer .link { background: none; border: none; color: #2c5282; padding: 0; text-decoration: underline; cursor: pointer; font-size: 0.85rem; }
+.traceability-drawer .link:hover { color: #1a365d; }
+.odp-traceability-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem; }
+.odp-traceability-table th { background: #edf2f7; padding: 0.4rem 0.5rem; border: 1px solid #cbd5e0; font-size: 0.75rem; }
+.odp-traceability-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.5rem; }
+
+/* Finalize section */
+.finalize-section { margin-top: 1rem; padding: 1rem; background: #fefcbf; border: 1px solid #d69e2e; border-radius: 6px; }
+.validation-errors { margin-top: 1rem; padding: 1rem; background: #fed7d7; border: 1px solid #c53030; border-radius: 6px; }
+.validation-errors h4 { margin-top: 0; color: #742a2a; }
+.validation-errors ul { margin: 0.5rem 0 0 1rem; }
