@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-08-19T12:50:30.450Z",
+    "actor": "sample-generator",
+    "action": "ASSESSMENT_CREATED",
+    "entity_id": "ASSESS-2026-900",
+    "before": {},
+    "after": {}
+  }
+]
