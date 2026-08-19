@@ -276,7 +276,7 @@ export function renderDashboard(container, { onBack }) {
               }
               await loadAssessment(assessment.id);
             } catch (err) {
-              alert(`Помилка мережи: ${err.message}`);
+              alert(`Помилка мережі: ${err.message}`);
             } finally {
               finalizeButton.disabled = false;
             }
