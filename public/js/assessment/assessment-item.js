@@ -1,10 +1,12 @@
 import { el } from '../render/dom.js';
-import { getAssessment, setAssessment } from './assessment-state.js';
+import { getAssessment, setAssessment, subscribe } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
 import { renderAssessmentTable } from './assessment-table.js';
 
 let openItemSourceId = null;
+let isDashboardSubscribed = false;
+let currentDashboardRerender = null;
 
 function renderItemDetailPanel(sourceId) {
   const assessment = getAssessment();
@@ -62,7 +64,8 @@ function renderItemDetailPanel(sourceId) {
   }, result.assessor_comment ?? '');
 
   commentArea.addEventListener('blur', () => {
-    const { assessment: updated } = updateResult(assessment, sourceId, {
+    const current = getAssessment();
+    const { assessment: updated } = updateResult(current, sourceId, {
       assessor_comment: commentArea.value
     });
     setAssessment(updated);
@@ -76,7 +79,8 @@ function renderItemDetailPanel(sourceId) {
   }, result.conclusion ?? '');
 
   conclusionArea.addEventListener('blur', () => {
-    const { assessment: updated } = updateResult(assessment, sourceId, {
+    const current = getAssessment();
+    const { assessment: updated } = updateResult(current, sourceId, {
       conclusion: conclusionArea.value
     });
     setAssessment(updated);
@@ -169,6 +173,21 @@ function renderWarningsBlock(assessment) {
 
 export function renderDashboard(container, { onBack }) {
   const assessment = getAssessment();
+
+  // Set up subscription for dashboard re-render (once only)
+  if (!isDashboardSubscribed) {
+    subscribe(() => {
+      // Skip re-render if user is typing in a detail panel textarea
+      const activeEl = document.activeElement;
+      const isTypingInPanel = activeEl?.tagName === 'TEXTAREA' && 
+                               activeEl?.closest('.item-detail-panel');
+      if (!isTypingInPanel && currentDashboardRerender) {
+        currentDashboardRerender();
+      }
+    });
+    isDashboardSubscribed = true;
+  }
+  currentDashboardRerender = () => renderDashboard(container, { onBack });
 
   // Header with metadata and status
   const statusBadge = el('span', {

@@ -1,5 +1,5 @@
 import { el } from '../render/dom.js';
-import { getAssessment, setAssessment } from './assessment-state.js';
+import { getAssessment, setAssessment, subscribe } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 
 export const RESULT_LABELS = {
@@ -66,6 +66,10 @@ export function groupPlanItems(assessment) {
 
 // Module-level state for expanded ODP rows
 const expandedRows = new Set();
+
+// Module-level state for re-render subscription
+let isSubscribed = false;
+let currentRerenderFn = null;
 
 function patchResult(sourceId, patch) {
   const current = getAssessment();
@@ -136,7 +140,9 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
           checked: isChecked ? '' : null,
           disabled: isFinalized ? '' : null,
           onchange: (e) => {
-            const currentMethods = result?.methods_used ?? [];
+            const current = getAssessment();
+            const currentResult = current.results.find(r => r.assessment_source_id === sourceId);
+            const currentMethods = currentResult?.methods_used ?? [];
             const newMethods = e.target.checked
               ? [...currentMethods, method]
               : currentMethods.filter(m => m !== method);
@@ -201,6 +207,17 @@ export function renderAssessmentTable(container, { onOpenItem }) {
   const assessment = getAssessment();
   const isFinalized = assessment.status === 'FINALIZED';
   const rerender = () => renderAssessmentTable(container, { onOpenItem });
+
+  // Set up subscription for auto re-render on state changes (once only)
+  if (!isSubscribed) {
+    subscribe(() => {
+      if (currentRerenderFn) {
+        currentRerenderFn();
+      }
+    });
+    isSubscribed = true;
+  }
+  currentRerenderFn = rerender;
 
   const thead = el('thead', {},
     el('tr', {},
