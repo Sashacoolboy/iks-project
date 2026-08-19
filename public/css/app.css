@@ -126,3 +126,50 @@ th { background: #edf2f7; }
 .constructor label { font-size: 0.82rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .req-cell button {background: #ddd; border: 1px solid #cbd5e0; border-radius: 4px; padding: 0.2rem 0.4rem; font-size: 0.75rem; color: #2c5282; margin-top: 10px;}
 .add.link-btn {padding: 10px 15px; color: #000; cursor: default; font-size: 1em; font-weight: 700;}
+/* Task 13: Assessment table styles */
+.assessment-container { position: relative; }
+.assessment-header { margin-bottom: 1rem; }
+.assessment-header .actions { margin-top: 0.5rem; }
+
+.warnings-block { background: #fffaf0; border: 1px solid #ed8936; border-radius: 6px; padding: 0.6rem 1rem; margin: 1rem 0; }
+.warnings-block .warning { margin: 0; color: #744210; }
+.warnings-list { margin: 0.5rem 0 0 1.5rem; }
+
+.assessment-table-container { margin: 1rem 0; }
+.assessment-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.85rem; }
+.assessment-table th { background: #edf2f7; font-weight: 600; padding: 0.5rem 0.6rem; border: 1px solid #cbd5e0; font-size: 0.8rem; }
+.assessment-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; vertical-align: top; }
+
+.assessment-table .group-row { background: #f7fafc; font-weight: 600; }
+.assessment-table .group-row.family { background: #2c5282; color: #fff; font-size: 0.95rem; }
+.assessment-table .group-row.control { background: #edf2f7; color: #1a202c; font-size: 0.88rem; }
+
+.assessment-table .assessment-item-row td { font-size: 0.82rem; }
+.assessment-table .objective { max-width: 20rem; }
+.assessment-table .conclusion { max-width: 12rem; }
+
+.assessment-table .odp-subrow { background: #f0fff4; }
+.assessment-table .odp-subrow td { padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #22543d; }
+.assessment-table .odp-meta { display: inline-block; margin-right: 1rem; }
+
+.assessment-table .methods { display: flex; flex-direction: column; gap: 0.2rem; }
+.assessment-table .methods label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; }
+
+.assessment-table button.link { background: none; border: none; color: #2c5282; padding: 0; text-decoration: underline; font-size: inherit; }
+.assessment-table button.link:hover { color: #1a365d; }
+
+.badge-finalized { background: #2f855a; color: #fff; }
+.badge-in-progress { background: #d69e2e; color: #fff; }
+
+.item-detail-panel { position: fixed; top: 0; right: 0; width: 40%; max-width: 36rem; height: 100vh; background: #fff; border-left: 2px solid #cbd5e0; box-shadow: -4px 0 12px rgba(0,0,0,0.1); overflow-y: auto; padding: 1.5rem; z-index: 100; }
+.item-detail-panel header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; }
+.item-detail-panel h3 { margin: 0; font-size: 1rem; }
+.item-detail-panel h4 { font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem; color: #2c5282; }
+.item-detail-panel section { margin-bottom: 1.5rem; }
+.item-detail-panel .objective-template, .item-detail-panel .resolved-objective { font-size: 0.85rem; margin: 0.3rem 0; color: #4a5568; }
+.item-detail-panel textarea { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 0.85rem; font-family: inherit; }
+.item-detail-panel .note { color: #718096; font-size: 0.8rem; font-style: italic; }
+
+.odp-detail-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem; }
+.odp-detail-table th { background: #edf2f7; padding: 0.4rem 0.5rem; border: 1px solid #cbd5e0; font-size: 0.75rem; }
+.odp-detail-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.5rem; }

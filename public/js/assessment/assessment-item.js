@@ -1,67 +1,232 @@
 import { el } from '../render/dom.js';
 import { getAssessment, setAssessment } from './assessment-state.js';
-import { renderEvidenceEditor } from './evidence-editor.js';
+import { updateResult } from '../../../core/assessment/assessment-run.js';
+import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
+import { renderAssessmentTable } from './assessment-table.js';
 
-const CONCLUSIONS = [
-  ['', '— оберіть —'], ['POSITIVE', 'Позитивно'], ['PARTIALLY_POSITIVE', 'Частково позитивно'],
-  ['NEGATIVE', 'Негативно'], ['NOT_APPLICABLE', 'Не застосовується'], ['NOT_ASSESSED', 'Не оцінено'],
-];
+let openItemSourceId = null;
 
-function itemDetail(item, rerender) {
-  const conclusionSel = el('select', {}, ...CONCLUSIONS.map(([v, l]) => el('option', { value: v, ...(item.conclusion === v ? { selected: '' } : {}) }, l)));
-  conclusionSel.addEventListener('change', () => {
-    setAssessment(a => { item.conclusion = conclusionSel.value || null; return { ...a }; });
-    rerender();
+function renderItemDetailPanel(sourceId) {
+  const assessment = getAssessment();
+  const planItem = assessment.plan.items.find(p => p.assessment_source_id === sourceId);
+  const result = assessment.results.find(r => r.assessment_source_id === sourceId);
+
+  if (!planItem || !result) {
+    return el('aside', { class: 'item-detail-panel' },
+      el('p', {}, 'Item not found'),
+      el('button', { type: 'button', onclick: () => { openItemSourceId = null; renderDashboard(document.querySelector('.assessment-container'), { onBack: () => {} }); } }, 'Закрити')
+    );
+  }
+
+  const isFinalized = assessment.status === 'FINALIZED';
+
+  // ODP values table
+  const odpTable = planItem.odp_values?.length > 0
+    ? el('table', { class: 'odp-detail-table' },
+        el('thead', {},
+          el('tr', {},
+            el('th', {}, 'Assessment ODP ID'),
+            el('th', {}, 'Local ODP ID'),
+            el('th', {}, 'БПБ'),
+            el('th', {}, 'ЦПБ'),
+            el('th', {}, 'Джерело'),
+            el('th', {}, 'Статус')
+          )
+        ),
+        el('tbody', {},
+          ...planItem.odp_values.map(odp => {
+            const baseline = Array.isArray(odp.baseline_value)
+              ? odp.baseline_value.join('; ')
+              : (odp.baseline_value ?? '—');
+            const target = Array.isArray(odp.target_value)
+              ? odp.target_value.join('; ')
+              : (odp.target_value ?? '[НЕ ВИЗНАЧЕНО]');
+            return el('tr', {},
+              el('td', {}, odp.assessment_odp_id ?? ''),
+              el('td', {}, odp.local_odp_id ?? ''),
+              el('td', {}, baseline),
+              el('td', {}, target),
+              el('td', {}, odp.effective_source ?? '—'),
+              el('td', {}, odp.status ?? '')
+            );
+          })
+        )
+      )
+    : el('p', {}, 'Немає значень параметрів визначення організації (ODP)');
+
+  // Assessor comment textarea
+  const commentArea = el('textarea', {
+    rows: '3',
+    disabled: isFinalized ? '' : null,
+    placeholder: 'Коментар оцінювача...'
+  }, result.assessor_comment ?? '');
+
+  commentArea.addEventListener('blur', () => {
+    const { assessment: updated } = updateResult(assessment, sourceId, {
+      assessor_comment: commentArea.value
+    });
+    setAssessment(updated);
   });
-  const commentArea = el('textarea', { rows: '2' }, item.assessor_comment ?? '');
-  commentArea.addEventListener('blur', () => setAssessment(a => { item.assessor_comment = commentArea.value; return { ...a }; }));
-  const findingDesc = el('textarea', { rows: '2', placeholder: 'Опис невідповідності' }, item.finding?.description ?? '');
-  findingDesc.addEventListener('blur', () => setAssessment(a => {
-    item.finding = { ...(item.finding ?? {}), description: findingDesc.value };
-    return { ...a };
-  }));
-  const evidenceBox = el('div', {});
-  renderEvidenceEditor(evidenceBox, item, () => { setAssessment(a => ({ ...a })); rerender(); });
 
-  return el('article', { class: 'profile-item' },
-    el('header', {}, el('strong', {}, item.id), item.catalog_missing
-      ? el('span', { class: 'badge badge-excluded' }, 'Методика не визначена')
-      : el('span', { class: 'badge' }, item.cpb_status)),
-    el('p', { class: 'stmt' }, item.resolved_statement || item.control_title),
-    el('label', { class: 'field' }, 'Висновок з оцінювання', conclusionSel),
-    el('label', { class: 'field' }, 'Коментар оцінювача', commentArea),
-    el('label', { class: 'field' }, 'Finding (опис невідповідності)', findingDesc),
-    el('h4', {}, 'Докази'), evidenceBox);
+  // Conclusion textarea
+  const conclusionArea = el('textarea', {
+    rows: '3',
+    disabled: isFinalized ? '' : null,
+    placeholder: 'Висновок...'
+  }, result.conclusion ?? '');
+
+  conclusionArea.addEventListener('blur', () => {
+    const { assessment: updated } = updateResult(assessment, sourceId, {
+      conclusion: conclusionArea.value
+    });
+    setAssessment(updated);
+  });
+
+  // Evidence count (full editor in Task 14)
+  const evidenceCount = result.evidence_ids?.length ?? 0;
+
+  const closeBtn = el('button', {
+    type: 'button',
+    onclick: () => {
+      openItemSourceId = null;
+      renderDashboard(document.querySelector('.assessment-container'), { onBack: () => {} });
+    }
+  }, 'Закрити');
+
+  return el('aside', { class: 'item-detail-panel' },
+    el('header', {},
+      el('h3', {}, sourceId),
+      closeBtn
+    ),
+    el('section', {},
+      el('h4', {}, 'Шаблон мети'),
+      el('p', { class: 'objective-template' }, planItem.objective_template ?? ''),
+      el('h4', {}, 'Розв\'язана мета оцінювання'),
+      el('p', { class: 'resolved-objective' }, planItem.resolved_objective ?? '')
+    ),
+    el('section', {},
+      el('h4', {}, 'Значення параметрів ODP'),
+      odpTable
+    ),
+    el('section', {},
+      el('label', { class: 'field' },
+        'Коментар оцінювача',
+        commentArea
+      )
+    ),
+    el('section', {},
+      el('label', { class: 'field' },
+        'Висновок',
+        conclusionArea
+      )
+    ),
+    el('section', {},
+      el('h4', {}, 'Докази'),
+      el('p', {}, `Кількість доказів: ${evidenceCount}`),
+      el('p', { class: 'note' }, '(Редактор доказів буде доданий у Task 14)')
+    )
+  );
+}
+
+function renderWarningsBlock(assessment) {
+  const unresolvedWarnings = (assessment.warnings ?? []).filter(w => w.code === 'ODP_UNRESOLVED');
+
+  if (unresolvedWarnings.length === 0) {
+    return null;
+  }
+
+  let showDetails = false;
+
+  const toggleBtn = el('button', {
+    type: 'button',
+    class: 'link',
+    onclick: () => {
+      showDetails = !showDetails;
+      const detailsList = warningsBlock.querySelector('.warnings-list');
+      detailsList.style.display = showDetails ? 'block' : 'none';
+      toggleBtn.textContent = showDetails ? 'Сховати' : 'Показати';
+    }
+  }, 'Показати');
+
+  const warningsList = el('ul', {
+    class: 'warnings-list',
+    style: 'display: none;'
+  }, ...unresolvedWarnings.map(w =>
+    el('li', {}, `${w.control_id}: ${w.local_odp_id}`)
+  ));
+
+  const warningsBlock = el('div', { class: 'warnings-block' },
+    el('p', { class: 'warning' },
+      `⚠️ Нерозв'язані параметри ODP: ${unresolvedWarnings.length}`,
+      ' ',
+      toggleBtn
+    ),
+    warningsList
+  );
+
+  return warningsBlock;
 }
 
 export function renderDashboard(container, { onBack }) {
-  const rerender = () => { container.replaceChildren(); renderDashboard(container, { onBack }); };
   const assessment = getAssessment();
+
+  // Header with metadata and status
+  const statusBadge = el('span', {
+    class: assessment.status === 'FINALIZED' ? 'badge badge-finalized' : 'badge badge-in-progress'
+  }, assessment.status === 'FINALIZED' ? 'Фіналізовано' : 'В процесі');
+
+  const summary = buildAssessmentSummary(assessment);
+  const progressText = `${summary.satisfied + summary.partially_satisfied} / ${summary.total} оцінено`;
+
   const backBtn = el('button', { type: 'button', onclick: onBack }, '← До реєстру оцінювань');
-  const exportBtn = el('button', { type: 'button', onclick: async () => {
-    try {
-      const r = await fetch(`/api/assessments/${encodeURIComponent(assessment.id)}/export/docx`, { method: 'POST' });
-      if (!r.ok) {
-        const body = await r.json();
-        alert(`Помилка експорту: ${body.error ?? 'невідома помилка'}`);
-        return;
+
+  const exportBtn = el('button', {
+    type: 'button',
+    onclick: async () => {
+      try {
+        const r = await fetch(`/api/assessments/${encodeURIComponent(assessment.id)}/export/docx`, { method: 'POST' });
+        if (!r.ok) {
+          const body = await r.json();
+          alert(`Помилка експорту: ${body.error ?? 'невідома помилка'}`);
+          return;
+        }
+        const blob = await r.blob();
+        const a = el('a', { href: URL.createObjectURL(blob), download: `${assessment.id}.docx` });
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch (err) {
+        alert(`Помилка мережі: ${err.message}`);
       }
-      const blob = await r.blob();
-      const a = el('a', { href: URL.createObjectURL(blob), download: `${assessment.id}.docx` });
-      a.click();
-      URL.revokeObjectURL(a.href);
-    } catch (err) {
-      alert(`Помилка мережі: ${err.message}`);
     }
-  } }, '🖨️ Експорт звіту (DOCX)');
-  const byFamily = new Map();
-  for (const item of assessment.items) {
-    if (!byFamily.has(item.family)) byFamily.set(item.family, []);
-    byFamily.get(item.family).push(item);
-  }
-  const groups = [...byFamily.entries()].map(([family, items]) =>
-    el('section', {}, el('h3', {}, family), ...items.map(item => itemDetail(item, rerender))));
-  container.replaceChildren(el('section', {},
+  }, '🖨️ Експорт звіту (DOCX)');
+
+  const header = el('section', { class: 'assessment-header' },
     el('h2', {}, `Оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
-    backBtn, exportBtn, ...groups));
+    el('p', {}, statusBadge, ' ', progressText),
+    el('div', { class: 'actions' }, backBtn, exportBtn)
+  );
+
+  // Warnings block
+  const warningsBlock = renderWarningsBlock(assessment);
+
+  // Table container
+  const tableContainer = el('div', { class: 'assessment-table-container' });
+
+  // Detail panel (if item is open)
+  const detailPanel = openItemSourceId ? renderItemDetailPanel(openItemSourceId) : null;
+
+  // Render the table
+  renderAssessmentTable(tableContainer, {
+    onOpenItem: (sourceId) => {
+      openItemSourceId = sourceId;
+      renderDashboard(container, { onBack });
+    }
+  });
+
+  const children = [header];
+  if (warningsBlock) children.push(warningsBlock);
+  children.push(tableContainer);
+  if (detailPanel) children.push(detailPanel);
+
+  container.replaceChildren(el('div', { class: 'assessment-container' }, ...children));
 }
