@@ -1,45 +1,204 @@
 import { createZip } from './zip-writer.js';
-import { escapeXml, run, par, parRuns, cell, cellXml, row, table } from './docx-writer.js';
+import { escapeXml, run, par, cell, row, table } from './docx-writer.js';
 
-const METHOD_LABELS = { EXAMINE: 'Дослідження', INTERVIEW: 'Опитування', TEST: 'Випробування', OBSERVE: 'Спостереження' };
-const CONCLUSION_LABELS = {
-  POSITIVE: 'Позитивно', PARTIALLY_POSITIVE: 'Частково позитивно', NEGATIVE: 'Негативно',
-  NOT_APPLICABLE: 'Не застосовується', NOT_ASSESSED: 'Не оцінено',
-};
-const RESULT_LABELS = {
-  SATISFIED: 'Позитивно', PARTIALLY_SATISFIED: 'Частково позитивно', NOT_SATISFIED: 'Негативно',
-  NOT_APPLICABLE: 'Не застосовується', NOT_ASSESSED: 'Не оцінено',
-};
+/**
+ * Builds v3 assessment report DOCX from report projection.
+ * No Date.now()/new Date() calls — reproducible output.
+ * @param {Object} opts - { projection }
+ * @returns {Buffer} DOCX file
+ */
+export function buildAssessmentDocx({ projection }) {
+  const sections = [];
 
-function evidenceBlockText(item) {
-  const byMethod = new Map();
-  for (const ev of item.evidence ?? []) {
-    if (!byMethod.has(ev.method)) byMethod.set(ev.method, []);
-    byMethod.get(ev.method).push(ev);
+  // Section 1: Title page
+  sections.push(par('Звіт за результатами оцінювання', { bold: true, sz: 32, align: 'center' }));
+  sections.push(par('інформаційно-комунікаційної системи', { align: 'center' }));
+  sections.push(par(''));
+  sections.push(par(`«${projection.title.ics_name}»`, { bold: true, align: 'center' }));
+  sections.push(par(''));
+  sections.push(par(`Номер оцінювання: ${projection.title.assessment_id}`));
+  sections.push(par(`Дата: ${projection.title.date}`));
+  sections.push(par(`Орган оцінювання: ${projection.title.assessment_body}`));
+  sections.push(par(`Оцінювач: ${projection.title.assessor_name}`));
+  sections.push(par(''));
+
+  // Section 2: System information
+  sections.push(par('1. Відомості про інформаційно-комунікаційну систему', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  sections.push(par(`Найменування ІКС: ${projection.system_info.ics_name}`));
+  sections.push(par(`Клас автоматизованої системи: ${projection.system_info.as_class}`));
+  sections.push(par(`Тип інформації: ${projection.system_info.info_type}`));
+  sections.push(par(''));
+
+  // Section 3: Basis and scope
+  sections.push(par('2. Підстава та область оцінювання', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  sections.push(par(`Профіль захисту: ${projection.basis_scope.cpb_source}`));
+  sections.push(par(`Хеш профілю: ${projection.basis_scope.cpb_hash}`));
+  sections.push(par(`Кількість заходів захисту: ${projection.basis_scope.items_total}`));
+  sections.push(par(`Кількість заходів контролю: ${projection.basis_scope.controls_total}`));
+  sections.push(par(''));
+
+  // Section 4: CPB version
+  sections.push(par('3. Версія центрального профілю базового захисту', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  sections.push(par(`Затверджена назва: ${projection.cpb_version.approved_name}`));
+  sections.push(par(`Хеш: ${projection.cpb_version.hash}`));
+  sections.push(par(''));
+
+  // Section 5: Methods table
+  sections.push(par('4. Методи оцінювання', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  const methodRows = [
+    row([cell('Метод', { header: true }), cell('Використано разів', { header: true })], { header: true }),
+    ...projection.methods.map(m => row([cell(m.label, {}), cell(String(m.used_count), {})]))
+  ];
+  sections.push(table(methodRows));
+  sections.push(par(''));
+
+  // Section 6: Results by families
+  sections.push(par('5. Результати оцінювання за класами заходів захисту', { bold: true, sz: 32 }));
+  sections.push(par(''));
+
+  for (const family of projection.families) {
+    sections.push(par(`Клас ${family.family}: ${family.family_title}`, { bold: true, sz: 30 }));
+    sections.push(par(''));
+
+    for (const control of family.controls) {
+      sections.push(par(`Захід ${control.control_id}: ${control.control_title}`, { bold: true }));
+      sections.push(par(''));
+
+      const itemRows = [
+        row([
+          cell('Позначення', { header: true }),
+          cell('Мета оцінювання', { header: true }),
+          cell('Оцінка', { header: true }),
+          cell('Методи', { header: true }),
+          cell('Висновок', { header: true })
+        ], { header: true }),
+        ...control.items.map(item => {
+          const methodsText = item.methods_used_labels.join(', ');
+          const evidenceText = item.evidence_ids.length > 0
+            ? `Докази: ${item.evidence_ids.join(', ')}`
+            : '';
+          const conclusionFull = [item.conclusion, evidenceText].filter(Boolean).join('\n');
+          return row([
+            cell(item.assessment_source_id, {}),
+            cell(item.resolved_objective, {}),
+            cell(item.result_label, {}),
+            cell(methodsText, {}),
+            cell(conclusionFull, {})
+          ]);
+        })
+      ];
+      sections.push(table(itemRows));
+      sections.push(par(''));
+    }
   }
-  const blocks = [];
-  for (const [method, list] of byMethod) {
-    const lines = list.map(ev => [ev.title, ev.reference, ev.observation].filter(Boolean).join(' — ')).join('\n');
-    blocks.push(`${METHOD_LABELS[method] ?? method}:\n${lines}`);
+
+  // Section 7: Evidence register
+  sections.push(par('6. Реєстр доказів', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  if (projection.evidence_register.length > 0) {
+    const evidenceRows = [
+      row([
+        cell('ID', { header: true }),
+        cell('Тип', { header: true }),
+        cell('Назва', { header: true }),
+        cell('Посилання', { header: true }),
+        cell('Зібрано', { header: true }),
+        cell('Дата', { header: true })
+      ], { header: true }),
+      ...projection.evidence_register.map(e => row([
+        cell(e.evidence_id, {}),
+        cell(e.type, {}),
+        cell(e.title, {}),
+        cell(e.reference, {}),
+        cell(e.collected_by, {}),
+        cell(e.collected_at, {})
+      ]))
+    ];
+    sections.push(table(evidenceRows));
+  } else {
+    sections.push(par('Докази відсутні.'));
   }
-  if (item.assessor_comment?.trim()) blocks.push(`Коментар оцінювача:\n${item.assessor_comment.trim()}`);
-  return blocks.join('\n\n');
+  sections.push(par(''));
+
+  // Section 8: Findings
+  sections.push(par('7. Недоліки', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  if (projection.findings.length > 0) {
+    const findingRows = [
+      row([
+        cell('ID', { header: true }),
+        cell('Серйозність', { header: true }),
+        cell('Назва', { header: true }),
+        cell('Опис', { header: true }),
+        cell('Рекомендація', { header: true }),
+        cell('Захід', { header: true })
+      ], { header: true }),
+      ...projection.findings.map(f => row([
+        cell(f.finding_id, {}),
+        cell(f.severity_label, {}),
+        cell(f.title, {}),
+        cell(f.description, {}),
+        cell(f.recommendation, {}),
+        cell(f.assessment_source_id, {})
+      ]))
+    ];
+    sections.push(table(findingRows));
+  } else {
+    sections.push(par('Недоліків не виявлено.'));
+  }
+  sections.push(par(''));
+
+  // Section 9: Overall conclusion
+  sections.push(par('8. Загальний висновок', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  sections.push(par(`Відповідає: ${projection.overall.counts.satisfied}`));
+  sections.push(par(`Частково відповідає: ${projection.overall.counts.partially_satisfied}`));
+  sections.push(par(`Не відповідає: ${projection.overall.counts.not_satisfied}`));
+  sections.push(par(`Не застосовується: ${projection.overall.counts.not_applicable}`));
+  sections.push(par(`Не оцінено: ${projection.overall.counts.not_assessed}`));
+  sections.push(par(''));
+  sections.push(par(`Висновок: ${projection.overall.conclusion_text}`, { bold: true }));
+  sections.push(par(''));
+
+  // Section 10: Appendices - unresolved ODP
+  sections.push(par('9. Додатки', { bold: true, sz: 32 }));
+  sections.push(par(''));
+  sections.push(par('9.1. Нерозвʼязані параметри (ODP)', { bold: true }));
+  sections.push(par(''));
+  if (projection.appendices.unresolved_odp.length > 0) {
+    const odpRows = [
+      row([
+        cell('ID параметра', { header: true }),
+        cell('Захід', { header: true })
+      ], { header: true }),
+      ...projection.appendices.unresolved_odp.map(odp => row([
+        cell(odp.local_odp_id, {}),
+        cell(odp.control_id, {})
+      ]))
+    ];
+    sections.push(table(odpRows));
+  } else {
+    sections.push(par('Усі параметри розвʼязано.'));
+  }
+
+  const documentXml = sections.join('');
+  return packAssessmentDocx(documentXml, projection.title.date);
 }
 
-function itemRow(item) {
-  const reqText = item.catalog_missing
-    ? `${item.id}\n\nМетодика оцінювання для цього заходу не визначена у локальному каталозі.`
-    : `${item.id}\n\n${item.resolved_statement ?? ''}`;
-  const conclusionText = item.conclusion ? (CONCLUSION_LABELS[item.conclusion] ?? item.conclusion) : 'Не оцінено';
-  return row([
-    cell(item.control_id, {}),
-    cell(reqText, {}),
-    cell(conclusionText, {}),
-    cell(evidenceBlockText(item), {}),
-  ]);
-}
+function packAssessmentDocx(documentXml, dateStr) {
+  // Parse date for reproducibility (YYYY-MM-DD)
+  let fixedDate;
+  if (dateStr) {
+    const parts = dateStr.split('-').map(Number);
+    if (parts.length === 3) {
+      fixedDate = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    }
+  }
 
-function packAssessmentDocx(documentXml) {
   return createZip([
     { path: '[Content_Types].xml', content:
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
@@ -59,53 +218,5 @@ function packAssessmentDocx(documentXml) {
       `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ` +
       `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
       `<w:body>${documentXml}</w:body></w:document>` },
-  ]);
-}
-
-export function buildAssessmentDocx({ assessment }) {
-  // Minimal v1/v3 compatibility shim until Task 12 full rewrite
-  const isV3 = assessment.schema_version?.startsWith('3.');
-  const items = isV3
-    ? assessment.plan.items.map(planItem => {
-        const result = assessment.results.find(r => r.assessment_source_id === planItem.assessment_source_id) ?? {};
-        const evidenceRecords = (result.evidence_ids ?? []).map(eid => assessment.evidence.find(e => e.evidence_id === eid)).filter(Boolean);
-        return {
-          id: planItem.assessment_source_id,
-          control_id: planItem.control_id,
-          resolved_statement: planItem.resolved_objective,
-          conclusion: result.result,
-          assessor_comment: result.assessor_comment,
-          evidence: evidenceRecords.map(ev => ({
-            method: result.methods_used[0] ?? 'EXAMINE',
-            source_type: ev.type,
-            title: ev.title,
-            reference: ev.reference,
-            observation: ev.observation,
-          })),
-        };
-      })
-    : assessment.items;
-  const title = par(`Звіт з оцінювання ІКС «${assessment.metadata?.ics_name ?? ''}»`, { bold: true });
-  const meta = par(`Оцінювач: ${assessment.metadata?.assessor_name ?? ''}  Клас АС: ${assessment.metadata?.as_class ?? ''}`);
-  const header = row([
-    cell('№ заходу захисту', { header: true }),
-    cell('Оцінювання', { header: true }),
-    cell('Висновок з оцінювання', { header: true }),
-    cell('Докази, джерела отримання відомостей, коментарі оцінювача', { header: true }),
-  ], { header: true });
-  const itemRowsData = items.map(item => {
-    const reqText = item.catalog_missing
-      ? `${item.id}\n\nМетодика оцінювання для цього заходу не визначена у локальному каталозі.`
-      : `${item.id}\n\n${item.resolved_statement ?? ''}`;
-    const conclusionText = item.conclusion ? ((isV3 ? RESULT_LABELS : CONCLUSION_LABELS)[item.conclusion] ?? item.conclusion) : 'Не оцінено';
-    return row([
-      cell(item.control_id, {}),
-      cell(reqText, {}),
-      cell(conclusionText, {}),
-      cell(evidenceBlockText(item), {}),
-    ]);
-  });
-  const rows = [header, ...itemRowsData];
-  const body = title + meta + table(rows);
-  return packAssessmentDocx(body);
+  ], { fixedDate });
 }

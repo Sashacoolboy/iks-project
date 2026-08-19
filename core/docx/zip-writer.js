@@ -24,8 +24,8 @@ function dosDateTime(d = new Date()) {
   return { time, date };
 }
 
-export function createZip(entries) {
-  const { time, date } = dosDateTime();
+export function createZip(entries, { fixedDate } = {}) {
+  const { time, date } = dosDateTime(fixedDate);
   const localParts = [];
   const centralParts = [];
   let offset = 0;

@@ -14,6 +14,7 @@ import { validateAssessment } from './core/assessment/assessment-validator.js';
 import { makeAuditEntry, appendAuditEntry } from './core/assessment/audit-trail.js';
 import { sha256, buildCatalogVersion } from './core/assessment/versioning.js';
 import { buildAssessmentDocx } from './core/docx/assessment-docx-writer.js';
+import { buildReportProjection } from './core/assessment/report-projection.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT ?? 3000);
@@ -247,7 +248,11 @@ createServer(async (req, res) => {
           let assessment;
           try { assessment = JSON.parse(await readFile(join(dir, 'assessment.json'), 'utf8')); }
           catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
-          const buf = buildAssessmentDocx({ assessment });
+          let cpbSnapshot;
+          try { cpbSnapshot = JSON.parse(await readFile(join(dir, 'cpb-snapshot.json'), 'utf8')); }
+          catch { cpbSnapshot = { state: {} }; }
+          const projection = buildReportProjection({ assessment, cpbSnapshot });
+          const buf = buildAssessmentDocx({ projection });
           await mkdir(join(ROOT, 'exports', 'assessments'), { recursive: true });
           await writeFile(join(ROOT, 'exports', 'assessments', `${assessment.id}.docx`), buf);
           await appendAudit(dir, makeAuditEntry({ actor: '', action: 'REPORT_GENERATED', entity_id: assessment.id }));
