@@ -92,14 +92,28 @@ export function relevantOdpEntries(planItem) {
   return all.filter(v => set.has(v.local_odp_id));
 }
 
+const collapsePlaceholders = (t) => String(t ?? '').replace(/\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g, '[$1]');
+
 // Текст тултіпа: стейтменти, де вжито цей ODP; плейсхолдери згортаються до [odp-id]
 export function usageTitle(odp) {
   const usages = odp.statement_usage ?? [];
   if (!usages.length) return null;
-  const clean = (t) => String(t ?? '').replace(/\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g, '[$1]');
   return 'Використовується в пункті: ' + usages
-    .map(u => `${u.statement_path ? u.statement_path + ') ' : ''}${clean(u.text)}`)
+    .map(u => `${u.statement_path ? u.statement_path + ') ' : ''}${collapsePlaceholders(u.text)}`)
     .join('\n');
+}
+
+// Тултіп на позначенні пункту: текст вимоги заходу з НД ТЗІ
+export function statementTitle(planItem) {
+  if (!planItem.statement_text) return null;
+  const label = planItem.statement_path
+    ? `${planItem.control_id}.${firstSegmentLabel(planItem.statement_path)} — `
+    : '';
+  return label + collapsePlaceholders(planItem.statement_text);
+}
+
+function firstSegmentLabel(path) {
+  return String(path ?? '').split('.')[0].replace(/[\[(].*$/, '');
 }
 
 export function odpColumnParts(planItem) {
@@ -146,10 +160,12 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
   const sourceId = planItem.assessment_source_id;
   const isExpanded = expandedRows.has(sourceId);
 
-  // Toggle expand/collapse button
+  // Toggle expand/collapse button; hover — текст вимоги заходу з НД ТЗІ
+  const stmtTitle = statementTitle(planItem);
   const toggleBtn = el('button', {
     type: 'button',
     class: 'link',
+    ...(stmtTitle ? { title: stmtTitle } : {}),
     onclick: () => {
       if (isExpanded) {
         expandedRows.delete(sourceId);

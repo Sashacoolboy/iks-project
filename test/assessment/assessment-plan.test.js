@@ -56,6 +56,20 @@ test('relevant_local_odp_ids: statement-матчинг, VERIFIED-мапінг т
   assert.ok(Array.isArray(odp4.statement_paths) && odp4.statement_paths.length > 0);
 });
 
+test('statement_text: текст вимоги заходу з nd_tzi на кожному пункті', () => {
+  const a1 = items.find(i => i.assessment_source_id === 'AC-02a.[01]');
+  assert.equal(a1.statement_text, 'Визначити та задокументувати типи облікових записів системи, дозволених для використання в ІС для підтримки цілей, завдань, функцій і процесів організації.');
+  const e = items.find(i => i.assessment_source_id === 'AC-02e');
+  assert.ok(e.statement_text.includes('Вимагати схвалення'));
+  // ODP-рядок з VERIFIED-звʼязком → текст стейтменту, де вжито локальний ODP
+  const ref3 = items.find(i => i.assessment_source_id === 'AC-02_ODP[03]');
+  assert.ok(ref3.statement_text.includes('Вимагати схвалення'));
+  // без VERIFIED-звʼязку → повний текст заходу (всі пункти a..l)
+  const ref1 = items.find(i => i.assessment_source_id === 'AC-02_ODP[01]');
+  assert.ok(ref1.statement_text.includes('a) Визначити та задокументувати типи облікових записів'));
+  assert.ok(ref1.statement_text.includes('j) Проводити перегляд облікових записів'));
+});
+
 test('невибрані enhancements не потрапляють у план', () => {
   // АС-2: profile.enhancements = [] → only БПБ-mandated enhancements, no user-selected ones
   // Check: any enhancement in items should NOT be from the (empty) profile.enhancements list

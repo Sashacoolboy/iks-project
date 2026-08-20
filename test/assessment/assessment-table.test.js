@@ -1,6 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle } from '../../public/js/assessment/assessment-table.js';
+import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle, statementTitle } from '../../public/js/assessment/assessment-table.js';
+
+test('statementTitle: текст вимоги заходу з префіксом пункту, плейсхолдер згорнутий', () => {
+  const item = { control_id: 'AC-02', statement_path: 'a.[01]',
+    statement_text: 'Визначити та задокументувати типи облікових записів системи.' };
+  assert.equal(statementTitle(item), 'AC-02.a — Визначити та задокументувати типи облікових записів системи.');
+  const odpRow = { control_id: 'AC-02', statement_path: null,
+    statement_text: 'Вимагати схвалення {{ insert: param, ac-2_odp.01 }} запитів.' };
+  assert.equal(statementTitle(odpRow), 'Вимагати схвалення [ac-2_odp.01] запитів.');
+  assert.equal(statementTitle({ control_id: 'AC-02', statement_path: 'e' }), null);
+});
 
 test('usageTitle і odpColumnParts: тултіп зі стейтментами, плейсхолдер згорнутий', () => {
   const odp = { local_odp_id: 'ac-2_odp.01', baseline_value: null, target_value: null,

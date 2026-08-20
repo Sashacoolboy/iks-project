@@ -34,6 +34,35 @@ export function firstPathSegment(path) {
   return String(path ?? '').split('.')[0].replace(/[\[(].*$/, '');
 }
 
+// nd_tzi: canonical_id → верхньорівневі statement-рядки {seg ('a'), text}
+function indexNdStatements(ndTzi) {
+  const map = new Map();
+  for (const fam of ndTzi.document.security_families)
+    for (const c of fam.controls)
+      for (const node of [c, ...(c.children ?? [])]) {
+        const items = node.catalog?.statement?.items ?? [];
+        map.set(node.canonical_id, items.map(it => ({
+          seg: String(it.label ?? '').replace(/[^\p{L}\p{N}]/gu, ''),
+          text: it.text ?? '',
+        })));
+      }
+  return map;
+}
+
+function ndStatementTextFor(flat, statementPath) {
+  if (!flat?.length) return null;
+  if (!statementPath) return flat.length === 1 ? flat[0].text : null;
+  const seg = firstPathSegment(statementPath);
+  const hit = flat.find(l => l.seg === seg);
+  return hit ? hit.text : (flat.length === 1 ? flat[0].text : null);
+}
+
+// Повний текст вимоги заходу (всі верхньорівневі пункти) — для ODP-рядків без точного пункту
+function ndFullStatementText(flat) {
+  if (!flat?.length) return null;
+  return flat.map(l => (l.seg ? `${l.seg}) ` : '') + l.text).join('\n');
+}
+
 /**
  * buildAssessmentPlan (v3)
  * @param {object} params
@@ -47,6 +76,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
   const items = [];
   const warnings = [];
   const adapterIndex = indexAdapter(adapter);
+  const ndStatements = indexNdStatements(catalogs.ndTzi);
   const cpb = { info_type: approvedState.info_type, profile: approvedState.profile };
   const genericDefaults = catalogs.genericDefaults;
   const applicable = cpbApplicableControlIds(approvedState, catalogs);
@@ -85,6 +115,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
     }
 
     const adapterCtrl = adapterIndex.controls.get(catCtrl.control_id);
+    const ndFlat = ndStatements.get(catCtrl.canonical_control_id);
     const odpValues = (adapterCtrl?.assessment_odps ?? []).map(entry => {
       const eff = effectiveFor(entry);
       if (eff.status === 'UNRESOLVED') {
@@ -116,13 +147,22 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
       // ОДП, релевантні саме цьому пункту: за першим сегментом statement_path,
       // VERIFIED-мапінгом для ODP-рядків та підставленими плейсхолдерами
       const relevantIds = new Set();
+      let statementText = null;
       if (item.kind === 'ODP_DEFINITION') {
         const hit = adapterIndex.nistVerified.get(item.assessment_source_id);
-        if (hit) relevantIds.add(hit.entry.local_odp_id);
+        if (hit) {
+          relevantIds.add(hit.entry.local_odp_id);
+          statementText = hit.entry.statement_usage?.[0]?.text ?? null;
+        }
+        // без VERIFIED-зв'язку точний пункт невідомий — показуємо повний текст заходу
+        if (!statementText) statementText = ndFullStatementText(ndFlat);
       } else if (item.statement_path) {
         const seg = firstPathSegment(item.statement_path);
         for (const v of odpValues)
           if ((v.statement_paths ?? []).some(p => firstPathSegment(p) === seg)) relevantIds.add(v.local_odp_id);
+        statementText = ndStatementTextFor(ndFlat, item.statement_path);
+      } else {
+        statementText = ndStatementTextFor(ndFlat, null);
       }
       for (const ph of placeholders) if (ph.local_odp_id) relevantIds.add(ph.local_odp_id);
 
@@ -137,6 +177,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
         statement_path: item.statement_path, 
         kind: item.kind, 
         cpb_status: cpbStatus,
+        statement_text: statementText,
         objective_template: item.objective_template, 
         resolved_objective, 
         placeholders,
