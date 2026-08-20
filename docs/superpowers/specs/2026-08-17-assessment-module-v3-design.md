@@ -2,7 +2,7 @@
 
 **Дата:** 2026-08-17
 **Статус:** затверджено користувачем
-**Авторитетне ТЗ:** [data/assessment_module_agent_task_v3.md](../../../data/assessment_module_agent_task_v3.md) (v3 controls architecture; нормативні джерела controls text/content)
+**Авторитетне ТЗ:** [docs/assessment_module_agent_task_v3.md](../../assessment_module_agent_task_v3.md) (v3 controls architecture; нормативні джерела controls text/content)
 **Замінює:** assessment module v1 (комміти 2026-08-13..15, старий spec `docs/superpowers/specs/...standalone-app-design.md` §assessment та план `2026-08-13-assessment-module-implementation.md`)
 
 ## Контекст і мета
