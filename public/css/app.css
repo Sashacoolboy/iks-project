@@ -9,7 +9,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 button.primary { background: #2c5282; color: #fff; border-color: #2c5282; font-weight: 600; }
 h2 { font-size: 1.15rem; } h3 { font-size: 1rem; margin-top: 1.25rem; }
 
-#stepper { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+#stepper { display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0.5rem 1.5rem; background: #1a365d; }
 .step-tab { background: #2c5282; color: #cbd5e0; border: none; font-size: 0.8rem; }
 .step-tab.active { background: #fff; color: #1a365d; font-weight: 600; }
 .step-tab.done { background: #2f855a; color: #fff; }
