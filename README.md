@@ -18,8 +18,8 @@
 
 1. **Створення** — генерація assessment-запису з затвердженого approved-запису (POST `/api/assessments`)
 2. **Оцінювання** — внесення результатів перевірки (SATISFIED/PARTIALLY_SATISFIED/NOT_SATISFIED/NOT_APPLICABLE/NOT_ASSESSED), завантаження доказів (evidence), фіксація недоліків (findings)
-3. **Фіналізація** — перевірка обов'язкових результатів, перехід у read-only режим (PUT `/api/assessments/:id/finalize`)
-4. **Експорт DOCX** — генерація звіту оцінювання (GET `/api/assessments/:id/export`)
+3. **Фіналізація** — перевірка обов'язкових результатів, перехід у read-only режим (POST `/api/assessments/:id/finalize`)
+4. **Експорт DOCX** — генерація звіту оцінювання (POST `/api/assessments/:id/export/docx`)
 
 ### Файлова структура `assessments/<id>/`
 
@@ -27,7 +27,7 @@
 
 - `assessment.json` — основний запис (план, результати, evidence, findings)
 - `cpb-snapshot.json` — immutable знімок затвердженого ЦПБ (джерело плану)
-- `catalog-version.json` — версії каталогів assessment_catalog.json та assessment_odp_adapter.json
+- `catalog-version.json` — хеші 5 каталогів (nd_tzi.json, assessment_odp_adapter.json, assessment_catalog.json, assessment_reference.json, generic_parameter_defaults.json)
 - `audit-log.json` — журнал дій (створення, оновлення, фіналізація)
 - `evidence/` — завантажені файли доказів (.pdf, .png, .jpg, .txt тощо)
 

@@ -1,5 +1,5 @@
 import { createZip } from './zip-writer.js';
-import { escapeXml, run, par, cell, row, table } from './docx-writer.js';
+import { par, cell, row, table } from './docx-writer.js';
 
 /**
  * Builds v3 assessment report DOCX from report projection.

@@ -38,7 +38,7 @@ export function renderEvidenceEditor(container, { sourceId }) {
   const assessment = getAssessment();
   const result = assessment.results.find(r => r.assessment_source_id === sourceId);
   if (!result) {
-    container.replaceChildren(el('p', {}, 'Result not found'));
+    container.replaceChildren(el('p', {}, 'Результат не знайдено'));
     return;
   }
 

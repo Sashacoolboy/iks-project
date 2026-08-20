@@ -24,3 +24,21 @@ test('проєкція: розділи, лейбли, загальний вис�
   assert.ok(p.overall.conclusion_text.includes('не відповідає'));
   assert.deepEqual(p.appendices.unresolved_odp, [{ local_odp_id: 'ac-2_odp.01', control_id: 'AC-02' }]);
 });
+
+test('висновок tier 2 (partially_satisfied)', () => {
+  const a2 = { ...assessment, results: [{ ...assessment.results[0], result: 'PARTIALLY_SATISFIED' }] };
+  const p = buildReportProjection({ assessment: a2, cpbSnapshot: { state: {} } });
+  assert.match(p.overall.conclusion_text, /частково відповідає/);
+});
+
+test('висновок tier 3 (not_assessed)', () => {
+  const a3 = { ...assessment, results: [{ ...assessment.results[0], result: 'NOT_ASSESSED' }] };
+  const p = buildReportProjection({ assessment: a3, cpbSnapshot: { state: {} } });
+  assert.match(p.overall.conclusion_text, /не завершено/);
+});
+
+test('висновок tier 4 (clean)', () => {
+  const a4 = { ...assessment, results: [{ ...assessment.results[0], result: 'SATISFIED' }] };
+  const p = buildReportProjection({ assessment: a4, cpbSnapshot: { state: {} } });
+  assert.equal(p.overall.conclusion_text, 'ІКС відповідає вимогам ЦПБ');
+});

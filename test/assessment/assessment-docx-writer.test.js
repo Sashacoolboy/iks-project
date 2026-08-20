@@ -105,7 +105,7 @@ test('document.xml містить обовʼязкові розділи та у�
   assert.match(xml, /перевірити наявність схвалення керівником СЗІ/, 'resolved objective');
 
   // Загальний висновок
-  assert.match(xml, /не відповідає вимогам ЦПБ/, 'overall conclusion');
+  assert.match(xml, /ІКС не відповідає вимогам ЦПБ/, 'overall conclusion');
 });
 
 test('відтворюваність: дві послідовні генерації → ідентичні байти', () => {

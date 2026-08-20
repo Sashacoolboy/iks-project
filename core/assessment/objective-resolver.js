@@ -12,9 +12,10 @@ export function resolveAssessmentObjective({ objectiveTemplate, adapterIndex, ef
     const { entry } = verified;
     const ev = effectiveValueFor(entry.local_odp_id);
     if (ev?.status === 'RESOLVED') {
+      const text = Array.isArray(ev.value) ? ev.value.join('; ') : ev.value;
       placeholders.push({ ref, label, resolution: 'SUBSTITUTED', local_odp_id: entry.local_odp_id,
-        assessment_odp_id: entry.assessment_odp_id, value: ev.value });
-      return ev.value;
+        assessment_odp_id: entry.assessment_odp_id, value: text });
+      return text;
     }
     placeholders.push({ ref, label, resolution: 'UNRESOLVED_VALUE', local_odp_id: entry.local_odp_id,
       assessment_odp_id: entry.assessment_odp_id, value: null });

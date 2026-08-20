@@ -209,11 +209,11 @@ export function buildReportProjection({ assessment, cpbSnapshot }) {
   if (counts.not_satisfied > 0) {
     conclusion_text = `ІКС не відповідає вимогам ЦПБ: ${counts.not_satisfied} заходів не відповідають`;
   } else if (counts.partially_satisfied > 0) {
-    conclusion_text = 'частково відповідає';
+    conclusion_text = `ІКС частково відповідає вимогам ЦПБ: ${counts.partially_satisfied} заходів відповідають частково`;
   } else if (counts.not_assessed > 0) {
-    conclusion_text = 'оцінювання не завершено';
+    conclusion_text = `Оцінювання не завершено: ${counts.not_assessed} заходів не оцінено`;
   } else {
-    conclusion_text = 'відповідає';
+    conclusion_text = 'ІКС відповідає вимогам ЦПБ';
   }
 
   const overall = {

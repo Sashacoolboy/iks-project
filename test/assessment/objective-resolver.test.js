@@ -42,3 +42,12 @@ test('текст без плейсхолдерів проходить без з�
   assert.equal(r.resolved_objective, 'звичайний текст;');
   assert.deepEqual(r.placeholders, []);
 });
+
+test('RESOLVED з масивом → об\'єднання через "; "', () => {
+  const { resolved_objective, placeholders } = resolveAssessmentObjective({
+    objectiveTemplate: TPL, adapterIndex,
+    effectiveValueFor: () => ({ status: 'RESOLVED', value: ['а', 'б'] }),
+  });
+  assert.equal(resolved_objective, 'для запитів на створення облікових записів потрібні схвалення від а; б;');
+  assert.equal(placeholders[0].value, 'а; б');
+});
