@@ -1,6 +1,31 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupPlanItems, RESULT_LABELS, METHOD_LABELS } from '../../public/js/assessment/assessment-table.js';
+import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts } from '../../public/js/assessment/assessment-table.js';
+
+test('relevantOdpEntries + odpColumnTexts: фільтр за relevant_local_odp_ids і підписи', () => {
+  const odpValues = [
+    { local_odp_id: 'ac-2_odp.01', baseline_value: null, target_value: null },
+    { local_odp_id: 'ac-2_odp.02', baseline_value: null, target_value: 'зі списку' },
+    { local_odp_id: 'ac-2_odp.04', baseline_value: 'мінімум щоквартально', target_value: 'мінімум щоквартально' },
+  ];
+  // один релевантний ODP → значення без підпису
+  const single = { odp_values: odpValues, relevant_local_odp_ids: ['ac-2_odp.04'] };
+  assert.deepEqual(relevantOdpEntries(single).map(v => v.local_odp_id), ['ac-2_odp.04']);
+  assert.deepEqual(odpColumnTexts(single), { baseline: 'мінімум щоквартально', target: 'мінімум щоквартально' });
+  // кілька релевантних → з підписами local ODP id
+  const multi = { odp_values: odpValues, relevant_local_odp_ids: ['ac-2_odp.01', 'ac-2_odp.02'] };
+  assert.deepEqual(odpColumnTexts(multi), {
+    baseline: 'ac-2_odp.01: —; ac-2_odp.02: —',
+    target: 'ac-2_odp.01: [НЕ ВИЗНАЧЕНО]; ac-2_odp.02: зі списку',
+  });
+  // жодного релевантного → «—»
+  const none = { odp_values: odpValues, relevant_local_odp_ids: [] };
+  assert.deepEqual(odpColumnTexts(none), { baseline: '—', target: '—' });
+  // legacy-записи без relevant_local_odp_ids → лише непорожні значення, з підписами
+  const legacy = { odp_values: odpValues };
+  assert.deepEqual(relevantOdpEntries(legacy).map(v => v.local_odp_id), ['ac-2_odp.02', 'ac-2_odp.04']);
+  assert.equal(odpColumnTexts(legacy).baseline, 'ac-2_odp.02: —; ac-2_odp.04: мінімум щоквартально');
+});
 
 test('groupPlanItems: groups by family then control, preserves plan order', () => {
   const assessment = {

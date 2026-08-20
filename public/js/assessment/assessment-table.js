@@ -83,6 +83,28 @@ function formatOdpValue(value) {
   return String(value);
 }
 
+// ОДП, релевантні пункту; legacy-записи без relevant_local_odp_ids → лише непорожні значення контроля
+export function relevantOdpEntries(planItem) {
+  const all = planItem.odp_values ?? [];
+  const rel = planItem.relevant_local_odp_ids;
+  if (!Array.isArray(rel)) return all.filter(v => v.baseline_value != null || v.target_value != null);
+  const set = new Set(rel);
+  return all.filter(v => set.has(v.local_odp_id));
+}
+
+export function odpColumnTexts(planItem) {
+  const relevant = relevantOdpEntries(planItem);
+  const label = (v, raw, fallback) => {
+    const text = formatOdpValue(raw) ?? fallback;
+    return relevant.length > 1 || !Array.isArray(planItem.relevant_local_odp_ids)
+      ? `${v.local_odp_id}: ${text}` : text;
+  };
+  return {
+    baseline: relevant.map(v => label(v, v.baseline_value, '—')).join('; ') || '—',
+    target: relevant.map(v => label(v, v.target_value, '[НЕ ВИЗНАЧЕНО]')).join('; ') || '—',
+  };
+}
+
 function odpSubrows(planItem) {
   return (planItem.odp_values ?? []).map(odp => {
     const baseline = formatOdpValue(odp.baseline_value) ?? '—';
@@ -154,14 +176,8 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     })
   );
 
-  // БПБ and ЦПБ values (aggregated from odp_values)
-  const baselineValues = (planItem.odp_values ?? [])
-    .map(odp => formatOdpValue(odp.baseline_value) ?? '—')
-    .join('; ') || '—';
-
-  const targetValues = (planItem.odp_values ?? [])
-    .map(odp => formatOdpValue(odp.target_value) ?? '[НЕ ВИЗНАЧЕНО]')
-    .join('; ') || '—';
+  // БПБ та ЦПБ: лише релевантні цьому пункту ODP (повний перелік — у розгортанні рядка)
+  const { baseline: baselineValues, target: targetValues } = odpColumnTexts(planItem);
 
   // Evidence button
   const evidenceCount = result?.evidence_ids?.length ?? 0;

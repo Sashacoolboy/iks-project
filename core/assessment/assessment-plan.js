@@ -29,6 +29,11 @@ function cpbApplicableControlIds(approvedState, catalogs) {
 
 const CPB_STATUS_MAP = { [STATUS.APPLIED]: 'APPLIED', [STATUS.EXEMPT]: 'EXEMPT', [STATUS.EXCLUDED]: 'EXCLUDED' };
 
+// 'а.01(a)[01]' → 'a', 'd.03[02]' → 'd', 'c.2' → 'c' — спільний перший сегмент для матчингу каталог ↔ адаптер
+export function firstPathSegment(path) {
+  return String(path ?? '').split('.')[0].replace(/[\[(].*$/, '');
+}
+
 /**
  * buildAssessmentPlan (v3)
  * @param {object} params
@@ -92,6 +97,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
       return { 
         assessment_odp_id: entry.assessment_odp_id, 
         local_odp_id: entry.local_odp_id,
+        statement_paths: (entry.statement_usage ?? []).map(u => u.statement_path),
         baseline_value: baselineValue({ adapterEntry: entry, infoType: cpb.info_type }),
         target_value: eff.value, 
         effective_source: eff.source, 
@@ -105,6 +111,19 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
         adapterIndex, 
         effectiveValueFor 
       });
+
+      // ОДП, релевантні саме цьому пункту: за першим сегментом statement_path,
+      // VERIFIED-мапінгом для ODP-рядків та підставленими плейсхолдерами
+      const relevantIds = new Set();
+      if (item.kind === 'ODP_DEFINITION') {
+        const hit = adapterIndex.nistVerified.get(item.assessment_source_id);
+        if (hit) relevantIds.add(hit.entry.local_odp_id);
+      } else if (item.statement_path) {
+        const seg = firstPathSegment(item.statement_path);
+        for (const v of odpValues)
+          if ((v.statement_paths ?? []).some(p => firstPathSegment(p) === seg)) relevantIds.add(v.local_odp_id);
+      }
+      for (const ph of placeholders) if (ph.local_odp_id) relevantIds.add(ph.local_odp_id);
 
       items.push({
         assessment_source_id: item.assessment_source_id, 
@@ -121,6 +140,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
         resolved_objective, 
         placeholders,
         odp_values: odpValues, 
+        relevant_local_odp_ids: [...relevantIds],
         available_methods: Object.keys(item.methods),
       });
 

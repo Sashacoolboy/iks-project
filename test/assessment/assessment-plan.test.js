@@ -40,6 +40,22 @@ test('unresolved ODP потрапляють у warnings', () => {
   assert.ok(warnings.some(w => w.code === 'ODP_UNRESOLVED' && w.local_odp_id === 'ac-2_odp.01'));
 });
 
+test('relevant_local_odp_ids: statement-матчинг, VERIFIED-мапінг та порожньо без звʼязку', () => {
+  // AC-02e: statement 'e' → адаптерне statement_usage 'e' у ac-2_odp.01 (+ плейсхолдер теж ac-2_odp.01)
+  const e = items.find(i => i.assessment_source_id === 'AC-02e');
+  assert.deepEqual(e.relevant_local_odp_ids, ['ac-2_odp.01']);
+  // ODP-рядок з reference-нумерацією AC-02_ODP[03] → через VERIFIED → локальний ac-2_odp.01
+  const ref3 = items.find(i => i.assessment_source_id === 'AC-02_ODP[03]');
+  assert.equal(ref3.kind, 'ODP_DEFINITION');
+  assert.deepEqual(ref3.relevant_local_odp_ids, ['ac-2_odp.01']);
+  // ODP-рядок без VERIFIED-звʼязку → порожньо
+  const ref1 = items.find(i => i.assessment_source_id === 'AC-02_ODP[01]');
+  assert.deepEqual(ref1.relevant_local_odp_ids, []);
+  // statement_paths присутні в odp_values
+  const odp4 = e.odp_values.find(v => v.assessment_odp_id === 'AC-02_ODP[04]');
+  assert.ok(Array.isArray(odp4.statement_paths) && odp4.statement_paths.length > 0);
+});
+
 test('невибрані enhancements не потрапляють у план', () => {
   // АС-2: profile.enhancements = [] → only БПБ-mandated enhancements, no user-selected ones
   // Check: any enhancement in items should NOT be from the (empty) profile.enhancements list
