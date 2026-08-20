@@ -98,6 +98,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
         assessment_odp_id: entry.assessment_odp_id, 
         local_odp_id: entry.local_odp_id,
         statement_paths: (entry.statement_usage ?? []).map(u => u.statement_path),
+        statement_usage: (entry.statement_usage ?? []).map(u => ({ statement_path: u.statement_path, text: u.text })),
         baseline_value: baselineValue({ adapterEntry: entry, infoType: cpb.info_type }),
         target_value: eff.value, 
         effective_source: eff.source, 

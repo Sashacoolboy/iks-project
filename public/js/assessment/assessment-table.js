@@ -92,16 +92,34 @@ export function relevantOdpEntries(planItem) {
   return all.filter(v => set.has(v.local_odp_id));
 }
 
-export function odpColumnTexts(planItem) {
+// Текст тултіпа: стейтменти, де вжито цей ODP; плейсхолдери згортаються до [odp-id]
+export function usageTitle(odp) {
+  const usages = odp.statement_usage ?? [];
+  if (!usages.length) return null;
+  const clean = (t) => String(t ?? '').replace(/\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g, '[$1]');
+  return 'Використовується в пункті: ' + usages
+    .map(u => `${u.statement_path ? u.statement_path + ') ' : ''}${clean(u.text)}`)
+    .join('\n');
+}
+
+export function odpColumnParts(planItem) {
   const relevant = relevantOdpEntries(planItem);
-  const label = (v, raw, fallback) => {
-    const text = formatOdpValue(raw) ?? fallback;
-    return relevant.length > 1 || !Array.isArray(planItem.relevant_local_odp_ids)
-      ? `${v.local_odp_id}: ${text}` : text;
-  };
+  const withLabel = relevant.length > 1 || !Array.isArray(planItem.relevant_local_odp_ids);
+  const part = (v, raw, fallback) => ({
+    text: (withLabel ? `${v.local_odp_id}: ` : '') + (formatOdpValue(raw) ?? fallback),
+    title: usageTitle(v),
+  });
   return {
-    baseline: relevant.map(v => label(v, v.baseline_value, '—')).join('; ') || '—',
-    target: relevant.map(v => label(v, v.target_value, '[НЕ ВИЗНАЧЕНО]')).join('; ') || '—',
+    baseline: relevant.map(v => part(v, v.baseline_value, '—')),
+    target: relevant.map(v => part(v, v.target_value, '[НЕ ВИЗНАЧЕНО]')),
+  };
+}
+
+export function odpColumnTexts(planItem) {
+  const parts = odpColumnParts(planItem);
+  return {
+    baseline: parts.baseline.map(p => p.text).join('; ') || '—',
+    target: parts.target.map(p => p.text).join('; ') || '—',
   };
 }
 
@@ -110,8 +128,9 @@ function odpSubrows(planItem) {
     const baseline = formatOdpValue(odp.baseline_value) ?? '—';
     const target = formatOdpValue(odp.target_value) ?? '[НЕ ВИЗНАЧЕНО]';
     const source = odp.effective_source ?? '—';
+    const title = usageTitle(odp);
 
-    return el('tr', { class: 'odp-subrow' },
+    return el('tr', { class: 'odp-subrow', ...(title ? { title } : {}) },
       el('td', {}, odp.assessment_odp_id ?? ''),
       el('td', { colspan: '7' },
         el('span', { class: 'odp-meta' }, `local: ${odp.local_odp_id}`),
@@ -176,8 +195,14 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     })
   );
 
-  // БПБ та ЦПБ: лише релевантні цьому пункту ODP (повний перелік — у розгортанні рядка)
-  const { baseline: baselineValues, target: targetValues } = odpColumnTexts(planItem);
+  // БПБ та ЦПБ: лише релевантні цьому пункту ODP; hover — стейтмент, де ODP вживається
+  const odpParts = odpColumnParts(planItem);
+  const odpCell = (list) => list.length
+    ? el('td', {}, ...list.flatMap((p, i) => {
+        const span = el('span', { class: 'odp-value', ...(p.title ? { title: p.title } : {}) }, p.text);
+        return i ? ['; ', span] : [span];
+      }))
+    : el('td', {}, '—');
 
   // Evidence button
   const evidenceCount = result?.evidence_ids?.length ?? 0;
@@ -201,8 +226,8 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
   const row = el('tr', { class: 'assessment-item-row' },
     el('td', {}, toggleBtn),
     el('td', { class: 'objective' }, planItem.resolved_objective ?? ''),
-    el('td', {}, baselineValues),
-    el('td', {}, targetValues),
+    odpCell(odpParts.baseline),
+    odpCell(odpParts.target),
     el('td', {}, resultSelect),
     el('td', {}, methodsDiv),
     el('td', {}, evidenceBtn),

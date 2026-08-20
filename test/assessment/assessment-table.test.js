@@ -1,6 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts } from '../../public/js/assessment/assessment-table.js';
+import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle } from '../../public/js/assessment/assessment-table.js';
+
+test('usageTitle і odpColumnParts: тултіп зі стейтментами, плейсхолдер згорнутий', () => {
+  const odp = { local_odp_id: 'ac-2_odp.01', baseline_value: null, target_value: null,
+    statement_usage: [{ statement_path: 'e', text: 'Вимагати схвалення {{ insert: param, ac-2_odp.01 }} запитів' }] };
+  assert.equal(usageTitle(odp), 'Використовується в пункті: e) Вимагати схвалення [ac-2_odp.01] запитів');
+  assert.equal(usageTitle({ local_odp_id: 'x' }), null); // без usage — без тултіпа
+  const item = { odp_values: [odp], relevant_local_odp_ids: ['ac-2_odp.01'] };
+  const parts = odpColumnParts(item);
+  assert.equal(parts.target[0].text, '[НЕ ВИЗНАЧЕНО]');
+  assert.ok(parts.target[0].title.includes('e) Вимагати схвалення'));
+});
 
 test('relevantOdpEntries + odpColumnTexts: фільтр за relevant_local_odp_ids і підписи', () => {
   const odpValues = [
