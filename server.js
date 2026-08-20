@@ -18,6 +18,8 @@ import { buildReportProjection } from './core/assessment/report-projection.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT ?? 3000);
+// За замовчуванням лише loopback (ТЗ §23); HOST=0.0.0.0 — свідоме рішення для хостингу за зовнішнім контролем доступу
+const HOST = process.env.HOST ?? '127.0.0.1';
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
 const NAME_RE = /^[a-zа-яіїєґ0-9_\-]+$/i;
 const KINDS = new Set(['ics', 'cpb', 'approved']);
@@ -314,4 +316,4 @@ createServer(async (req, res) => {
   } catch (err) {
     return json(res, 500, { error: String(err.message ?? err) });
   }
-}).listen(PORT, '127.0.0.1', () => console.log(`listening on http://127.0.0.1:${PORT}`));
+}).listen(PORT, HOST, () => console.log(`listening on http://${HOST}:${PORT}`));
