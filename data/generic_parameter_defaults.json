@@ -3669,6 +3669,14 @@
       "requiresInput": false,
       "options": null
     },
+    "ir-8_odp.04": {
+      "controlId": "IR-8",
+      "guideline": "визначений організацією персонал з реагування на інциденти (визначений за іменем та/або за ролями) й організаційні елементи",
+      "formGroup": "GEN_PERSONNEL_ROLE",
+      "defaultValue": "Адміністратор безпеки",
+      "requiresInput": false,
+      "options": null
+    },
     "ir-9_odp.01": {
       "controlId": "IR-9",
       "guideline": "персоналаборолі,визначеніорганізацією",

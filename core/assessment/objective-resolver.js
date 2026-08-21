@@ -1,9 +1,12 @@
-const PLACEHOLDER_RE = /<([A-Z]{2}-\d{2}(?:\(\d{2}\))?_ODP(?:\[\d{2}\])?)\s+([^>]+)>/g;
+// дефіс опційний: у частині каталогу референси без нього (<IR08_ODP[06] …>) — нормалізуємо при розборі
+const PLACEHOLDER_RE = /<([A-Z]{2}-?\d{2}(?:\(\d{2}\))?_ODP(?:\[\d{2}\])?)\s+([^>]+)>/g;
+const normalizeRef = (ref) => ref.replace(/^([A-Z]{2})(\d)/, '$1-$2');
 export const UNDEFINED_TAG = '[НЕ ВИЗНАЧЕНО]';
 
 export function resolveAssessmentObjective({ objectiveTemplate, adapterIndex, effectiveValueFor }) {
   const placeholders = [];
-  const resolved_objective = String(objectiveTemplate ?? '').replace(PLACEHOLDER_RE, (m, ref, label) => {
+  const resolved_objective = String(objectiveTemplate ?? '').replace(PLACEHOLDER_RE, (m, rawRef, label) => {
+    const ref = normalizeRef(rawRef);
     const verified = adapterIndex.nistVerified.get(ref);
     if (!verified) {
       placeholders.push({ ref, label, resolution: 'REFERENCE_ONLY', local_odp_id: null, assessment_odp_id: null, value: null });

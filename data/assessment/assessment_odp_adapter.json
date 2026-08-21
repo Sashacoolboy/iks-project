@@ -22,9 +22,9 @@
   },
   "statistics": {
     "controls_with_local_odp": 587,
-    "local_odp_total": 1027,
+    "local_odp_total": 1028,
     "nist_traceability_status": {
-      "VERIFIED": 5,
+      "VERIFIED": 6,
       "UNRESOLVED": 1022
     }
   },
@@ -19676,7 +19676,7 @@
       "family_title": "РЕАГУВАННЯ НА ІНЦИДЕНТИ",
       "title": "ПЛАН РЕАГУВАННЯ НА ІНЦИДЕНТИ",
       "enhancement": false,
-      "assessment_odp_count": 3,
+      "assessment_odp_count": 4,
       "assessment_odps": [
         {
           "assessment_odp_id": "IR-08_ODP[01]",
@@ -19779,6 +19779,38 @@
           "nist_traceability": {
             "status": "UNRESOLVED",
             "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "IR-08_ODP[04]",
+          "local_odp_id": "ir-8_odp.04",
+          "ordinal": 4,
+          "semantic": {
+            "label": "визначений організацією персонал з реагування на інциденти (визначений за іменем та/або за ролями) й організаційні елементи",
+            "source_text": "[Призначення: визначений організацією персонал з реагування на інциденти, визначений за іменем та/або за ролями) й організаційні елементи]",
+            "guideline": "визначений організацією персонал з реагування на інциденти (визначений за іменем та/або за ролями) й організаційні елементи"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "d",
+              "text": "Повідомляти про зміни плану реагування на інциденти {{ insert: param, ir-8_odp.04 }}.",
+              "context": "Повідомляти про зміни плану реагування на інциденти {{ insert: param, ir-8_odp.04 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ir-8_odp.04"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "IR-08_ODP[06]",
+              "IR-08_ODP[07]"
+            ]
           }
         }
       ],
