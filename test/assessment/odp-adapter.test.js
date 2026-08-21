@@ -13,15 +13,15 @@ test('normalizeControlId / denormalizeControlId', () => {
   assert.equal(denormalizeControlId('AC-2(5)'), 'AC-02(05)');
 });
 
-test('indexAdapter: 1028 entries, gold mapping, nist reverse index', () => {
+test('indexAdapter: 1062 entries, gold mapping, nist reverse index', () => {
   const idx = indexAdapter(adapter);
-  assert.equal(idx.byAssessmentId.size, 1028);
+  assert.equal(idx.byAssessmentId.size, 1062);
   assert.equal(idx.duplicates.length, 0);
   assert.equal(idx.byAssessmentId.get('AC-02_ODP[01]').entry.local_odp_id, 'ac-2_odp.01');
   // зворотний VERIFIED-індекс: NIST AC-02_ODP[03] → локальний AC-02_ODP[01]
   assert.equal(idx.nistVerified.get('AC-02_ODP[03]').entry.assessment_odp_id, 'AC-02_ODP[01]');
   assert.equal(idx.nistVerified.get('AC-02_ODP[07]').entry.assessment_odp_id, 'AC-02_ODP[03]');
-  assert.equal(idx.nistVerified.size, 9); // 1+1+3+1 (AC-02) + 1 (AU-11) + 2 (IR-08)
+  assert.equal(idx.nistVerified.size, 25); // AC-02: 6, AU-11: 1, IR-08: 2, batch-екстракція 2026-08-21: 16
 });
 
 test('validateAdapter: production adapter чистий', () => {

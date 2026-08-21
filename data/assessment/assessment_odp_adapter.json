@@ -21,11 +21,11 @@
     "validation_cpb": "АС-2.json"
   },
   "statistics": {
-    "controls_with_local_odp": 587,
-    "local_odp_total": 1028,
+    "controls_with_local_odp": 606,
+    "local_odp_total": 1062,
     "nist_traceability_status": {
-      "VERIFIED": 6,
-      "UNRESOLVED": 1022
+      "VERIFIED": 22,
+      "UNRESOLVED": 1040
     }
   },
   "controls": [
@@ -301,13 +301,119 @@
       }
     },
     {
+      "control_id": "AC-03(08)",
+      "canonical_control_id": "AC-3(8)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "ЗАБЕЗПЕЧЕННЯ ДОСТУПУ - АНУЛЮВАННЯ ПРАВ ДОСТУПУ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-03(08)_ODP",
+          "local_odp_id": "ac-3.8_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією правил, що регулюють терміни скасування прав доступу",
+            "source_text": "[Призначення: визначених організацією правил, що регулюють терміни скасування прав доступу]",
+            "guideline": "визначених організацією правил, що регулюють терміни скасування прав доступу"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Здійснювати анулювання прав доступу в результаті змін атрибутів безпеки суб’єктів і об’єктів на основі {{ insert: param, ac-3.8_odp.01 }}.",
+              "context": "Здійснювати анулювання прав доступу в результаті змін атрибутів безпеки суб’єктів і об’єктів на основі {{ insert: param, ac-3.8_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-3.8_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "AC-03(08)_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; процедури щодо забезпечення доступу; проєктна документація системи; налаштування конфігурації системи та супутня документація; правила, що регулюють скасування дозволів на доступ; записи аудиту системи; інші відповідні документи або записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за забезпечення доступу; системні / мережеві адміністратори; персонал організації, відповідальний за інформаційну безпеку; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що реалізують функції забезпечення доступу]"
+        ]
+      }
+    },
+    {
+      "control_id": "AC-04(06)",
+      "canonical_control_id": "AC-4(6)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "УПРАВЛІННЯ ІНФОРМАЦІЙНИМИ ПОТОКАМИ - МЕТАДАНІ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-04(06)_ODP",
+          "local_odp_id": "ac-4.6_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією метаданих",
+            "source_text": "[Призначення: визначених організацією метаданих]",
+            "guideline": "визначених організацією метаданих"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Здійснювати управління інформаційним потоком на основі {{ insert: param, ac-4.6_odp.01 }}.",
+              "context": "Здійснювати управління інформаційним потоком на основі {{ insert: param, ac-4.6_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-4.6_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "AC-04(06)_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; політики управління інформаційними потоками; процедури щодо посилення інформаційного потоку; проєктна документація системи; налаштування конфігурації системи та супутня документація; типи метаданих, що застосовуються для забезпечення прийняття рішень щодо управління інформаційним потоком; записи аудиту системи; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Системні / мережеві адміністратори; персонал організації, відповідальний за інформаційну безпеку; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що реалізують політику забезпечення впровадження інформаційного потоку]."
+        ]
+      }
+    },
+    {
       "control_id": "AC-10",
       "canonical_control_id": "AC-10",
       "family": "AC",
       "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
       "title": "УПРАВЛІННЯ ПАРАЛЕЛЬНОЮ СЕСІЄЮ",
       "enhancement": false,
-      "assessment_odp_count": 1,
+      "assessment_odp_count": 2,
       "assessment_odps": [
         {
           "assessment_odp_id": "AC-10_ODP",
@@ -336,6 +442,37 @@
           "nist_traceability": {
             "status": "UNRESOLVED",
             "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-10_ODP[02]",
+          "local_odp_id": "ac-10_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначеної організацією кількості",
+            "source_text": "[Призначення: визначеної організацією кількості]",
+            "guideline": "визначеної організацією кількості"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Обмежити кількість одночасних сеансів для кожного {{ insert: param, ac-10_odp.01 }} до {{ insert: param, ac-10_odp.02 }}.",
+              "context": "Обмежити кількість одночасних сеансів для кожного {{ insert: param, ac-10_odp.01 }} до {{ insert: param, ac-10_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-10_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "AC-10_ODP[02]"
+            ]
           }
         }
       ],
@@ -686,6 +823,166 @@
       }
     },
     {
+      "control_id": "AC-16(01)",
+      "canonical_control_id": "AC-16(1)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "АТРИБУТИ БЕЗПЕКИ ТА ПРИВАТНОСТІ - ДИНАМІЧНЕ ПОВ’ЯЗАННЯ АТРИБУТІВ",
+      "enhancement": true,
+      "assessment_odp_count": 2,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-16(01)_ODP[01]",
+          "local_odp_id": "ac-16.1_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначеними організацією суб’єктами й об’єктами",
+            "source_text": "[Призначення: визначеними організацією суб’єктами й об’єктами]",
+            "guideline": "визначеними організацією суб’єктами й об’єктами"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Динамічно пов’язувати атрибути безпеки та приватності з {{ insert: param, ac-16.1_odp.01 }} відповідно до {{ insert: param, ac-16.1_odp.02 }}, у міру створення та об’єднання інформації.",
+              "context": "Динамічно пов’язувати атрибути безпеки та приватності з {{ insert: param, ac-16.1_odp.01 }} відповідно до {{ insert: param, ac-16.1_odp.02 }}, у міру створення та об’єднання інформації."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.1_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-16(01)_ODP[02]",
+          "local_odp_id": "ac-16.1_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначених організацією політик безпеки та приватності",
+            "source_text": "[Призначення: визначених організацією політик безпеки та приватності]",
+            "guideline": "визначених організацією політик безпеки та приватності"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Динамічно пов’язувати атрибути безпеки та приватності з {{ insert: param, ac-16.1_odp.01 }} відповідно до {{ insert: param, ac-16.1_odp.02 }}, у міру створення та об’єднання інформації.",
+              "context": "Динамічно пов’язувати атрибути безпеки та приватності з {{ insert: param, ac-16.1_odp.01 }} відповідно до {{ insert: param, ac-16.1_odp.02 }}, у міру створення та об’єднання інформації."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.1_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; процедури, спрямовані на динамічне пов'язування атрибутів безпеки з інформацією; проєктна документація системи; налаштування конфігурації системи та супутня документація; записи аудиту системи; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Системні або мережеві адміністратори; персонал організації, відповідальний за інформаційну безпеку; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що реалізують динамічну асоціацію атрибутів безпеки з інформацією]."
+        ]
+      }
+    },
+    {
+      "control_id": "AC-16(03)",
+      "canonical_control_id": "AC-16(3)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "АТРИБУТИ БЕЗПЕКИ ТА ПРИВАТНОСТІ - ПІДТРИМКА СИСТЕМОЮ ПОВ’ЯЗАННЯ АТРИБУТІВ",
+      "enhancement": true,
+      "assessment_odp_count": 2,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-16(03)_ODP[01]",
+          "local_odp_id": "ac-16.3_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією атрибутів безпеки та приватності",
+            "source_text": "[Призначення: визначених організацією атрибутів безпеки та приватності]",
+            "guideline": "визначених організацією атрибутів безпеки та приватності"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Підтримати пов’язання та цілісність {{ insert: param, ac-16.3_odp.01 }} з {{ insert: param, ac-16.3_odp.02 }}.",
+              "context": "Підтримати пов’язання та цілісність {{ insert: param, ac-16.3_odp.01 }} з {{ insert: param, ac-16.3_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.3_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-16(03)_ODP[02]",
+          "local_odp_id": "ac-16.3_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначених організацією суб’єктів і об’єктів",
+            "source_text": "[Призначення: визначених організацією суб’єктів і об’єктів]",
+            "guideline": "визначених організацією суб’єктів і об’єктів"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Підтримати пов’язання та цілісність {{ insert: param, ac-16.3_odp.01 }} з {{ insert: param, ac-16.3_odp.02 }}.",
+              "context": "Підтримати пов’язання та цілісність {{ insert: param, ac-16.3_odp.01 }} з {{ insert: param, ac-16.3_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.3_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; процедури щодо об'єднання атрибутів безпеки до інформації; проєктна документація системи; налаштування конфігурації системи та супутня документація; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за захист інформації; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що підтримують об’єднання та цілісність атрибутів безпеки з інформацією]."
+        ]
+      }
+    },
+    {
       "control_id": "AC-16(04)",
       "canonical_control_id": "AC-16(4)",
       "family": "AC",
@@ -766,6 +1063,195 @@
       }
     },
     {
+      "control_id": "AC-16(05)",
+      "canonical_control_id": "AC-16(5)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "АТРИБУТИ БЕЗПЕКИ ТА ПРИВАТНОСТІ - ВІДОБРАЖЕННЯ АТРИБУТІВ НА ПРИСТРОЯХ ВИВЕДЕННЯ",
+      "enhancement": true,
+      "assessment_odp_count": 2,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-16(05)_ODP[01]",
+          "local_odp_id": "ac-16.5_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначені організацією спеціальні інструкції щодо поширення, обробки чи наступного розподілу інформації",
+            "source_text": "[Призначення: визначені організацією спеціальні інструкції щодо поширення, обробки чи наступного розподілу інформації]",
+            "guideline": "визначені організацією спеціальні інструкції щодо поширення, обробки чи наступного розподілу інформації"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Відображати атрибути безпеки та приватності в зручній для людини формі для кожного об’єкту, який система передає на пристрої виведення, щоб ідентифікувати {{ insert: param, ac-16.5_odp.01 }}, використовуючи {{ insert: param, ac-16.5_odp.02 }}.",
+              "context": "Відображати атрибути безпеки та приватності в зручній для людини формі для кожного об’єкту, який система передає на пристрої виведення, щоб ідентифікувати {{ insert: param, ac-16.5_odp.01 }}, використовуючи {{ insert: param, ac-16.5_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.5_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-16(05)_ODP[02]",
+          "local_odp_id": "ac-16.5_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначену організацією ідентифікацію, у зручній для людини формі про стандартні угоди про присвоєння імен",
+            "source_text": "[Призначення: визначену організацією ідентифікацію, у зручній для людини формі про стандартні угоди про присвоєння імен]",
+            "guideline": "визначену організацією ідентифікацію, у зручній для людини формі про стандартні угоди про присвоєння імен"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Відображати атрибути безпеки та приватності в зручній для людини формі для кожного об’єкту, який система передає на пристрої виведення, щоб ідентифікувати {{ insert: param, ac-16.5_odp.01 }}, використовуючи {{ insert: param, ac-16.5_odp.02 }}.",
+              "context": "Відображати атрибути безпеки та приватності в зручній для людини формі для кожного об’єкту, який система передає на пристрої виведення, щоб ідентифікувати {{ insert: param, ac-16.5_odp.01 }}, використовуючи {{ insert: param, ac-16.5_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.5_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; процедури, що стосуються відображення атрибутів безпеки у зручній для людини формі; спеціальні інструкції щодо розповсюдження, пово дження чи поширення; типи зрозумілих для людини, ідентифікованих організацією стандартних угод про іменування; проєктна документація системи; налаштування конфігурації системи та супутня докумен85 тація; записи аудиту системи; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за безпеку інформації; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Пристрої виведення системи, що відображають атрибути захисту у читаному для людини вигляді на кожному об'єкті]."
+        ]
+      }
+    },
+    {
+      "control_id": "AC-16(06)",
+      "canonical_control_id": "AC-16(6)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "АТРИБУТИ БЕЗПЕКИ ТА ПРИВАТНОСТІ - ПІДТРИМКА ПОВ’ЯЗАННЯ АТРИБУТІВ ОРГАНІЗАЦІЄЮ",
+      "enhancement": true,
+      "assessment_odp_count": 3,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-16(06)_ODP[01]",
+          "local_odp_id": "ac-16.6_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією атрибутів безпеки та приватності",
+            "source_text": "[Призначення: визначених організацією атрибутів безпеки та приватності]",
+            "guideline": "визначених організацією атрибутів безпеки та приватності"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Вимагати від персоналу пов’язувати та підтримувати асоціацію {{ insert: param, ac-16.6_odp.01 }} з {{ insert: param, ac-16.6_odp.02 }} відповідно до {{ insert: param, ac-16.6_odp.03 }}.",
+              "context": "Вимагати від персоналу пов’язувати та підтримувати асоціацію {{ insert: param, ac-16.6_odp.01 }} з {{ insert: param, ac-16.6_odp.02 }} відповідно до {{ insert: param, ac-16.6_odp.03 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.6_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-16(06)_ODP[02]",
+          "local_odp_id": "ac-16.6_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначеними організацією суб’єктами та об’єктами",
+            "source_text": "[Призначення: визначеними організацією суб’єктами та об’єктами]",
+            "guideline": "визначеними організацією суб’єктами та об’єктами"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Вимагати від персоналу пов’язувати та підтримувати асоціацію {{ insert: param, ac-16.6_odp.01 }} з {{ insert: param, ac-16.6_odp.02 }} відповідно до {{ insert: param, ac-16.6_odp.03 }}.",
+              "context": "Вимагати від персоналу пов’язувати та підтримувати асоціацію {{ insert: param, ac-16.6_odp.01 }} з {{ insert: param, ac-16.6_odp.02 }} відповідно до {{ insert: param, ac-16.6_odp.03 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.6_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-16(06)_ODP[03]",
+          "local_odp_id": "ac-16.6_odp.03",
+          "ordinal": 3,
+          "semantic": {
+            "label": "визначеної організацією політики безпеки та приватності",
+            "source_text": "[Призначення: визначеної організацією політики безпеки та приватності]",
+            "guideline": "визначеної організацією політики безпеки та приватності"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Вимагати від персоналу пов’язувати та підтримувати асоціацію {{ insert: param, ac-16.6_odp.01 }} з {{ insert: param, ac-16.6_odp.02 }} відповідно до {{ insert: param, ac-16.6_odp.03 }}.",
+              "context": "Вимагати від персоналу пов’язувати та підтримувати асоціацію {{ insert: param, ac-16.6_odp.01 }} з {{ insert: param, ac-16.6_odp.02 }} відповідно до {{ insert: param, ac-16.6_odp.03 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.6_odp.03"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; процедури, пов'язані з об'єднанням атрибутів безпеки з суб’єктами та об'єктами; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за асоціацію та підтримку асоціації атрибутів безпеки з суб’єк тами та об'єктами; персонал організації, відповідальний за інформаційну безпеку; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що підтримують асоціації атрибутів безпеки з суб’єктами та об'єктами]."
+        ]
+      }
+    },
+    {
       "control_id": "AC-16(08)",
       "canonical_control_id": "AC-16(8)",
       "family": "AC",
@@ -813,6 +1299,59 @@
         ],
         "TEST": [
           "[ВИБІР: Автоматизовані механізми, що реалізують методи або технології, що асоціюють атрибути безпеки з інформацією]."
+        ]
+      }
+    },
+    {
+      "control_id": "AC-16(09)",
+      "canonical_control_id": "AC-16(9)",
+      "family": "AC",
+      "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
+      "title": "АТРИБУТИ БЕЗПЕКИ ТА ПРИВАТНОСТІ - ПЕРЕПРИЗНАЧЕННЯ АТРИБУТІВ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AC-16(09)_ODP",
+          "local_odp_id": "ac-16.9_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією технік або процедур",
+            "source_text": "[Призначення: визначених організацією технік або процедур]",
+            "guideline": "визначених організацією технік або процедур"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Перепризначення атрибутів безпеки та приватності, пов’язаних з інформацією, здійснювати лише за допомогою механізмів перегляду, перевірених з використанням {{ insert: param, ac-16.9_odp.01 }}.",
+              "context": "Перепризначення атрибутів безпеки та приватності, пов’язаних з інформацією, здійснювати лише за допомогою механізмів перегляду, перевірених з використанням {{ insert: param, ac-16.9_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-16.9_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "AC-16(09)_ODP[01]"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика контролю доступу; процедури, спрямовані на перерозподіл атрибутів безпеки інформації; проєктна документація системи; налаштування конфігурації системи та супутня документація; записи аудиту системи; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за перерозподіл об'єднання атрибутів безпеки до інформації; персонал організації, відповідальний за інформаційну безпеку; розробники системи]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що реалізують методи або процедури перерозподілу об'єднання атрибутів безпеки до інформації]."
         ]
       }
     },
@@ -3035,7 +3574,7 @@
       "family_title": "УПРАВЛІННЯ ДОСТУПОМ",
       "title": "ЗАБЕЗПЕЧЕННЯ ДОСТУПУ - МАНДАТНЕ УПРАВЛІННЯ ДОСТУПОМ",
       "enhancement": true,
-      "assessment_odp_count": 2,
+      "assessment_odp_count": 3,
       "assessment_odps": [
         {
           "assessment_odp_id": "AC-03(03)_ODP[01]",
@@ -3085,6 +3624,35 @@
           "binding": {
             "type": "DIRECT_LOCAL_ODP",
             "cpb_ref": "ac-3.3_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "AC-03(03)_ODP[03]",
+          "local_odp_id": "ac-3.3_odp.03",
+          "ordinal": 3,
+          "semantic": {
+            "label": "визначену організацією мандатну (mandatory) політику управління доступом",
+            "source_text": "[Призначення: визначену організацією мандатну (mandatory) політику управління доступом]",
+            "guideline": "визначену організацією мандатну (mandatory) політику управління доступом"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Застосовувати {{ insert: param, ac-3.3_odp.03 }} щодо всіх суб’єктів і об’єктів доступу, у яких політика:",
+              "context": "Застосовувати {{ insert: param, ac-3.3_odp.03 }} щодо всіх суб’єктів і об’єктів доступу, у яких політика:"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ac-3.3_odp.03"
           },
           "bpb_bindings": {
             "open_confidential": [],
@@ -6698,6 +7266,59 @@
           "[ВИБІР: Персонал організації, відповідальний за навчання ролі з безпеки; персонал організації, який бере участь у навчанні з підвищення безпеки]."
         ],
         "TEST": []
+      }
+    },
+    {
+      "control_id": "AT-04",
+      "canonical_control_id": "AT-4",
+      "family": "AT",
+      "family_title": "ОБІЗНАНІСТЬ ТА НАВЧАННЯ",
+      "title": "НАВЧАЛЬНІ ЗАПИСИ",
+      "enhancement": false,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "AT-04_ODP",
+          "local_odp_id": "at-4_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначеного організацією періоду часу",
+            "source_text": "[Призначення: визначеного організацією періоду часу]",
+            "guideline": "визначеного організацією періоду часу"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "b",
+              "text": "Зберігати індивідуальні записи про навчання впродовж {{ insert: param, at-4_odp.01 }}.",
+              "context": "Зберігати індивідуальні записи про навчання впродовж {{ insert: param, at-4_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "at-4_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "AT-04_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Поінформованість щодо безпеки та політика навчання; процедури, що стосуються записів навчання з безпеки; обізнаність із безпеки та навчальні записи; план захисту інформації; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації з обов'язками щодо зберігання записів з безпеки]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що підтримують управління записами навчань з безпеки]."
+        ]
       }
     },
     {
@@ -10974,7 +11595,7 @@
       "family_title": "АУДИТ ТА ПІДЗВІТНІСТЬ",
       "title": "ВНУТРІШНІ З’ЄДНАННЯ СИСТЕМИ",
       "enhancement": false,
-      "assessment_odp_count": 2,
+      "assessment_odp_count": 3,
       "assessment_odps": [
         {
           "assessment_odp_id": "CA-09_ODP[01]",
@@ -11033,6 +11654,35 @@
             "status": "UNRESOLVED",
             "odp_ids": []
           }
+        },
+        {
+          "assessment_odp_id": "CA-09_ODP[03]",
+          "local_odp_id": "ca-9_odp.03",
+          "ordinal": 3,
+          "semantic": {
+            "label": "умови, визначені організацією",
+            "source_text": "[Призначення: умови, визначені організацією]",
+            "guideline": "умови, визначені організацією"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "c",
+              "text": "Розірвати внутрішні системні підключення після {{ insert: param, ca-9_odp.03 }};",
+              "context": "Розірвати внутрішні системні підключення після {{ insert: param, ca-9_odp.03 }};"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ca-9_odp.03"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
         }
       ],
       "assessment_methods_reference": {
@@ -11052,7 +11702,7 @@
       "family_title": "УПРАВЛІННЯ КОНФІГУРАЦІЄЮ",
       "title": "ПОЛІТИКА ТА ПРОЦЕДУРИ УПРАВЛІННЯ КОНФІГУРАЦІЄЮ",
       "enhancement": false,
-      "assessment_odp_count": 6,
+      "assessment_odp_count": 7,
       "assessment_odps": [
         {
           "assessment_odp_id": "CM-01_ODP[01]",
@@ -11254,6 +11904,35 @@
                 "reason": "statement_path_matches_local_odp_usage"
               }
             ]
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "CM-01_ODP[07]",
+          "local_odp_id": "cm-1_odp.07",
+          "ordinal": 7,
+          "semantic": {
+            "label": "визначених організацією персоналу або ролей",
+            "source_text": "[Призначення: визначених організацією персоналу або ролей]",
+            "guideline": "визначених організацією персоналу або ролей"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "a",
+              "text": "Розробити, задокументуватита поширити серед {{ insert: param, cm-1_odp.07 }}:",
+              "context": "Розробити, задокументуватита поширити серед {{ insert: param, cm-1_odp.07 }}:"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "cm-1_odp.07"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
           },
           "nist_traceability": {
             "status": "UNRESOLVED",
@@ -16338,6 +17017,59 @@
       }
     },
     {
+      "control_id": "IA-04(04)",
+      "canonical_control_id": "IA-4(4)",
+      "family": "IA",
+      "family_title": "ІДЕНТИФІКАЦІЯ ТА АВТЕНТИФІКАЦІЯ",
+      "title": "УПРАВЛІННЯ ІДЕНТИФІКАЦІЄЮ - ІДЕНТИФІКАЦІЯ СТАТУСУ КОРИСТУВАЧА",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "IA-04(04)_ODP",
+          "local_odp_id": "ia-4.4_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначена організацією ознака, що ідентифікує індивідуальний статус",
+            "source_text": "[Призначення: визначена організацією ознака, що ідентифікує індивідуальний статус]",
+            "guideline": "визначена організацією ознака, що ідентифікує індивідуальний статус"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Управляти індивідуальними ідентифікаторами, однозначно ідентифікуючи кожного індивідуума як {{ insert: param, ia-4.4_odp.01 }}.",
+              "context": "Управляти індивідуальними ідентифікаторами, однозначно ідентифікуючи кожного індивідуума як {{ insert: param, ia-4.4_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ia-4.4_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "IA-04(04)_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика ідентифікації та автентифікації; процедури, що стосуються управління ідентифікаторами; процедури, що стосуються управління обліковими записами; перелік ознак, що ідентифікують індивідуальний статус; інші відповідні документи або записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, який відповідає за управління ідентифікаторами; персонал організації , який відповідає за інформаційну безпеку; адміністратори системи / мережі]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що підтримують та / або впроваджують управління ідентифікаторами]."
+        ]
+      }
+    },
+    {
       "control_id": "IA-10",
       "canonical_control_id": "IA-10",
       "family": "IA",
@@ -20335,7 +21067,7 @@
       "family_title": "ТЕХНІЧНЕ ОБСЛУГОВУВАННЯ",
       "title": "КОНТРОЛЬОВАНЕ ОБСЛУГОВУВАННЯ",
       "enhancement": false,
-      "assessment_odp_count": 1,
+      "assessment_odp_count": 2,
       "assessment_odps": [
         {
           "assessment_odp_id": "MA-02_ODP",
@@ -20356,6 +21088,35 @@
           "binding": {
             "type": "DIRECT_LOCAL_ODP",
             "cpb_ref": "ma-2_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "MA-02_ODP[02]",
+          "local_odp_id": "ma-2_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначену організацією інформацію, пов’язану з технічним обслуговуванням",
+            "source_text": "[Призначення: визначену організацією інформацію, пов’язану з технічним обслуговуванням]",
+            "guideline": "визначену організацією інформацію, пов’язану з технічним обслуговуванням"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "f",
+              "text": "Вносити {{ insert: param, ma-2_odp.02 }} до записів з технічного обслуговування.",
+              "context": "Вносити {{ insert: param, ma-2_odp.02 }} до записів з технічного обслуговування."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ma-2_odp.02"
           },
           "bpb_bindings": {
             "open_confidential": [],
@@ -20846,7 +21607,7 @@
       "family_title": "ТЕХНІЧНЕ ОБСЛУГОВУВАННЯ",
       "title": "СВОЄЧАСНЕ ОБСЛУГОВУВАННЯ - ПЛАНОВЕ ТЕХНІЧНЕ ОБСЛУГОВУВАННЯ",
       "enhancement": true,
-      "assessment_odp_count": 1,
+      "assessment_odp_count": 2,
       "assessment_odps": [
         {
           "assessment_odp_id": "MA-06(02)_ODP",
@@ -20875,6 +21636,37 @@
           "nist_traceability": {
             "status": "UNRESOLVED",
             "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "MA-06(02)_ODP[02]",
+          "local_odp_id": "ma-6.2_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначені організацією часові інтервали",
+            "source_text": "[Призначення: визначені організацією часові інтервали]",
+            "guideline": "визначені організацією часові інтервали"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Здійснювати планове технічне обслуговування {{ insert: param, ma-6.2_odp.01 }} у {{ insert: param, ma-6.2_odp.02 }}.",
+              "context": "Здійснювати планове технічне обслуговування {{ insert: param, ma-6.2_odp.01 }} у {{ insert: param, ma-6.2_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ma-6.2_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "MA-06(02)_ODP[02]"
+            ]
           }
         }
       ],
@@ -21657,6 +22449,59 @@
       }
     },
     {
+      "control_id": "MP-06(03)",
+      "canonical_control_id": "MP-6(3)",
+      "family": "MP",
+      "family_title": "ЗАХИСТ НОСІЇВ ІНФОРМАЦІЇ",
+      "title": "ЗНИЩЕННЯ ІНФОРМАЦІЇ НА НОСІЯХ ІНФОРМАЦІЇ - НЕРУЙНІВНІ МЕТОДИ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "MP-06(03)_ODP",
+          "local_odp_id": "mp-6.3_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією умов, що вимагають очищення портативних запам’ятовувальних пристроїв",
+            "source_text": "[Призначення: визначених організацією умов, що вимагають очищення портативних запам’ятовувальних пристроїв]",
+            "guideline": "визначених організацією умов, що вимагають очищення портативних запам’ятовувальних пристроїв"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Застосовувати методи неруйнівного очищення до портативних запам’ятовувальних пристроїв перед підключенням таких пристроїв до системи за наступних обставин: {{ insert: param, mp-6.3_odp.01 }}.",
+              "context": "Застосовувати методи неруйнівного очищення до портативних запам’ятовувальних пристроїв перед підключенням таких пристроїв до системи за наступних обставин: {{ insert: param, mp-6.3_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "mp-6.3_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "MP-06(03)_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика захисту носіїв інформації системи; процедури, що стосуються очищення та утилізації носіїв інформації; перелік умов, що вимагають очищення зовнішніх носіїв інформації ; записи очищення носіїв інформації; записи аудиту; інші відповідні документи або записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за очищення носіїв інформації; персонал організації, який відповідає за інформаційну безпеку]."
+        ],
+        "TEST": [
+          "[ВИБІР: Процеси організації для очищення зовнішніх носіїв інформації; автоматизовані механізми підтримки та / або впровадження очищення носіїв інформації]."
+        ]
+      }
+    },
+    {
       "control_id": "MP-06(07)",
       "canonical_control_id": "MP-6(7)",
       "family": "MP",
@@ -22168,6 +23013,48 @@
         "INTERVIEW": [],
         "TEST": []
       }
+    },
+    {
+      "control_id": "PE-10",
+      "canonical_control_id": "PE-10",
+      "family": "PE",
+      "family_title": "ФІЗИЧНИЙ ЗАХИСТ І ЗАХИСТ РОБОЧОГО СЕРЕДОВИЩА",
+      "title": "АВАРІЙНЕ ВІДКЛЮЧЕННЯ",
+      "enhancement": false,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "PE-10_ODP",
+          "local_odp_id": "pe-10_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначені організацією місця розташування в системі або в компоненті системи",
+            "source_text": "[Призначення: визначені організацією місця розташування в системі або в компоненті системи]",
+            "guideline": "визначені організацією місця розташування в системі або в компоненті системи"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "b",
+              "text": "Встановити перемикачі або пристрої аварійного відключення в {{ insert: param, pe-10_odp.01 }} для забезпечення безпечного та легкого доступу персоналу.",
+              "context": "Встановити перемикачі або пристрої аварійного відключення в {{ insert: param, pe-10_odp.01 }} для забезпечення безпечного та легкого доступу персоналу."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "pe-10_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "PE-10_ODP[01]"
+            ]
+          }
+        }
+      ]
     },
     {
       "control_id": "PE-11",
@@ -22758,7 +23645,7 @@
       "family_title": "ФІЗИЧНИЙ ЗАХИСТ І ЗАХИСТ РОБОЧОГО СЕРЕДОВИЩА",
       "title": "ЗАХИСТ ВІД ЕЛЕКТРОМАГНІТНОГО ІМПУЛЬСУ",
       "enhancement": false,
-      "assessment_odp_count": 1,
+      "assessment_odp_count": 2,
       "assessment_odps": [
         {
           "assessment_odp_id": "PE-21_ODP",
@@ -22787,6 +23674,37 @@
           "nist_traceability": {
             "status": "UNRESOLVED",
             "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "PE-21_ODP[02]",
+          "local_odp_id": "pe-21_odp.02",
+          "ordinal": 2,
+          "semantic": {
+            "label": "визначених організацією систем",
+            "source_text": "[Призначення: визначених організацією систем]",
+            "guideline": "визначених організацією систем"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Використовувати {{ insert: param, pe-21_odp.01 }} проти пошкодження електромагнітним імпульсом для {{ insert: param, pe-21_odp.02 }}.",
+              "context": "Використовувати {{ insert: param, pe-21_odp.01 }} проти пошкодження електромагнітним імпульсом для {{ insert: param, pe-21_odp.02 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "pe-21_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "PE-21_ODP[02]"
+            ]
           }
         }
       ],
@@ -28887,6 +29805,59 @@
       }
     },
     {
+      "control_id": "RA-10",
+      "canonical_control_id": "RA-10",
+      "family": "RA",
+      "family_title": "ОЦІНЮВАННЯ РИЗИКУ",
+      "title": "АКТИВНИЙ ПОШУК ЗАГРОЗ",
+      "enhancement": false,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "RA-10_ODP",
+          "local_odp_id": "ra-10_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "частота, визначена організацією",
+            "source_text": "[Призначення: частота, визначена організацією]",
+            "guideline": "частота, визначена організацією"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "b",
+              "text": "використовуйте можливості активного пошуку загроз {{ insert: param, ra-10_odp.01 }}.",
+              "context": "використовуйте можливості активного пошуку загроз {{ insert: param, ra-10_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ra-10_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "RA-10_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика придбання систем та послуг; процедури придбання систем та послуг; процедури, що стосуються зовнішніх системних послуг; контракти на придбання системи, системного компонента або системної послуги; документація щодо подання пропозицій; документація щодо придбання; угоди про рівень обслуговування; процедури, що стосуються визначення обмежень юрисдикції для обробки та місця зберігання; інформація/дані та/або системні послуги; вимоги або умови організаційної безпеки для зовнішніх постачальників; план захисту інформації системи; план управління ризиками ланцюга постачання; інші відповідні документи або записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації, відповідальний за придбання систем та послуг; персонал організації, відповідальний за інформаційну без пеку; персонал організації, відповідальний за управління ризиками ланцюга постачання; зовнішні постачальники системних послуг]."
+        ],
+        "TEST": [
+          "[ВИБІР: Процеси організації , що обмежують зовнішніх постачальників системних послуг обробляти та зберігати інформацію в межах юридичної юрисдикції України]."
+        ]
+      }
+    },
+    {
       "control_id": "SA-01",
       "canonical_control_id": "SA-1",
       "family": "SA",
@@ -29125,6 +30096,88 @@
       }
     },
     {
+      "control_id": "SA-04",
+      "canonical_control_id": "SA-4",
+      "family": "SA",
+      "family_title": "ПРИДБАННЯ СИСТЕМИ ТА ПОСЛУГ",
+      "title": "ПРОЦЕС ЗАКУПІВЕЛЬ",
+      "enhancement": false,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "SA-04_ODP",
+          "local_odp_id": "sa-4_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "стандартні пункти контракту; пункти контракту, визначені організацією",
+            "source_text": "[Вибір (один або більше): стандартні пункти контракту; [Призначення: пункти контракту, визначені організацією]]",
+            "guideline": "стандартні пункти контракту; пункти контракту, визначені організацією"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Включіть такі вимоги, описи та критерії, явно або за допомогою посилання, використовуючи {{ insert: param, sa-4_odp.01 }} в контракті про придбання системи, системного компонента або системної послуги:",
+              "context": "Включіть такі вимоги, описи та критерії, явно або за допомогою посилання, використовуючи {{ insert: param, sa-4_odp.01 }} в контракті про придбання системи, системного компонента або системної послуги:"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sa-4_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "SA-04_ODP[01]"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "control_id": "SA-09(02)",
+      "canonical_control_id": "SA-9(2)",
+      "family": "SA",
+      "family_title": "ПРИДБАННЯ СИСТЕМИ ТА ПОСЛУГ",
+      "title": "ЗОВНІШНІ ПОСЛУГИ ДЛЯ СИСТЕМИ- ВИЗНАЧЕННЯ ФУНКЦІЙ, ПОРТІВ, ПРОТОКОЛІВ ТА СЛУЖБ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "SA-09(02)_ODP",
+          "local_odp_id": "sa-9.2_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "визначених організацією зовнішніх послуг для системи",
+            "source_text": "[Призначення: визначених організацією зовнішніх послуг для системи]",
+            "guideline": "визначених організацією зовнішніх послуг для системи"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Вимагати від постачальників наведених нижче зовнішніх послуг для системи {{ insert: param, sa-9.2_odp.01 }} визначити функції, порти, протоколи та інші служби, необхідні для використання таких служб.",
+              "context": "Вимагати від постачальників наведених нижче зовнішніх послуг для системи {{ insert: param, sa-9.2_odp.01 }} визначити функції, порти, протоколи та інші служби, необхідні для використання таких служб."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sa-9.2_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        }
+      ]
+    },
+    {
       "control_id": "SA-10",
       "canonical_control_id": "SA-10",
       "family": "SA",
@@ -29320,7 +30373,7 @@
       "family_title": "ПРИДБАННЯ СИСТЕМИ ТА ПОСЛУГ",
       "title": "ТЕСТУВАННЯ ТА ОЦІНЮВАННЯ РОЗРОБНИКА",
       "enhancement": false,
-      "assessment_odp_count": 2,
+      "assessment_odp_count": 3,
       "assessment_odps": [
         {
           "assessment_odp_id": "SA-11_ODP[01]",
@@ -29370,6 +30423,35 @@
           "binding": {
             "type": "DIRECT_LOCAL_ODP",
             "cpb_ref": "sa-11_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "SA-11_ODP[03]",
+          "local_odp_id": "sa-11_odp.03",
+          "ordinal": 3,
+          "semantic": {
+            "label": "з визначеною організацією частотою",
+            "source_text": "[Призначення: з визначеною організацією частотою]",
+            "guideline": "з визначеною організацією частотою"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "b",
+              "text": "виконати {{ insert: param, sa-11_odp.01 }} тестування/оцінювання {{ insert: param, sa-11_odp.03 }} з {{ insert: param, sa-11_odp.02 }};",
+              "context": "виконати {{ insert: param, sa-11_odp.01 }} тестування/оцінювання {{ insert: param, sa-11_odp.03 }} з {{ insert: param, sa-11_odp.02 }};"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sa-11_odp.03"
           },
           "bpb_bindings": {
             "open_confidential": [],
@@ -33219,6 +34301,46 @@
       }
     },
     {
+      "control_id": "SC-08(01)",
+      "canonical_control_id": "SC-8(1)",
+      "family": "SC",
+      "family_title": "ЗАХИСТ ІНФОРМАЦІЙНОЇ СИСТЕМИ ТА КОМУНІКАЦІЙ",
+      "title": "КОНФІДЕНЦІЙНІСТЬ ТА ЦІЛІСНІСТЬ ПЕРЕДАЧІ - КРИПТОГРАФІЧНИЙ ЗАХИСТ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "SC-08(01)_ODP",
+          "local_odp_id": "sc-8.1_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "запобігання несанкціонованому розкриттю інформації; вияв змін в інформації",
+            "source_text": "[Вибір (один або більше): запобігання несанкціонованому розкриттю інформації; вияв змін в інформації]",
+            "guideline": "запобігання несанкціонованому розкриттю інформації; вияв змін в інформації"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Реалізувати механізми криптографічного захисту для {{ insert: param, sc-8.1_odp.01 }} під час передачі.",
+              "context": "Реалізувати механізми криптографічного захисту для {{ insert: param, sc-8.1_odp.01 }} під час передачі."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sc-8.1_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        }
+      ]
+    },
+    {
       "control_id": "SC-10",
       "canonical_control_id": "SC-10",
       "family": "SC",
@@ -33464,6 +34586,59 @@
         ],
         "TEST": [
           "[ВИБІР: Автоматизовані механізми, що підтримують та, або реалізують симетричне встановлення та управління криптографічним ключем]."
+        ]
+      }
+    },
+    {
+      "control_id": "SC-12(03)",
+      "canonical_control_id": "SC-12(3)",
+      "family": "SC",
+      "family_title": "ЗАХИСТ ІНФОРМАЦІЙНОЇ СИСТЕМИ ТА КОМУНІКАЦІЙ",
+      "title": "ВСТАНОВЛЕННЯ ТА УПРАВЛІННЯ КРИПТОГРАФІЧНИМИ КЛЮЧАМИ - АСИМЕТРИЧНІ КЛЮЧІ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "SC-12(03)_ODP",
+          "local_odp_id": "sc-12.3_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "затверджені уповноваженим органом технології та процеси управління ключами; посилені сертифікати відкритого ключа; попередньо визначений «ключовий» матеріал; кваліфіковані сертифікати відкритого ключа та надійні апаратні засоби цифрового підпису (токени), які захищають особистий ключ користувача; сертифікати, видані відповідно до визначених організацією вимог",
+            "source_text": "[Призначення: затверджені уповноваженим органом технології та процеси управління ключами; посилені сертифікати відкритого ключа; попередньо визначений «ключовий» матеріал; кваліфіковані сертифікати відкритого ключа та надійні апаратні засоби цифрового підпису (токени), які захищають особистий ключ користувача; сертифікати, видані відповідно до визначених організацією вимог]",
+            "guideline": "затверджені уповноваженим органом технології та процеси управління ключами; посилені сертифікати відкритого ключа; попередньо визначений «ключовий» матеріал; кваліфіковані сертифікати відкритого ключа та надійні апаратні засоби цифрового підпису (токени), які захищають особистий ключ користувача; сертифікати, видані відповідно до визначених організацією вимог"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Виробляти, керувати та поширювати асиметричні криптографічні ключі, використовуючи {{ insert: param, sc-12.3_odp.01 }}.",
+              "context": "Виробляти, керувати та поширювати асиметричні криптографічні ключі, використовуючи {{ insert: param, sc-12.3_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sc-12.3_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "SC-12(03)_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Політика захисту системи та комунікацій; процедури, що стосуються встановлення та управління криптографічним ключем; проєктна документація системи; налаштування конфігурації системи та відповідна документація; записи аудиту системи; перелік криптог рафічних продуктів, затверджених уповноваженим органом; інші відповідні документи або записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Адміністратори системи, мережі; персонал організації , відповідальний за інформаційну безпеку; розробник системи; персонал організації, відповідальний за створення та управління криптографічним ключем; персонал організації, відповідальний за сертифікати відкритих ключів]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми, що підтримують та, або реалізують асиметричне встановлення та управління криптографічним ключем]."
         ]
       }
     },
@@ -37733,6 +38908,48 @@
       }
     },
     {
+      "control_id": "SI-08(02)",
+      "canonical_control_id": "SI-8(2)",
+      "family": "SI",
+      "family_title": "ЦІЛІСНІСТЬ СИСТЕМИ ТА ІНФОРМАЦІЇ",
+      "title": "ЗАХИСТ ВІД СПАМУ - АВТОМАТИЧНІ ОНОВЛЕННЯ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "SI-08(02)_ODP",
+          "local_odp_id": "si-8.2_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "з визначеною організацією частотою",
+            "source_text": "[Призначення: з визначеною організацією частотою]",
+            "guideline": "з визначеною організацією частотою"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Автоматично оновлювати механізми захисту від спаму {{ insert: param, si-8.2_odp.01 }}.",
+              "context": "Автоматично оновлювати механізми захисту від спаму {{ insert: param, si-8.2_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "si-8.2_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "SI-08(02)_ODP"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "control_id": "SI-10",
       "canonical_control_id": "SI-10",
       "family": "SI",
@@ -39313,7 +40530,7 @@
       "family_title": "ЦІЛІСНІСТЬ СИСТЕМИ ТА ІНФОРМАЦІЇ",
       "title": "ФРАГМЕНТАЦІЯ ІНФОРМАЦІЇ",
       "enhancement": false,
-      "assessment_odp_count": 2,
+      "assessment_odp_count": 3,
       "assessment_odps": [
         {
           "assessment_odp_id": "SI-23_ODP[01]",
@@ -39363,6 +40580,35 @@
           "binding": {
             "type": "DIRECT_LOCAL_ODP",
             "cpb_ref": "si-23_odp.02"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "SI-23_ODP[03]",
+          "local_odp_id": "si-23_odp.03",
+          "ordinal": 3,
+          "semantic": {
+            "label": "обставини, визначені організацією",
+            "source_text": "[Призначення: обставини, визначені організацією]",
+            "guideline": "обставини, визначені організацією"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "На основі {{ insert: param, si-23_odp.03 }}:",
+              "context": "На основі {{ insert: param, si-23_odp.03 }}:"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "si-23_odp.03"
           },
           "bpb_bindings": {
             "open_confidential": [],
@@ -41953,6 +43199,48 @@
       }
     },
     {
+      "control_id": "SR-04",
+      "canonical_control_id": "SR-4",
+      "family": "SR",
+      "family_title": "УПРАВЛІННЯ РИЗИКАМИ ЛАНЦЮГА ПОСТАЧАННЯ",
+      "title": "ПОХОДЖЕННЯ",
+      "enhancement": false,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "SR-04_ODP",
+          "local_odp_id": "sr-4_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "системи, визначені організацією, системні компоненти та пов’язані дані",
+            "source_text": "[Призначення: системи, визначені організацією, системні компоненти та пов’язані дані]",
+            "guideline": "системи, визначені організацією, системні компоненти та пов’язані дані"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Документуйте, відстежуйте та підтримуйте справжнє походження таких систем, компонентів системи і пов’язаних даних: {{ insert: param, sr-4_odp.01 }}.",
+              "context": "Документуйте, відстежуйте та підтримуйте справжнє походження таких систем, компонентів системи і пов’язаних даних: {{ insert: param, sr-4_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sr-4_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "SR-04_ODP"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "control_id": "SR-10",
       "canonical_control_id": "SR-10",
       "family": "SR",
@@ -42537,7 +43825,7 @@
       "family_title": "УПРАВЛІННЯ РИЗИКАМИ ЛАНЦЮГА ПОСТАЧАННЯ",
       "title": "КОНТРОЛЬ ЛАНЦЮГА ПОСТАЧАННЯ І ПРОЦЕСІВ",
       "enhancement": false,
-      "assessment_odp_count": 3,
+      "assessment_odp_count": 4,
       "assessment_odps": [
         {
           "assessment_odp_id": "SR-03_ODP[01]",
@@ -42616,6 +43904,35 @@
           "binding": {
             "type": "DIRECT_LOCAL_ODP",
             "cpb_ref": "sr-3_odp.03"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "UNRESOLVED",
+            "odp_ids": []
+          }
+        },
+        {
+          "assessment_odp_id": "SR-03_ODP[04]",
+          "local_odp_id": "sr-3_odp.04",
+          "ordinal": 4,
+          "semantic": {
+            "label": "визначена організацією система або компонент системи",
+            "source_text": "[Призначення: визначена організацією система або компонент системи]",
+            "guideline": "визначена організацією система або компонент системи"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "a",
+              "text": "Встановлення процесу або процесів для виявлення та усунення слабких місць або недоліків в елементах і процесах ланцюга постачання {{ insert: param, sr-3_odp.04 }} у координації з {{ insert: param, sr-3_odp.01 }};",
+              "context": "Встановлення процесу або процесів для виявлення та усунення слабких місць або недоліків в елементах і процесах ланцюга постачання {{ insert: param, sr-3_odp.04 }} у координації з {{ insert: param, sr-3_odp.01 }};"
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "sr-3_odp.04"
           },
           "bpb_bindings": {
             "open_confidential": [],
@@ -43192,6 +44509,59 @@
         "EXAMINE": [],
         "INTERVIEW": [],
         "TEST": []
+      }
+    },
+    {
+      "control_id": "CA-05(01)",
+      "canonical_control_id": "CA-5(1)",
+      "family": "CA",
+      "family_title": "",
+      "title": "ПЛАН УСУНЕННЯ НЕДОЛІКІВ ТА КОНТРОЛЬНІ ПОКАЗНИКИ- АВТОМАТИЗАЦІЯ ПІДТРИМКИ ЗАДЛЯ ТОЧНОСТІ ТА ВЖИВАНОСТІ",
+      "enhancement": true,
+      "assessment_odp_count": 1,
+      "assessment_odps": [
+        {
+          "assessment_odp_id": "CA-05(01)_ODP",
+          "local_odp_id": "ca-5.1_odp.01",
+          "ordinal": 1,
+          "semantic": {
+            "label": "автоматизовані механізми, визначені організацією",
+            "source_text": "[Завдання: автоматизовані механізми, визначені організацією]",
+            "guideline": "автоматизовані механізми, визначені організацією"
+          },
+          "statement_usage": [
+            {
+              "statement_path": "1",
+              "text": "Забезпечити точність, актуальність і доступність плану усунення недоліків і основних етапів для системи за допомогою {{ insert: param, ca-5.1_odp.01 }}.",
+              "context": "Забезпечити точність, актуальність і доступність плану усунення недоліків і основних етапів для системи за допомогою {{ insert: param, ca-5.1_odp.01 }}."
+            }
+          ],
+          "binding": {
+            "type": "DIRECT_LOCAL_ODP",
+            "cpb_ref": "ca-5.1_odp.01"
+          },
+          "bpb_bindings": {
+            "open_confidential": [],
+            "service": []
+          },
+          "nist_traceability": {
+            "status": "VERIFIED",
+            "odp_ids": [
+              "CA-05(01)_ODP"
+            ]
+          }
+        }
+      ],
+      "assessment_methods_reference": {
+        "EXAMINE": [
+          "[ВИБІР: Оцінка безпеки та політика авторизації; процедури щодо плану дій та етапів; проєктна документація системи, налаштування конфігурації системи та супутня документація; записи аудиту системи; план дій та етапів; інші відповідні документи чи записи]."
+        ],
+        "INTERVIEW": [
+          "[ВИБІР: Персонал організації з планом дій та основних етапів розробки та реалізацією обов'язків; відповідальними за розробку та впровадження; gерсонал організації, відповідальний за інформаційну безпеку]."
+        ],
+        "TEST": [
+          "[ВИБІР: Автоматизовані механізми розробки, впровадження та підтримки плану дій та етапів]."
+        ]
       }
     }
   ],

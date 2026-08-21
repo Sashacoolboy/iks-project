@@ -8236,6 +8236,278 @@
       "defaultValue": null,
       "requiresInput": true,
       "options": null
+    },
+    "ac-3.3_odp.03": {
+      "controlId": "AC-3(3)",
+      "guideline": "визначену організацією мандатну (mandatory) політику управління доступом",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-3.8_odp.01": {
+      "controlId": "AC-3(8)",
+      "guideline": "визначених організацією правил, що регулюють терміни скасування прав доступу",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-4.6_odp.01": {
+      "controlId": "AC-4(6)",
+      "guideline": "визначених організацією метаданих",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-10_odp.02": {
+      "controlId": "AC-10",
+      "guideline": "визначеної організацією кількості",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.1_odp.01": {
+      "controlId": "AC-16(1)",
+      "guideline": "визначеними організацією суб’єктами й об’єктами",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.1_odp.02": {
+      "controlId": "AC-16(1)",
+      "guideline": "визначених організацією політик безпеки та приватності",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.3_odp.01": {
+      "controlId": "AC-16(3)",
+      "guideline": "визначених організацією атрибутів безпеки та приватності",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.3_odp.02": {
+      "controlId": "AC-16(3)",
+      "guideline": "визначених організацією суб’єктів і об’єктів",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.5_odp.01": {
+      "controlId": "AC-16(5)",
+      "guideline": "визначені організацією спеціальні інструкції щодо поширення, обробки чи наступного розподілу інформації",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.5_odp.02": {
+      "controlId": "AC-16(5)",
+      "guideline": "визначену організацією ідентифікацію, у зручній для людини формі про стандартні угоди про присвоєння імен",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.6_odp.01": {
+      "controlId": "AC-16(6)",
+      "guideline": "визначених організацією атрибутів безпеки та приватності",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.6_odp.02": {
+      "controlId": "AC-16(6)",
+      "guideline": "визначеними організацією суб’єктами та об’єктами",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.6_odp.03": {
+      "controlId": "AC-16(6)",
+      "guideline": "визначеної організацією політики безпеки та приватності",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ac-16.9_odp.01": {
+      "controlId": "AC-16(9)",
+      "guideline": "визначених організацією технік або процедур",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "at-4_odp.01": {
+      "controlId": "AT-4",
+      "guideline": "визначеного організацією періоду часу",
+      "formGroup": "GEN_TIME_PERIOD",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ca-5.1_odp.01": {
+      "controlId": "CA-5(1)",
+      "guideline": "автоматизовані механізми, визначені організацією",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ca-9_odp.03": {
+      "controlId": "CA-9",
+      "guideline": "умови, визначені організацією",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "cm-1_odp.07": {
+      "controlId": "CM-1",
+      "guideline": "визначених організацією персоналу або ролей",
+      "formGroup": "GEN_PERSONNEL_ROLE",
+      "defaultValue": "Адміністратор безпеки",
+      "requiresInput": false,
+      "options": null
+    },
+    "ia-4.4_odp.01": {
+      "controlId": "IA-4(4)",
+      "guideline": "визначена організацією ознака, що ідентифікує індивідуальний статус",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ma-2_odp.02": {
+      "controlId": "MA-2",
+      "guideline": "визначену організацією інформацію, пов’язану з технічним обслуговуванням",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ma-6.2_odp.02": {
+      "controlId": "MA-6(2)",
+      "guideline": "визначені організацією часові інтервали",
+      "formGroup": "GEN_TIME_PERIOD",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "mp-6.3_odp.01": {
+      "controlId": "MP-6(3)",
+      "guideline": "визначених організацією умов, що вимагають очищення портативних запам’ятовувальних пристроїв",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "pe-10_odp.01": {
+      "controlId": "PE-10",
+      "guideline": "визначені організацією місця розташування в системі або в компоненті системи",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "pe-21_odp.02": {
+      "controlId": "PE-21",
+      "guideline": "визначених організацією систем",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "ra-10_odp.01": {
+      "controlId": "RA-10",
+      "guideline": "частота, визначена організацією",
+      "formGroup": "GEN_FREQUENCY",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sa-4_odp.01": {
+      "controlId": "SA-4",
+      "guideline": "стандартні пункти контракту; пункти контракту, визначені організацією",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sa-9.2_odp.01": {
+      "controlId": "SA-9(2)",
+      "guideline": "визначених організацією зовнішніх послуг для системи",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sa-11_odp.03": {
+      "controlId": "SA-11",
+      "guideline": "з визначеною організацією частотою",
+      "formGroup": "GEN_FREQUENCY",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sc-8.1_odp.01": {
+      "controlId": "SC-8(1)",
+      "guideline": "запобігання несанкціонованому розкриттю інформації; вияв змін в інформації",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sc-12.3_odp.01": {
+      "controlId": "SC-12(3)",
+      "guideline": "затверджені уповноваженим органом технології та процеси управління ключами; посилені сертифікати відкритого ключа; попередньо визначений «ключовий» матеріал; кваліфіковані сертифікати відкритого ключа та надійні апаратні засоби цифрового підпису (токени), які захищають особистий ключ користувача; сертифікати, видані відповідно до визначених організацією вимог",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "si-8.2_odp.01": {
+      "controlId": "SI-8(2)",
+      "guideline": "з визначеною організацією частотою",
+      "formGroup": "GEN_FREQUENCY",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "si-23_odp.03": {
+      "controlId": "SI-23",
+      "guideline": "обставини, визначені організацією",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sr-3_odp.04": {
+      "controlId": "SR-3",
+      "guideline": "визначена організацією система або компонент системи",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
+    "sr-4_odp.01": {
+      "controlId": "SR-4",
+      "guideline": "системи, визначені організацією, системні компоненти та пов’язані дані",
+      "formGroup": "GEN_OTHER",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
     }
   }
 }
