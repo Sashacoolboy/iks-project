@@ -1637,6 +1637,14 @@
       "requiresInput": true,
       "options": null
     },
+    "au-11_odp.01": {
+      "controlId": "AU-11",
+      "guideline": "визначений організацією період часу, відповідно політиці зберігання записів",
+      "formGroup": "GEN_TIME_PERIOD",
+      "defaultValue": null,
+      "requiresInput": true,
+      "options": null
+    },
     "au-11.1_odp.01": {
       "controlId": "AU-11(1)",
       "guideline": "визначені організацією заходи",
