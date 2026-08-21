@@ -78,3 +78,10 @@ test('невибрані enhancements не потрапляють у план', 
   // Since profile.enhancements is [], no items should come from user selection (all are БПБ-mandated)
   assert.ok(enhItems.every(i => !as2.profile.enhancements.includes(i.control_id)));
 });
+
+test('methods_reference: копія assessment_methods_reference з адаптера', () => {
+  const e = items.find(i => i.assessment_source_id === 'AC-02e');
+  const adapterCtrl = adapter.controls.find(c => c.control_id === 'AC-02');
+  assert.deepEqual(e.methods_reference, adapterCtrl.assessment_methods_reference);
+  assert.ok(e.methods_reference.EXAMINE?.length > 0);
+});

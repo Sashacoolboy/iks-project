@@ -184,6 +184,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
         odp_values: odpValues, 
         relevant_local_odp_ids: [...relevantIds],
         available_methods: Object.keys(item.methods),
+        methods_reference: adapterCtrl?.assessment_methods_reference ?? {},
       });
 
       if (!Object.keys(item.methods).length) {
