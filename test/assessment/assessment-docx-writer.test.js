@@ -96,11 +96,6 @@ test('document.xml містить обовʼязкові розділи та у�
   assert.match(xml, /АС-2/, 'ICS name');
   assert.match(xml, /ASSESS-2026-077/, 'assessment ID');
 
-  // Методи (українські лейбли)
-  assert.match(xml, /Дослідження/, 'EXAMINE label');
-  assert.match(xml, /Співбесіда/, 'INTERVIEW label');
-  assert.match(xml, /Перевірка/, 'TEST label');
-
   // Resolved objective
   assert.match(xml, /перевірити наявність схвалення керівником СЗІ/, 'resolved objective');
 

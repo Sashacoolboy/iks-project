@@ -46,18 +46,20 @@ export function buildAssessmentDocx({ projection }) {
   sections.push(par(`Хеш: ${projection.cpb_version.hash}`));
   sections.push(par(''));
 
-  // Section 5: Methods table
-  sections.push(par('4. Методи оцінювання', { bold: true, sz: 32 }));
-  sections.push(par(''));
-  const methodRows = [
-    row([cell('Метод', { header: true }), cell('Використано разів', { header: true })], { header: true }),
-    ...projection.methods.map(m => row([cell(m.label, {}), cell(String(m.used_count), {})]))
-  ];
-  sections.push(table(methodRows));
-  sections.push(par(''));
+  // Section 5: Methods table (only if methods are available)
+  if (projection.methods) {
+    sections.push(par('4. Методи оцінювання', { bold: true, sz: 32 }));
+    sections.push(par(''));
+    const methodRows = [
+      row([cell('Метод', { header: true }), cell('Використано разів', { header: true })], { header: true }),
+      ...projection.methods.map(m => row([cell(m.label, {}), cell(String(m.used_count), {})]))  
+    ];
+    sections.push(table(methodRows));
+    sections.push(par(''));
+  }
 
   // Section 6: Results by families
-  sections.push(par('5. Результати оцінювання за класами заходів захисту', { bold: true, sz: 32 }));
+  sections.push(par(projection.methods ? '5. Результати оцінювання за класами заходів захисту' : '4. Результати оцінювання за класами заходів захисту', { bold: true, sz: 32 }));
   sections.push(par(''));
 
   for (const family of projection.families) {
@@ -73,11 +75,9 @@ export function buildAssessmentDocx({ projection }) {
           cell('Позначення', { header: true }),
           cell('Мета оцінювання', { header: true }),
           cell('Оцінка', { header: true }),
-          cell('Методи', { header: true }),
           cell('Висновок', { header: true })
         ], { header: true }),
         ...control.items.map(item => {
-          const methodsText = item.methods_used_labels.join(', ');
           const evidenceText = item.evidence_ids.length > 0
             ? `Докази: ${item.evidence_ids.join(', ')}`
             : '';
@@ -86,7 +86,6 @@ export function buildAssessmentDocx({ projection }) {
             cell(item.assessment_source_id, {}),
             cell(item.resolved_objective, {}),
             cell(item.result_label, {}),
-            cell(methodsText, {}),
             cell(conclusionFull, {})
           ]);
         })
@@ -97,7 +96,6 @@ export function buildAssessmentDocx({ projection }) {
   }
 
   // Section 7: Evidence register
-  sections.push(par('6. Реєстр доказів', { bold: true, sz: 32 }));
   sections.push(par(''));
   if (projection.evidence_register.length > 0) {
     const evidenceRows = [

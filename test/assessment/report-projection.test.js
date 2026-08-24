@@ -18,7 +18,8 @@ test('проєкція: розділи, лейбли, загальний вис�
   const p = buildReportProjection({ assessment, cpbSnapshot: { state: {} } });
   assert.equal(p.title.assessment_id, 'ASSESS-2026-077');
   assert.equal(p.families[0].controls[0].items[0].result_label, 'Не відповідає');
-  assert.deepEqual(p.families[0].controls[0].items[0].methods_used_labels, ['Дослідження', 'Співбесіда']);
+  assert.equal(p.families[0].controls[0].items[0].methods_used_labels, undefined);
+  assert.equal(p.methods, undefined);
   assert.equal(p.findings[0].severity_label, 'Значний');
   assert.equal(p.evidence_register.length, 1);
   assert.ok(p.overall.conclusion_text.includes('не відповідає'));

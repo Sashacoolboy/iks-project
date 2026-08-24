@@ -12,12 +12,6 @@ export const RESULT_LABELS = {
   NOT_APPLICABLE: 'Не застосовується'
 };
 
-export const METHOD_LABELS = {
-  EXAMINE: 'Дослідження',
-  INTERVIEW: 'Співбесіда',
-  TEST: 'Перевірка'
-};
-
 export const SEVERITY_LABELS = {
   OBSERVATION: 'Спостереження',
   MINOR: 'Незначний',
@@ -124,26 +118,6 @@ export function buildReportProjection({ assessment, cpbSnapshot }) {
     approved_name: assessment.cpb_snapshot?.source_approved_name ?? ''
   };
 
-  // Count method usage
-  const methodCounts = {
-    EXAMINE: 0,
-    INTERVIEW: 0,
-    TEST: 0
-  };
-  for (const result of assessment.results ?? []) {
-    for (const method of result.methods_used ?? []) {
-      if (methodCounts.hasOwnProperty(method)) {
-        methodCounts[method]++;
-      }
-    }
-  }
-
-  const methods = Object.entries(methodCounts).map(([key, used_count]) => ({
-    key,
-    label: METHOD_LABELS[key],
-    used_count
-  }));
-
   // Build families with items, including result labels and methods labels
   const families = groups.map(group => ({
     family: group.family,
@@ -158,7 +132,6 @@ export function buildReportProjection({ assessment, cpbSnapshot }) {
           resolved_objective: item.planItem.resolved_objective,
           result: result?.result ?? 'NOT_ASSESSED',
           result_label: RESULT_LABELS[result?.result ?? 'NOT_ASSESSED'],
-          methods_used_labels: (result?.methods_used ?? []).map(m => METHOD_LABELS[m]),
           evidence_ids: result?.evidence_ids ?? [],
           conclusion: result?.conclusion ?? ''
         };
@@ -238,7 +211,6 @@ export function buildReportProjection({ assessment, cpbSnapshot }) {
     system_info,
     basis_scope,
     cpb_version,
-    methods,
     families,
     evidence_register,
     findings,
