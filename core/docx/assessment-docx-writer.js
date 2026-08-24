@@ -46,20 +46,8 @@ export function buildAssessmentDocx({ projection }) {
   sections.push(par(`Хеш: ${projection.cpb_version.hash}`));
   sections.push(par(''));
 
-  // Section 5: Methods table (only if methods are available)
-  if (projection.methods) {
-    sections.push(par('4. Методи оцінювання', { bold: true, sz: 32 }));
-    sections.push(par(''));
-    const methodRows = [
-      row([cell('Метод', { header: true }), cell('Використано разів', { header: true })], { header: true }),
-      ...projection.methods.map(m => row([cell(m.label, {}), cell(String(m.used_count), {})]))  
-    ];
-    sections.push(table(methodRows));
-    sections.push(par(''));
-  }
-
-  // Section 6: Results by families
-  sections.push(par(projection.methods ? '5. Результати оцінювання за класами заходів захисту' : '4. Результати оцінювання за класами заходів захисту', { bold: true, sz: 32 }));
+  // Section 4: Results by families
+  sections.push(par('4. Результати оцінювання за класами заходів захисту', { bold: true, sz: 32 }));
   sections.push(par(''));
 
   for (const family of projection.families) {
@@ -95,7 +83,8 @@ export function buildAssessmentDocx({ projection }) {
     }
   }
 
-  // Section 7: Evidence register
+  // Section 5: Evidence register
+  sections.push(par('5. Реєстр доказів', { bold: true, sz: 32 }));
   sections.push(par(''));
   if (projection.evidence_register.length > 0) {
     const evidenceRows = [
@@ -122,8 +111,8 @@ export function buildAssessmentDocx({ projection }) {
   }
   sections.push(par(''));
 
-  // Section 8: Findings
-  sections.push(par('7. Недоліки', { bold: true, sz: 32 }));
+  // Section 6: Findings
+  sections.push(par('6. Недоліки', { bold: true, sz: 32 }));
   sections.push(par(''));
   if (projection.findings.length > 0) {
     const findingRows = [
@@ -150,8 +139,8 @@ export function buildAssessmentDocx({ projection }) {
   }
   sections.push(par(''));
 
-  // Section 9: Overall conclusion
-  sections.push(par('8. Загальний висновок', { bold: true, sz: 32 }));
+  // Section 7: Overall conclusion
+  sections.push(par('7. Загальний висновок', { bold: true, sz: 32 }));
   sections.push(par(''));
   sections.push(par(`Відповідає: ${projection.overall.counts.satisfied}`));
   sections.push(par(`Частково відповідає: ${projection.overall.counts.partially_satisfied}`));
@@ -162,10 +151,10 @@ export function buildAssessmentDocx({ projection }) {
   sections.push(par(`Висновок: ${projection.overall.conclusion_text}`, { bold: true }));
   sections.push(par(''));
 
-  // Section 10: Appendices - unresolved ODP
-  sections.push(par('9. Додатки', { bold: true, sz: 32 }));
+  // Section 8: Appendices - unresolved ODP
+  sections.push(par('8. Додатки', { bold: true, sz: 32 }));
   sections.push(par(''));
-  sections.push(par('9.1. Нерозвʼязані параметри (ODP)', { bold: true }));
+  sections.push(par('8.1. Нерозвʼязані параметри (ODP)', { bold: true }));
   sections.push(par(''));
   if (projection.appendices.unresolved_odp.length > 0) {
     const odpRows = [

@@ -36,7 +36,6 @@ const assessment = {
     {
       assessment_source_id: 'AC-02e',
       result: 'NOT_SATISFIED',
-      methods_used: ['EXAMINE', 'INTERVIEW', 'TEST'],
       evidence_ids: ['EV-001'],
       finding_ids: ['F-001'],
       conclusion: 'захід не виконується належним чином',
@@ -98,6 +97,11 @@ test('document.xml містить обовʼязкові розділи та у�
 
   // Resolved objective
   assert.match(xml, /перевірити наявність схвалення керівником СЗІ/, 'resolved objective');
+
+  // Секції перенумеровані після видалення «Методів оцінювання»
+  assert.match(xml, /4\. Результати оцінювання за класами заходів захисту/, 'section 4 renumbered');
+  assert.match(xml, /8\. Додатки/, 'section 8 renumbered');
+  assert.ok(!xml.includes('Методи оцінювання'), 'методи-секція видалена');
 
   // Загальний висновок
   assert.match(xml, /ІКС не відповідає вимогам ЦПБ/, 'overall conclusion');
