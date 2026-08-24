@@ -14,16 +14,25 @@ export function emptyDictionary() {
   return { entries: {} };
 }
 
-/** Додає факт заповнення параметра (з типом інформації); повертає НОВИЙ словник */
-export function mergeRecord(dict, { paramId, label, source_text, value, info_type }) {
+/** Додає факт заповнення параметра (з типом інформації, опційним вердиктом оцінювача); повертає НОВИЙ словник */
+export function mergeRecord(dict, { paramId, label, source_text, value, info_type, verdict }) {
   const v = (value ?? '').trim();
   if (!paramId || !v) return dict;
   const entries = { ...(dict?.entries ?? {}) };
   const prev = entries[paramId] ?? { label: label ?? '', source_text: source_text ?? '', values: [] };
   const values = [...prev.values];
   const hit = values.find(x => x.value === v && (x.info_type ?? null) === (info_type ?? null));
-  if (hit) { hit.count += 1; hit.last_used = new Date().toISOString(); }
-  else values.unshift({ value: v, count: 1, last_used: new Date().toISOString(), ...(info_type ? { info_type } : {}) });
+  if (hit) {
+    hit.count += 1;
+    hit.last_used = new Date().toISOString();
+    if (verdict) hit.verdict_counts = { VALID: 0, INVALID: 0, ...hit.verdict_counts, [verdict]: (hit.verdict_counts?.[verdict] ?? 0) + 1 };
+  } else {
+    values.unshift({
+      value: v, count: 1, last_used: new Date().toISOString(),
+      ...(info_type ? { info_type } : {}),
+      ...(verdict ? { verdict_counts: { VALID: 0, INVALID: 0, [verdict]: 1 } } : {}),
+    });
+  }
   values.sort((a, b) => b.count - a.count);
   entries[paramId] = { label: prev.label || label || '', source_text: prev.source_text || source_text || '', values: values.slice(0, 15) };
   return { entries };

@@ -68,3 +68,16 @@ test('dynamicPolicyIndex мапить відповідь на всі парам�
   assert.equal(idx.get('p2'), 'щопівроку');
   assert.equal(dynamicPolicyIndex(d, {}).size, 0);
 });
+
+test('mergeRecord: verdict_counts накопичуються, без verdict — не з\'являються', () => {
+  let d = emptyDictionary();
+  d = mergeRecord(d, { paramId: 'v_odp.01', label: 'мітка', value: 'значення' }); // без verdict (v1)
+  assert.equal(d.entries['v_odp.01'].values[0].verdict_counts, undefined);
+
+  d = mergeRecord(d, { paramId: 'v_odp.01', label: 'мітка', value: 'значення', verdict: 'VALID' });
+  d = mergeRecord(d, { paramId: 'v_odp.01', label: 'мітка', value: 'значення', verdict: 'VALID' });
+  d = mergeRecord(d, { paramId: 'v_odp.01', label: 'мітка', value: 'значення', verdict: 'INVALID' });
+  const entry = d.entries['v_odp.01'].values[0];
+  assert.equal(entry.count, 4);
+  assert.deepEqual(entry.verdict_counts, { VALID: 2, INVALID: 1 });
+});
