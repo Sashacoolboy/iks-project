@@ -81,3 +81,24 @@ test('mergeRecord: verdict_counts накопичуються, без verdict —
   assert.equal(entry.count, 4);
   assert.deepEqual(entry.verdict_counts, { VALID: 2, INVALID: 1 });
 });
+
+test('mergeRecord: попередній знімок словника не мутується при наступному mergeRecord', () => {
+  let d1 = emptyDictionary();
+  d1 = mergeRecord(d1, { paramId: 'imm_odp.01', label: 'мітка', value: 'значення-1' });
+  // Capture snapshot of first result
+  const snapshotValue = d1.entries['imm_odp.01'].values[0];
+  const snapshotCount = snapshotValue.count;
+  const snapshotLastUsed = snapshotValue.last_used;
+  
+  // Make a second mergeRecord call with the same paramId/value
+  let d2 = mergeRecord(d1, { paramId: 'imm_odp.01', label: 'мітка', value: 'значення-1' });
+  
+  // CRITICAL PROOF OF IMMUTABILITY: The snapshot object from d1 must be unchanged
+  assert.equal(snapshotValue.count, snapshotCount, 'snapshot.count was mutated by second mergeRecord call');
+  assert.equal(snapshotValue.last_used, snapshotLastUsed, 'snapshot.last_used was mutated by second mergeRecord call');
+  
+  // Verify the new dictionary d2 has a DIFFERENT object with incremented count
+  const newValue = d2.entries['imm_odp.01'].values[0];
+  assert.equal(newValue.count, snapshotCount + 1, 'new dictionary should have incremented count');
+  assert.notStrictEqual(snapshotValue, newValue, 'snapshot and new value must be different objects (not references to same object)');
+});

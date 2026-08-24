@@ -23,9 +23,13 @@ export function mergeRecord(dict, { paramId, label, source_text, value, info_typ
   const values = [...prev.values];
   const hit = values.find(x => x.value === v && (x.info_type ?? null) === (info_type ?? null));
   if (hit) {
-    hit.count += 1;
-    hit.last_used = new Date().toISOString();
-    if (verdict) hit.verdict_counts = { VALID: 0, INVALID: 0, ...hit.verdict_counts, [verdict]: (hit.verdict_counts?.[verdict] ?? 0) + 1 };
+    const idx = values.indexOf(hit);
+    values[idx] = {
+      ...hit,
+      count: hit.count + 1,
+      last_used: new Date().toISOString(),
+      ...(verdict ? { verdict_counts: { VALID: 0, INVALID: 0, ...hit.verdict_counts, [verdict]: (hit.verdict_counts?.[verdict] ?? 0) + 1 } } : {})
+    };
   } else {
     values.unshift({
       value: v, count: 1, last_used: new Date().toISOString(),
