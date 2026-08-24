@@ -133,7 +133,9 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
         baseline_value: baselineValue({ adapterEntry: entry, infoType: cpb.info_type }),
         target_value: eff.value, 
         effective_source: eff.source, 
-        status: eff.status 
+        status: eff.status,
+        semantic_label: entry.semantic?.label ?? null,
+        semantic_source_text: entry.semantic?.source_text ?? null,
       };
     });
 

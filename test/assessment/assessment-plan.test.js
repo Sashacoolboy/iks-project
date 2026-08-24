@@ -85,3 +85,10 @@ test('methods_reference: копія assessment_methods_reference з адапте
   assert.deepEqual(e.methods_reference, adapterCtrl.assessment_methods_reference);
   assert.ok(e.methods_reference.EXAMINE?.length > 0);
 });
+
+test('odp_values: semantic_label/semantic_source_text з адаптера', () => {
+  const e = items.find(i => i.assessment_source_id === 'AC-02e');
+  const odp1 = e.odp_values.find(v => v.local_odp_id === 'ac-2_odp.01');
+  assert.equal(odp1.semantic_label, 'визначеною організацією відповідальною особою або роллю');
+  assert.equal(odp1.semantic_source_text, '[Призначення: визначеною організацією відповідальною особою або роллю]');
+});
