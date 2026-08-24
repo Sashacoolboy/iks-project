@@ -112,7 +112,7 @@ export function statementTitle(planItem) {
   return label + collapsePlaceholders(planItem.statement_text);
 }
 
-function firstSegmentLabel(path) {
+export function firstSegmentLabel(path) {
   return String(path ?? '').split('.')[0].replace(/[\[(].*$/, '');
 }
 
