@@ -79,12 +79,35 @@ function patchResult(sourceId, patch) {
   const current = getAssessment();
   const { assessment } = updateResult(current, sourceId, patch);
   setAssessment(assessment);
+  const planItem = assessment.plan.items.find(p => p.assessment_source_id === sourceId);
+  const rec = planItem ? buildDictionaryRecord(planItem, patch, assessment.metadata?.info_type) : null;
+  if (rec) fetch('/api/dictionary/record', { method: 'POST', body: JSON.stringify(rec) }).catch(() => {});
 }
 
 function formatOdpValue(value) {
   if (value === null || value === undefined) return null;
   if (Array.isArray(value)) return value.join('; ');
   return String(value);
+}
+
+// Запис у словник політик: лише для ODP_DEFINITION-рядків (однозначний ODP), лише коли result дає вердикт
+export function buildDictionaryRecord(planItem, patch, infoType) {
+  if (planItem.kind !== 'ODP_DEFINITION') return null;
+  const verdict = patch.result === 'SATISFIED' || patch.result === 'PARTIALLY_SATISFIED' ? 'VALID'
+    : patch.result === 'NOT_SATISFIED' ? 'INVALID' : null;
+  if (!verdict) return null;
+  const own = (planItem.odp_values ?? []).find(v => v.assessment_odp_id === planItem.assessment_source_id);
+  if (!own) return null;
+  const value = formatOdpValue(own.target_value);
+  if (!value) return null;
+  return {
+    paramId: own.local_odp_id,
+    label: own.semantic_label ?? '',
+    source_text: own.semantic_source_text ?? '',
+    value,
+    info_type: infoType ?? null,
+    verdict,
+  };
 }
 
 // ОДП, релевантні пункту; legacy-записи без relevant_local_odp_ids → лише непорожні значення контроля

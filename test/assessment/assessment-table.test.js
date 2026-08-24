@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle, statementTitle } from '../../public/js/assessment/assessment-table.js';
+import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle, statementTitle, buildDictionaryRecord } from '../../public/js/assessment/assessment-table.js';
 
 test('statementTitle: текст вимоги заходу з префіксом пункту, плейсхолдер згорнутий', () => {
   const item = { control_id: 'AC-02', statement_path: 'a.[01]',
@@ -173,3 +173,33 @@ test('METHOD_LABELS: Ukrainian labels', () => {
   assert.equal(METHOD_LABELS.INTERVIEW, 'Співбесіда');
   assert.equal(METHOD_LABELS.TEST, 'Перевірка');
 });
+
+test('buildDictionaryRecord: ODP_DEFINITION + SATISFIED → VALID запис', () => {
+  const planItem = {
+    kind: 'ODP_DEFINITION',
+    assessment_source_id: 'AC-02_ODP[01]',
+    odp_values: [
+      { assessment_odp_id: 'AC-02_ODP[01]', local_odp_id: 'ac-2_odp.01', target_value: 'Начальник СЗІ',
+        semantic_label: 'відповідальна особа', semantic_source_text: '[Призначення: ...]' },
+    ],
+  };
+  const rec = buildDictionaryRecord(planItem, { result: 'SATISFIED' }, 'open_confidential');
+  assert.deepEqual(rec, {
+    paramId: 'ac-2_odp.01', label: 'відповідальна особа', source_text: '[Призначення: ...]',
+    value: 'Начальник СЗІ', info_type: 'open_confidential', verdict: 'VALID',
+  });
+});
+
+test('buildDictionaryRecord: NOT_SATISFIED → INVALID; NOT_ASSESSED/без result/STATEMENT/без значення → null', () => {
+  const planItem = {
+    kind: 'ODP_DEFINITION', assessment_source_id: 'X',
+    odp_values: [{ assessment_odp_id: 'X', local_odp_id: 'x.01', target_value: 'значення' }],
+  };
+  assert.equal(buildDictionaryRecord(planItem, { result: 'NOT_SATISFIED' }, null).verdict, 'INVALID');
+  assert.equal(buildDictionaryRecord(planItem, { result: 'NOT_ASSESSED' }, null), null);
+  assert.equal(buildDictionaryRecord(planItem, {}, null), null);
+  assert.equal(buildDictionaryRecord({ ...planItem, kind: 'STATEMENT' }, { result: 'SATISFIED' }, null), null);
+  const noValue = { kind: 'ODP_DEFINITION', assessment_source_id: 'Y', odp_values: [{ assessment_odp_id: 'Y', local_odp_id: 'y.01', target_value: null }] };
+  assert.equal(buildDictionaryRecord(noValue, { result: 'SATISFIED' }, null), null);
+});
+
