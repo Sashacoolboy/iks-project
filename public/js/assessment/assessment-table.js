@@ -146,7 +146,7 @@ function odpSubrows(planItem) {
 
     return el('tr', { class: 'odp-subrow', ...(title ? { title } : {}) },
       el('td', {}, odp.assessment_odp_id ?? ''),
-      el('td', { colspan: '7' },
+      el('td', { colspan: '6' },
         el('span', { class: 'odp-meta' }, `local: ${odp.local_odp_id}`),
         el('span', { class: 'odp-meta' }, `БПБ: ${baseline}`),
         el('span', { class: 'odp-meta' }, `ЦПБ: ${target}`),
@@ -187,30 +187,6 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     }, label)
   ));
 
-  // Methods checkboxes
-  const methodsDiv = el('div', { class: 'methods' },
-    ...(planItem.available_methods ?? []).map(method => {
-      const isChecked = result?.methods_used?.includes(method) ?? false;
-      return el('label', {},
-        el('input', {
-          type: 'checkbox',
-          checked: isChecked ? '' : null,
-          disabled: isFinalized ? '' : null,
-          onchange: (e) => {
-            const current = getAssessment();
-            const currentResult = current.results.find(r => r.assessment_source_id === sourceId);
-            const currentMethods = currentResult?.methods_used ?? [];
-            const newMethods = e.target.checked
-              ? [...currentMethods, method]
-              : currentMethods.filter(m => m !== method);
-            patchResult(sourceId, { methods_used: newMethods });
-          }
-        }),
-        ` ${METHOD_LABELS[method] ?? method}`
-      );
-    })
-  );
-
   // БПБ та ЦПБ: лише релевантні цьому пункту ODP; hover — стейтмент, де ODP вживається
   const odpParts = odpColumnParts(planItem);
   const odpCell = (list) => list.length
@@ -245,7 +221,6 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     odpCell(odpParts.baseline),
     odpCell(odpParts.target),
     el('td', {}, resultSelect),
-    el('td', {}, methodsDiv),
     el('td', {}, evidenceBtn),
     conclusionCell
   );
@@ -280,10 +255,9 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     el('tr', {},
       el('th', {}, 'Позначення мети оцінювання'),
       el('th', {}, 'Мета оцінювання'),
-      el('th', {}, 'Значення з БПБ'),
-      el('th', {}, 'Значення з ЦПБ'),
+      el('th', {}, el('span', { class: 'step-badge' }, '1'), ' Значення з БПБ'),
+      el('th', {}, el('span', { class: 'step-badge' }, '1'), ' Значення з ЦПБ'),
       el('th', {}, 'Вибір оцінки'),
-      el('th', {}, 'Вибір типів дослідження'),
       el('th', {}, 'Докази / джерела'),
       el('th', {}, 'Висновок')
     )
@@ -296,7 +270,7 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     // Family header row
     tbody.append(
       el('tr', { class: 'group-row family' },
-        el('td', { colspan: '8' }, `${familyGroup.family} — ${familyGroup.family_title}`)
+        el('td', { colspan: '7' }, `${familyGroup.family} — ${familyGroup.family_title}`)
       )
     );
 
@@ -304,7 +278,7 @@ export function renderAssessmentTable(container, { onOpenItem }) {
       // Control header row
       tbody.append(
         el('tr', { class: 'group-row control' },
-          el('td', { colspan: '8' }, `${controlGroup.control_id} — ${controlGroup.control_title}`)
+          el('td', { colspan: '7' }, `${controlGroup.control_id} — ${controlGroup.control_title}`)
         )
       );
 
