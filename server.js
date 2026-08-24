@@ -192,7 +192,7 @@ createServer(async (req, res) => {
           const existing = await readAssessmentGuarded(dir);
           if (existing.status === 'FINALIZED') return json(res, 409, { error: 'оцінювання фіналізовано — зміни заборонені' });
           let body;
-          try { body = deserializeAssessment((await readBody(req)).toString('utf8')); }
+          try { body = deserializeAssessment((await readBody(req, 20_000_000)).toString('utf8')); }
           catch { return json(res, 400, { error: 'некоректний JSON' }); }
           const errors = validateAssessmentSchema(body);
           if (errors.length) return json(res, 400, { error: errors.join('; ') });
