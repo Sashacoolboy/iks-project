@@ -79,6 +79,8 @@ createServer(async (req, res) => {
           const rec = JSON.parse((await readBody(req)).toString('utf8'));
           if (typeof rec?.paramId !== 'string' || typeof rec?.value !== 'string')
             return json(res, 400, { error: 'потрібні paramId та value' });
+          if (rec.verdict !== undefined && rec.verdict !== 'VALID' && rec.verdict !== 'INVALID')
+            return json(res, 400, { error: 'verdict має бути VALID або INVALID' });
           let dict;
           try { dict = JSON.parse(await readFile(dictFile, 'utf8')); } catch { dict = emptyDictionary(); }
           dict = mergeRecord(dict, rec);

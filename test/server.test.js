@@ -67,6 +67,18 @@ test('словник ODP: record → GET накопичує значення', a
   assert.equal(bad.status, 400);
 });
 
+test('словник ODP: verdict валідується (VALID/INVALID або відсутній)', async () => {
+  const okRec = { paramId: 'test_odp.02', label: 'мітка', value: 'значення', verdict: 'VALID' };
+  const ok = await fetch(BASE + '/api/dictionary/record', { method: 'POST', body: JSON.stringify(okRec) });
+  assert.equal(ok.status, 200);
+  const dict = await (await fetch(BASE + '/api/dictionary')).json();
+  assert.deepEqual(dict.entries['test_odp.02'].values[0].verdict_counts, { VALID: 1, INVALID: 0 });
+
+  const badRec = { paramId: 'test_odp.03', label: 'мітка', value: 'значення', verdict: 'MAYBE' };
+  const bad = await fetch(BASE + '/api/dictionary/record', { method: 'POST', body: JSON.stringify(badRec) });
+  assert.equal(bad.status, 400);
+});
+
 test('затверджені профілі: POST → список з метаданими', async () => {
   const rec = { kind: 'approved', approved_at: '2026-08-11T10:00:00Z',
     summary: { total: 100, autofilled: 40, risks_count: 9 },
