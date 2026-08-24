@@ -2,7 +2,7 @@ import { el } from '../render/dom.js';
 import { getAssessment, setAssessment, subscribe, loadAssessment, getLastSaveError } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
-import { renderAssessmentTable } from './assessment-table.js';
+import { renderAssessmentTable, collapsePlaceholders } from './assessment-table.js';
 import { renderEvidenceEditor } from './evidence-editor.js';
 import { renderFindingDialog } from './finding-dialog.js';
 import { renderTraceabilityDrawer } from './traceability-drawer.js';
@@ -109,6 +109,25 @@ function renderItemDetailPanel(sourceId) {
   const traceabilitySection = el('section', {});
   renderTraceabilityDrawer(traceabilitySection, planItem);
 
+  const step1Section = el('section', { class: 'assessment-item-step' },
+    el('h4', {}, 'Крок 1. Валідність заповнення ЦПБ'),
+    el('p', { class: 'resolved-objective' }, collapsePlaceholders(planItem.statement_text)),
+    el('p', { class: 'note' }, 'Перевірте, чи трактування параметра в ЦПБ відповідає вимозі НД ТЗІ.'),
+    odpTable
+  );
+
+  const methodStepSection = (method, title) => {
+    const refs = planItem.methods_reference?.[method] ?? [];
+    const text = refs.length ? refs.join('\n') : 'Підказка відсутня для цього заходу.';
+    return el('section', { class: 'assessment-item-step' },
+      el('h4', {}, title),
+      el('p', { class: 'methods-guidance' }, text)
+    );
+  };
+  const step2Section = methodStepSection('EXAMINE', 'Крок 2. Дослідження');
+  const step3Section = methodStepSection('INTERVIEW', 'Крок 3. Опитування');
+  const step4Section = methodStepSection('TEST', 'Крок 4. Тестування');
+
   return el('aside', { class: 'item-detail-panel' },
     el('header', {},
       el('h3', {}, sourceId),
@@ -120,10 +139,10 @@ function renderItemDetailPanel(sourceId) {
       el('h4', {}, 'Розв\'язана мета оцінювання'),
       el('p', { class: 'resolved-objective' }, planItem.resolved_objective ?? '')
     ),
-    el('section', {},
-      el('h4', {}, 'Значення параметрів ODP'),
-      odpTable
-    ),
+    step1Section,
+    step2Section,
+    step3Section,
+    step4Section,
     el('section', {},
       el('label', { class: 'field' },
         'Коментар оцінювача',

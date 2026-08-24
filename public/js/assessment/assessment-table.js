@@ -92,7 +92,7 @@ export function relevantOdpEntries(planItem) {
   return all.filter(v => set.has(v.local_odp_id));
 }
 
-const collapsePlaceholders = (t) => String(t ?? '').replace(/\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g, '[$1]');
+export const collapsePlaceholders = (t) => String(t ?? '').replace(/\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g, '[$1]');
 
 // Текст тултіпа: стейтменти, де вжито цей ODP; плейсхолдери згортаються до [odp-id]
 export function usageTitle(odp) {
