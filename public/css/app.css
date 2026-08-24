@@ -144,6 +144,14 @@ th { background: #edf2f7; }
 .assessment-table .group-row { background: #f7fafc; font-weight: 600; }
 .assessment-table .group-row.family { background: #2c5282; color: #fff; font-size: 0.95rem; }
 .assessment-table .group-row.control { background: #edf2f7; color: #1a202c; font-size: 0.88rem; }
+.assessment-table .group-row.control { cursor: pointer; }
+.assessment-table .control-doc-row td { background: #fffff0; padding: 0.75rem 1rem; }
+.control-doc-legend { font-size: 0.75rem; color: #4a5568; margin-bottom: 0.6rem; }
+.control-doc-legend .param { padding: 0 0.5rem; margin-right: 0.2rem; border-radius: 3px; }
+.control-doc-columns { display: flex; gap: 1.5rem; }
+.control-doc-col { flex: 1; min-width: 0; }
+.control-doc-col h5 { margin: 0 0 0.4rem; font-size: 0.85rem; color: #2c5282; }
+.control-doc-line { font-size: 0.82rem; margin: 0.3rem 0; line-height: 1.4; }
 
 .assessment-table .assessment-item-row td { font-size: 0.82rem; }
 .assessment-table .objective { max-width: 20rem; }

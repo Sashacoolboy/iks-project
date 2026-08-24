@@ -1,4 +1,5 @@
 // public/js/assessment/control-document-view.js
+import { el } from '../render/dom.js';
 import { firstSegmentLabel } from './assessment-table.js';
 
 const PARAM_RE = /\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g;
@@ -63,4 +64,35 @@ export function buildControlDocument(items) {
   }
 
   return { left, right };
+}
+
+function renderLine(line) {
+  return el('p', { class: 'control-doc-line' },
+    line.label ? `${line.label}. ` : '',
+    ...line.parts.map(p => p.type === 'param'
+      ? el('span', { class: `param ${p.source ?? ''}` }, p.text)
+      : p.text));
+}
+
+/**
+ * @param {HTMLElement} container
+ * @param {Array<{planItem: object}>} items — controlGroup.items
+ */
+export function renderControlDocument(container, items) {
+  const { left, right } = buildControlDocument(items);
+
+  const legend = el('div', { class: 'control-doc-legend' },
+    el('span', { class: 'param src-override' }, '  '), ' введено вручну в ЦПБ   ',
+    el('span', { class: 'param src-bpb' }, '  '), ' успадковано з БПБ / типове значення   ',
+    el('span', { class: 'param src-empty' }, '  '), ' не визначено');
+
+  const columns = el('div', { class: 'control-doc-columns' },
+    el('div', { class: 'control-doc-col' },
+      el('h5', {}, 'Трактування з НД ТЗІ'),
+      ...left.map(renderLine)),
+    el('div', { class: 'control-doc-col' },
+      el('h5', {}, 'Фактичний ЦПБ'),
+      ...right.map(renderLine)));
+
+  container.replaceChildren(legend, columns);
 }

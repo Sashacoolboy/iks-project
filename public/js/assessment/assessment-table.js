@@ -1,6 +1,7 @@
 import { el } from '../render/dom.js';
 import { getAssessment, setAssessment, subscribe } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
+import { renderControlDocument } from './control-document-view.js';
 
 export const RESULT_LABELS = {
   NOT_ASSESSED: 'Не оцінено',
@@ -66,6 +67,9 @@ export function groupPlanItems(assessment) {
 
 // Module-level state for expanded ODP rows
 const expandedRows = new Set();
+
+// Module-level state for expanded control document-view blocks (family::control_id)
+const expandedControlDocs = new Set();
 
 // Module-level state for re-render subscription
 let isSubscribed = false;
@@ -275,12 +279,30 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     );
 
     for (const controlGroup of familyGroup.controls) {
-      // Control header row
+      const controlKey = `${familyGroup.family}::${controlGroup.control_id}`;
+      const isDocExpanded = expandedControlDocs.has(controlKey);
+
+      // Control header row — клік розгортає/згортає документ-в'ю
       tbody.append(
-        el('tr', { class: 'group-row control' },
-          el('td', { colspan: '7' }, `${controlGroup.control_id} — ${controlGroup.control_title}`)
+        el('tr', {
+          class: 'group-row control',
+          onclick: () => {
+            if (isDocExpanded) expandedControlDocs.delete(controlKey);
+            else expandedControlDocs.add(controlKey);
+            rerender();
+          }
+        },
+          el('td', { colspan: '7' },
+            `${controlGroup.control_id} — ${controlGroup.control_title} `,
+            el('span', { class: 'collapse-mark' }, isDocExpanded ? '▲' : '▼'))
         )
       );
+
+      if (isDocExpanded) {
+        const docCell = el('td', { colspan: '7' });
+        tbody.append(el('tr', { class: 'control-doc-row' }, docCell));
+        renderControlDocument(docCell, controlGroup.items);
+      }
 
       // Item rows with optional ODP subrows
       for (const pair of controlGroup.items) {
