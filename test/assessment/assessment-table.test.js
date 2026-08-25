@@ -1,6 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle, statementTitle, buildDictionaryRecord } from '../../public/js/assessment/assessment-table.js';
+import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle, statementTitle, buildDictionaryRecord, firstSegmentLabel } from '../../public/js/assessment/assessment-table.js';
+
+test('firstSegmentLabel: розпізнає формат [a]/[b] (напр. AC-05) так само, як a/a.[01]/d.03[02]', () => {
+  assert.equal(firstSegmentLabel('[a]'), 'a');
+  assert.equal(firstSegmentLabel('[b]'), 'b');
+  assert.equal(firstSegmentLabel('a'), 'a');
+  assert.equal(firstSegmentLabel('a.[01]'), 'a');
+  assert.equal(firstSegmentLabel('d.03[02]'), 'd');
+});
+
 
 test('statementTitle: текст вимоги заходу з префіксом пункту, плейсхолдер згорнутий', () => {
   const item = { control_id: 'AC-02', statement_path: 'a.[01]',

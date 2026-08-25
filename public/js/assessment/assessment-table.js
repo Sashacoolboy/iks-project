@@ -140,7 +140,10 @@ export function statementTitle(planItem) {
 }
 
 export function firstSegmentLabel(path) {
-  return String(path ?? '').split('.')[0].replace(/[\[(].*$/, '');
+  const seg = String(path ?? '').split('.')[0];
+  const wrapped = seg.match(/^[\[(]([a-zA-Zа-яіїєґА-ЯІЇЄҐ]+)[\])]$/);
+  if (wrapped) return wrapped[1];
+  return seg.replace(/[\[(].*$/, '');
 }
 
 export function odpColumnParts(planItem) {
