@@ -1,0 +1,34 @@
+[
+  {
+    "timestamp": "2026-08-25T03:25:56.588Z",
+    "actor": "",
+    "action": "ASSESSMENT_CREATED",
+    "entity_id": "ASSESS-2026-1001",
+    "before": {},
+    "after": {}
+  },
+  {
+    "timestamp": "2026-08-25T05:52:33.298Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-1001",
+    "before": {
+      "updated_at": "2026-08-25T03:25:56.525Z"
+    },
+    "after": {
+      "updated_at": "2026-08-25T05:52:33.279Z"
+    }
+  },
+  {
+    "timestamp": "2026-08-25T06:26:04.434Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-1001",
+    "before": {
+      "updated_at": "2026-08-25T05:52:33.279Z"
+    },
+    "after": {
+      "updated_at": "2026-08-25T06:26:04.409Z"
+    }
+  }
+]

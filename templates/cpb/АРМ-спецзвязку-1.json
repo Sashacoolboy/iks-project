@@ -1,0 +1,21 @@
+{
+  "kind": "cpb",
+  "saved_at": "2026-08-25T03:25:18.556Z",
+  "info_type": "open_confidential",
+  "profile": {
+    "param_overrides": {
+      "ac-7_odp.05": "повідомити адміністратора відповідального",
+      "ac-2.6_odp.01": "відповідно до положення про управління привілеями"
+    },
+    "enhancements": [
+      "AT-2(3)",
+      "AC-7(2)",
+      "AC-2(7)",
+      "AC-2(1)"
+    ],
+    "excluded": [],
+    "exemption_overrides": [
+      "AC:12"
+    ]
+  }
+}

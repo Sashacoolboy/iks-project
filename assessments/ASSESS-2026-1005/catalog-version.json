@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-08-25T06:27:45.564Z",
+  "hashes": {
+    "nd_tzi.json": {
+      "sha256": "5999a0aa0a6478e464993eeaca28db341396f6b2bc9eff92ebc766f93ba1728b",
+      "bytes": 2217128
+    },
+    "assessment_odp_adapter.json": {
+      "sha256": "240995c661b62cd97880c352fc0182f6da8d732ec75cdf102d055402773ca66d",
+      "bytes": 2483679
+    },
+    "assessment_catalog.json": {
+      "sha256": "0e2a8080bd33038ee6a5c08638a86f9a5258d71581fcafc5e529fc89ebb74af5",
+      "bytes": 7398394
+    },
+    "assessment_reference.json": {
+      "sha256": "2246779ead8f15d3219489c1f72d13e2c65c6cacc3dcafd539383fe7ab068820",
+      "bytes": 2764153
+    },
+    "generic_parameter_defaults.json": {
+      "sha256": "3a93996c33c6d1482dc6c9b739a0017ae95e6f62071508d49d9dbd3093ebeb9b",
+      "bytes": 317364
+    }
+  }
+}

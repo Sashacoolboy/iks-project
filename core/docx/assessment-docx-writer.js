@@ -143,9 +143,9 @@ export function buildAssessmentDocx({ projection }) {
   sections.push(par('7. Загальний висновок', { bold: true, sz: 32 }));
   sections.push(par(''));
   sections.push(par(`Відповідає: ${projection.overall.counts.satisfied}`));
-  sections.push(par(`Частково відповідає: ${projection.overall.counts.partially_satisfied}`));
+  //sections.push(par(`Частково відповідає: ${projection.overall.counts.partially_satisfied}`));
   sections.push(par(`Не відповідає: ${projection.overall.counts.not_satisfied}`));
-  sections.push(par(`Не застосовується: ${projection.overall.counts.not_applicable}`));
+  //sections.push(par(`Не застосовується: ${projection.overall.counts.not_applicable}`));
   sections.push(par(`Не оцінено: ${projection.overall.counts.not_assessed}`));
   sections.push(par(''));
   sections.push(par(`Висновок: ${projection.overall.conclusion_text}`, { bold: true }));

@@ -6,9 +6,9 @@ import { renderControlDocument } from './control-document-view.js';
 export const RESULT_LABELS = {
   NOT_ASSESSED: 'Не оцінено',
   SATISFIED: 'Відповідає',
-  PARTIALLY_SATISFIED: 'Частково відповідає',
+  //PARTIALLY_SATISFIED: 'Частково відповідає',
   NOT_SATISFIED: 'Не відповідає',
-  NOT_APPLICABLE: 'Не застосовується'
+  //NOT_APPLICABLE: 'Не застосовується'
 };
 
 export const METHOD_LABELS = {

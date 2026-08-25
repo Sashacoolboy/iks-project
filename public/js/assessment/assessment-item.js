@@ -110,19 +110,19 @@ function renderItemDetailPanel(sourceId) {
   renderTraceabilityDrawer(traceabilitySection, planItem);
 
   const step1Section = el('section', { class: 'assessment-item-step' },
-    el('h4', {}, 'Крок 1. Валідність заповнення ЦПБ'),
-    el('p', { class: 'resolved-objective' }, collapsePlaceholders(planItem.statement_text)),
-    el('p', { class: 'note' }, 'Перевірте, чи трактування параметра в ЦПБ відповідає вимозі НД ТЗІ.'),
-    odpTable
+    // el('h4', {}, 'Крок 1. Валідність заповнення ЦПБ'),
+    // el('p', { class: 'resolved-objective' }, collapsePlaceholders(planItem.statement_text)),
+    // el('p', { class: 'note' }, 'Перевірте, чи трактування параметра в ЦПБ відповідає вимозі НД ТЗІ.'),
+    // odpTable
   );
 
   const methodStepSection = (method, title) => {
-    const refs = planItem.methods_reference?.[method] ?? [];
-    const text = refs.length ? refs.join('\n') : 'Підказка відсутня для цього заходу.';
-    return el('section', { class: 'assessment-item-step' },
-      el('h4', {}, title),
-      el('p', { class: 'methods-guidance' }, text)
-    );
+    // const refs = planItem.methods_reference?.[method] ?? [];
+    // const text = refs.length ? refs.join('\n') : 'Підказка відсутня для цього заходу.';
+    // return el('section', { class: 'assessment-item-step' },
+    //   el('h4', {}, title),
+    //   el('p', { class: 'methods-guidance' }, text)
+    //);
   };
   const step2Section = methodStepSection('EXAMINE', 'Крок 2. Дослідження');
   const step3Section = methodStepSection('INTERVIEW', 'Крок 3. Опитування');

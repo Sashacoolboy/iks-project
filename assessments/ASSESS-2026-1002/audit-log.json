@@ -1,0 +1,22 @@
+[
+  {
+    "timestamp": "2026-08-25T03:32:03.353Z",
+    "actor": "",
+    "action": "ASSESSMENT_CREATED",
+    "entity_id": "ASSESS-2026-1002",
+    "before": {},
+    "after": {}
+  },
+  {
+    "timestamp": "2026-08-25T04:35:23.290Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-1002",
+    "before": {
+      "updated_at": "2026-08-25T03:32:03.282Z"
+    },
+    "after": {
+      "updated_at": "2026-08-25T04:35:23.265Z"
+    }
+  }
+]

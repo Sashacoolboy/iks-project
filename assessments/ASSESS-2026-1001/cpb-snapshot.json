@@ -1,0 +1,144 @@
+{
+  "kind": "approved",
+  "approved_at": "2026-08-25T03:25:47.424Z",
+  "summary": {
+    "total": 85,
+    "exempted": 9,
+    "excluded": 0,
+    "empty": 41,
+    "autofilled": 35,
+    "risks_count": 16,
+    "enhancements_count": 4
+  },
+  "state": {
+    "passport": {
+      "ics_name": "АРМ спецзв'язку №1",
+      "cert_body": "ДПСУ",
+      "as_class": 1
+    },
+    "global_constants": {
+      "password_rotation_days": "90 днів",
+      "security_officer_role": "Відповідальний відділу кіберзахисту",
+      "organization_policy_id": "Наказ №450",
+      "responsible_official": "Начальник відділу кіберзахисту",
+      "security_personnel_roles": "Адміністратор безпеки",
+      "policy_level": "рівень системи",
+      "policy_review_frequency": "Щорічно",
+      "policy_review_events": "інциденти безпеки",
+      "review_frequency_security": "щоквартально",
+      "training_frequency": "щорічно",
+      "training_events": "прийняття на роботу, кібер інциденти",
+      "malware_scan_frequency": "щоденно",
+      "hr_action_period": "5 робочих днів",
+      "session_timeout_minutes": "15 хвилин",
+      "session_logout_condition": "бездіяльність більше 15 хв",
+      "account_inactivity_period": "45 днів",
+      "account_notification_period": "24 години",
+      "failed_login_attempts": "5 спроб",
+      "failed_login_window": "30 хвилин",
+      "crypto_hardware_token": "Апаратний ключ Алмаз 1К",
+      "log_retention_months": "12 місяців",
+      "incident_response_time": "2 години"
+    },
+    "selected_assets": [
+      "A-01",
+      "A-02",
+      "A-04",
+      "A-03",
+      "A-05"
+    ],
+    "risks": {
+      "accepted_base": [
+        "R-001",
+        "R-002",
+        "R-003",
+        "R-004",
+        "R-005",
+        "R-010",
+        "R-011",
+        "R-012",
+        "R-013",
+        "R-014",
+        "R-015",
+        "R-016",
+        "R-034"
+      ],
+      "custom": [
+        {
+          "id": "C-001",
+          "custom": true,
+          "min_as_class": 1,
+          "treatment_strategy": "Зменшення",
+          "treatment_plan": "ТЕСТ",
+          "responsible": "Начальник ІБ",
+          "control_refs": [],
+          "enhancement_suggestions": [],
+          "asset_id": "A-04",
+          "threat": "Помилки користувача при обробці інформації",
+          "vulnerability": "Відсутність інструкцій на робочому місці",
+          "impact": 3,
+          "likelihood": 0.3,
+          "likelihood_label": "Низька",
+          "score": 0.9,
+          "level": "Середній",
+          "residual_risk": "Низький"
+        },
+        {
+          "id": "C-002",
+          "custom": true,
+          "min_as_class": 1,
+          "treatment_strategy": "Зменшення",
+          "treatment_plan": "Тест2",
+          "responsible": "Персонал, користувач ІКС",
+          "control_refs": [],
+          "enhancement_suggestions": [],
+          "asset_id": "A-03",
+          "threat": "НСД до документів у зоні друку",
+          "vulnerability": "Відсутність контролю видачі роздруківок",
+          "impact": 4,
+          "likelihood": 0.6,
+          "likelihood_label": "Висока",
+          "score": 2.4,
+          "level": "Високий",
+          "residual_risk": "Низький"
+        },
+        {
+          "id": "C-003",
+          "custom": true,
+          "min_as_class": 1,
+          "treatment_strategy": "Зменшення",
+          "treatment_plan": "Накладання плівки хамелеон на екран АРМ",
+          "responsible": "Персонал, користувач ІКС",
+          "control_refs": [],
+          "enhancement_suggestions": [],
+          "asset_id": "A-01",
+          "threat": "Візуальне зчитування інформації з екрана",
+          "vulnerability": "Розташування монітора у зоні огляду сторонніх",
+          "impact": 1,
+          "likelihood": 0.1,
+          "likelihood_label": "Дуже низька",
+          "score": 0.1,
+          "level": "Дуже низький",
+          "residual_risk": "Дуже низький"
+        }
+      ]
+    },
+    "info_type": "open_confidential",
+    "profile": {
+      "param_overrides": {
+        "ac-7_odp.05": "повідомити адміністратора відповідального",
+        "ac-2.6_odp.01": "відповідно до положення про управління привілеями"
+      },
+      "enhancements": [
+        "AT-2(3)",
+        "AC-7(2)",
+        "AC-2(7)",
+        "AC-2(1)"
+      ],
+      "excluded": [],
+      "exemption_overrides": [
+        "AC:12"
+      ]
+    }
+  }
+}
