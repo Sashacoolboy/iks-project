@@ -18,13 +18,14 @@ test('VERIFIED + resolved → підстановка effective value', () => {
     local_odp_id: 'ac-2_odp.01', assessment_odp_id: 'AC-02_ODP[01]', value: 'Начальника служби захисту інформації' }]);
 });
 
-test('VERIFIED + unresolved → [НЕ ВИЗНАЧЕНО]', () => {
+test('VERIFIED + unresolved → [НЕ ВИЗНАЧЕНО: <assessment_odp_id>]', () => {
   const { resolved_objective, placeholders } = resolveAssessmentObjective({
     objectiveTemplate: TPL, adapterIndex,
     effectiveValueFor: () => ({ status: 'UNRESOLVED', value: null }),
   });
-  assert.equal(resolved_objective, 'для запитів на створення облікових записів потрібні схвалення від [НЕ ВИЗНАЧЕНО];');
+  assert.equal(resolved_objective, 'для запитів на створення облікових записів потрібні схвалення від [НЕ ВИЗНАЧЕНО: AC-02_ODP[01]];');
   assert.equal(placeholders[0].resolution, 'UNRESOLVED_VALUE');
+  assert.equal(placeholders[0].assessment_odp_id, 'AC-02_ODP[01]');
 });
 
 test('без VERIFIED-зв\u02BCязку → нормативний текст як є (REFERENCE_ONLY)', () => {

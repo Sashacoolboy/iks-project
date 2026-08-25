@@ -26,8 +26,8 @@ test('AC-02e: resolved_objective, odp_values зі baseline/target', () => {
   const e = items.find(i => i.assessment_source_id === 'AC-02e');
   assert.ok(e, 'AC-02e має бути в плані');
   assert.ok(e.objective_template.includes('<AC-02_ODP[03]'));
-  // ac-2_odp.01 unresolved в АС-2 → [НЕ ВИЗНАЧЕНО]
-  assert.ok(e.resolved_objective.includes('[НЕ ВИЗНАЧЕНО]'));
+  // ac-2_odp.01 unresolved в АС-2 → [НЕ ВИЗНАЧЕНО: <assessment_odp_id>]
+  assert.ok(e.resolved_objective.includes('[НЕ ВИЗНАЧЕНО: AC-02_ODP[01]]'));
   const odp1 = e.odp_values.find(v => v.assessment_odp_id === 'AC-02_ODP[01]');
   assert.deepEqual([odp1.local_odp_id, odp1.status, odp1.target_value], ['ac-2_odp.01', 'UNRESOLVED', null]);
   const odp4 = e.odp_values.find(v => v.assessment_odp_id === 'AC-02_ODP[04]');

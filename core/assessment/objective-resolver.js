@@ -1,7 +1,8 @@
 // дефіс опційний: у частині каталогу референси без нього (<IR08_ODP[06] …>) — нормалізуємо при розборі
 const PLACEHOLDER_RE = /<([A-Z]{2}-?\d{2}(?:\(\d{2}\))?_ODP(?:\[\d{2}\])?)\s+([^>]+)>/g;
 const normalizeRef = (ref) => ref.replace(/^([A-Z]{2})(\d)/, '$1-$2');
-export const UNDEFINED_TAG = '[НЕ ВИЗНАЧЕНО]';
+// включає id ODP, щоб було зрозуміло, який параметр треба задати в ЦПБ
+const undefinedTag = (assessmentOdpId) => `[НЕ ВИЗНАЧЕНО: ${assessmentOdpId}]`;
 
 export function resolveAssessmentObjective({ objectiveTemplate, adapterIndex, effectiveValueFor }) {
   const placeholders = [];
@@ -22,7 +23,7 @@ export function resolveAssessmentObjective({ objectiveTemplate, adapterIndex, ef
     }
     placeholders.push({ ref, label, resolution: 'UNRESOLVED_VALUE', local_odp_id: entry.local_odp_id,
       assessment_odp_id: entry.assessment_odp_id, value: null });
-    return UNDEFINED_TAG;
+    return undefinedTag(entry.assessment_odp_id);
   });
   return { resolved_objective, placeholders };
 }

@@ -44,13 +44,13 @@ test('AC-02_ODP[03]: statement_usage h, порожні BPB bindings, UNRESOLVED 
   assert.equal(r.requires_input, true);
 });
 
-test('resolved objective: placeholder substitution і [НЕ ВИЗНАЧЕНО]', () => {
+test('resolved objective: placeholder substitution і [НЕ ВИЗНАЧЕНО: <assessment_odp_id>]', () => {
   const tpl = 'для запитів на створення облікових записів потрібні схвалення від <AC-02_ODP[03] персоналу або ролей>;';
   const withValue = resolveAssessmentObjective({ objectiveTemplate: tpl, adapterIndex: idx,
     effectiveValueFor: (id) => id === 'ac-2_odp.01' ? { status: 'RESOLVED', value: 'Начальник служби захисту інформації' } : null });
   assert.ok(withValue.resolved_objective.includes('Начальник служби захисту інформації'));
   const noValue = resolveAssessmentObjective({ objectiveTemplate: tpl, adapterIndex: idx,
     effectiveValueFor: () => ({ status: 'UNRESOLVED', value: null }) });
-  assert.ok(noValue.resolved_objective.includes('[НЕ ВИЗНАЧЕНО]'));
+  assert.ok(noValue.resolved_objective.includes('[НЕ ВИЗНАЧЕНО: AC-02_ODP[01]]'));
   assert.ok(!noValue.resolved_objective.includes('<AC-02_ODP'));
 });

@@ -53,8 +53,8 @@ test('план АС-2: AU-11 плейсхолдер опрацьовано, ODP 
   assert.notEqual(ph.resolution, 'REFERENCE_ONLY');
   assert.equal(ph.local_odp_id, 'au-11_odp.01');
   assert.ok(stmt.relevant_local_odp_ids.includes('au-11_odp.01'));
-  // без значення в ЦПБ/БПБ/дефолтах — [НЕ ВИЗНАЧЕНО], не сирий текст
-  if (ph.resolution === 'UNRESOLVED_VALUE') assert.ok(stmt.resolved_objective.includes('[НЕ ВИЗНАЧЕНО]'));
+  // без значення в ЦПБ/БПБ/дефолтах — [НЕ ВИЗНАЧЕНО: <id>], не сирий текст
+  if (ph.resolution === 'UNRESOLVED_VALUE') assert.ok(stmt.resolved_objective.includes(`[НЕ ВИЗНАЧЕНО: ${ph.assessment_odp_id}]`));
   const def = items.find(i => i.control_id === 'AU-11' && i.kind === 'ODP_DEFINITION');
   assert.ok(def.relevant_local_odp_ids.includes('au-11_odp.01'));
 });
