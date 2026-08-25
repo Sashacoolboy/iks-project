@@ -10,6 +10,17 @@ test('firstSegmentLabel: розпізнає формат [a]/[b] (напр. AC-0
   assert.equal(firstSegmentLabel('d.03[02]'), 'd');
 });
 
+test('firstSegmentLabel: розпізнає (a)[01]-стиль (AC-16/AT-01/CM-01) і числові дужки (SA-10/IA-05)', () => {
+  assert.equal(firstSegmentLabel('(a)[01]'), 'a');
+  assert.equal(firstSegmentLabel('(c)[01][01]'), 'c');
+  assert.equal(firstSegmentLabel('(b)(01)'), 'b');
+  assert.equal(firstSegmentLabel('(12)(a)'), '12');
+  assert.equal(firstSegmentLabel('(03)'), '03');
+  assert.equal(firstSegmentLabel('(03)[01]'), '03');
+  assert.equal(firstSegmentLabel('[01]'), '01');
+});
+
+
 
 test('statementTitle: текст вимоги заходу з префіксом пункту, плейсхолдер згорнутий', () => {
   const item = { control_id: 'AC-02', statement_path: 'a.[01]',

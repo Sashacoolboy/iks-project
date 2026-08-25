@@ -141,7 +141,7 @@ export function statementTitle(planItem) {
 
 export function firstSegmentLabel(path) {
   const seg = String(path ?? '').split('.')[0];
-  const wrapped = seg.match(/^[\[(]([a-zA-Zа-яіїєґА-ЯІЇЄҐ]+)[\])]$/);
+  const wrapped = seg.match(/^[\[(]([a-zA-Zа-яіїєґА-ЯІЇЄҐ0-9]+)[\])]/);
   if (wrapped) return wrapped[1];
   return seg.replace(/[\[(].*$/, '');
 }
