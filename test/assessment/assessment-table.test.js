@@ -188,6 +188,8 @@ test('buildDictionaryRecord: ODP_DEFINITION + SATISFIED → VALID запис', (
     paramId: 'ac-2_odp.01', label: 'відповідальна особа', source_text: '[Призначення: ...]',
     value: 'Начальник СЗІ', info_type: 'open_confidential', verdict: 'VALID',
   });
+  const recPartial = buildDictionaryRecord(planItem, { result: 'PARTIALLY_SATISFIED' }, 'open_confidential');
+  assert.equal(recPartial.verdict, 'VALID');
 });
 
 test('buildDictionaryRecord: NOT_SATISFIED → INVALID; NOT_ASSESSED/без result/STATEMENT/без значення → null', () => {
