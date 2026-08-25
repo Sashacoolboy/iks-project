@@ -57,7 +57,7 @@ export const step = {
       container.replaceChildren();
       step.render(container);
     } }, '+ Додати ризик');
-    const saveRisksBtn = el('button', { type: 'button', onclick: async () => {
+    const saveRisksBtn = el('button', { type: 'button', class: 'collapse-safe', onclick: async () => {
       const r = await fetch('/api/export/risks-docx', { method: 'POST', body: JSON.stringify({ state: getState() }) });
       if (!r.ok) { alert('Помилка експорту: ' + (await r.json()).error); return; }
       const blob = await r.blob();

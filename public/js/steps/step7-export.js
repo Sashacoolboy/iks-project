@@ -49,7 +49,7 @@ export const step = {
       }
     };
 
-    const exportBtn = el('button', { type: 'button', ...(canExport ? {} : { disabled: '' }), onclick: async () => {
+    const exportBtn = el('button', { type: 'button', class: 'collapse-safe', ...(canExport ? {} : { disabled: '' }), onclick: async () => {
       const r = await fetch('/api/export/docx', { method: 'POST', body: JSON.stringify({ state: getState() }) });
       if (!r.ok) { showStatus(false, 'Помилка експорту: ' + (await r.json()).error); return; }
       const blob = await r.blob();
@@ -65,8 +65,8 @@ export const step = {
       warnings,
       el('label', { class: 'field' }, 'Імʼя для збереження шаблону/запису', nameInput),
       el('div', { class: 'actions' },
-        el('button', { type: 'button', onclick: () => saveTemplate('ics', makeIcsTemplate(getState()), 'Шаблон ІКС') }, '💾 Зберегти як шаблон ІКС'),
-        el('button', { type: 'button', ...(canExport ? {} : { disabled: '' }), onclick: () => saveTemplate('cpb', makeCpbTemplate(getState()), 'Шаблон ЦПБ') }, '💾 Зберегти як шаблон ЦПБ'),
+        el('button', { type: 'button', class: 'collapse-safe', onclick: () => saveTemplate('ics', makeIcsTemplate(getState()), 'Шаблон ІКС') }, '💾 Зберегти як шаблон ІКС'),
+        el('button', { type: 'button', class: 'collapse-safe', ...(canExport ? {} : { disabled: '' }), onclick: () => saveTemplate('cpb', makeCpbTemplate(getState()), 'Шаблон ЦПБ') }, '💾 Зберегти як шаблон ЦПБ'),
         exportBtn,
         el('button', { type: 'button', class: 'primary', ...(canExport ? {} : { disabled: '' }), onclick: () => {
           const doc = buildProfile(getState(), catalogs);
