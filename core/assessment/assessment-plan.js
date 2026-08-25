@@ -29,9 +29,16 @@ function cpbApplicableControlIds(approvedState, catalogs) {
 
 const CPB_STATUS_MAP = { [STATUS.APPLIED]: 'APPLIED', [STATUS.EXEMPT]: 'EXEMPT', [STATUS.EXCLUDED]: 'EXCLUDED' };
 
-// 'а.01(a)[01]' → 'a', 'd.03[02]' → 'd', 'c.2' → 'c' — спільний перший сегмент для матчингу каталог ↔ адаптер
+// 'а.01(a)[01]' → 'a', 'd.03[02]' → 'd', 'c.2' → 'c', '(a)' → 'a', '(03)' → '03'
+// — спільний перший сегмент для матчингу каталог ↔ адаптер.
+// Дзеркалить firstSegmentLabel з public/js/assessment/assessment-table.js: без
+// цього обгортка "(x)"/"(x)[NN]" (CP-09, CP-01, PE-02, PE-03, AT-01, CM-01,
+// AC-16 тощо) давала порожній сегмент і statement_text = null для всього контролю.
 export function firstPathSegment(path) {
-  return String(path ?? '').split('.')[0].replace(/[\[(].*$/, '');
+  const seg = String(path ?? '').split('.')[0];
+  const wrapped = seg.match(/^[\[(]([a-zA-Zа-яіїєґА-ЯІЇЄҐ0-9]+)[\])]/);
+  if (wrapped) return wrapped[1];
+  return seg.replace(/[\[(].*$/, '');
 }
 
 // nd_tzi: canonical_id → верхньорівневі statement-рядки {seg ('a'), text}

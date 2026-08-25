@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { buildAssessmentPlan } from '../../core/assessment/assessment-plan.js';
+import { buildAssessmentPlan, firstPathSegment } from '../../core/assessment/assessment-plan.js';
 
 const read = async (p) => JSON.parse(await readFile(new URL(`../../${p}`, import.meta.url), 'utf8'));
 const catalogs = {
@@ -68,6 +68,27 @@ test('statement_text: текст вимоги заходу з nd_tzi на кож
   const ref1 = items.find(i => i.assessment_source_id === 'AC-02_ODP[01]');
   assert.ok(ref1.statement_text.includes('a) Визначити та задокументувати типи облікових записів'));
   assert.ok(ref1.statement_text.includes('j) Проводити перегляд облікових записів'));
+});
+
+test('statement_text: "(x)"-стиль шляху (CP-09) теж матчиться з nd_tzi, а не тільки голі літери', () => {
+  // Регрес: firstPathSegment раніше повертав "" для "(a)"/"(c)" тощо (все, що
+  // обгорнуте в дужки), тож statement_text ставав null для всього контролю CP-09.
+  const a = items.find(i => i.assessment_source_id === 'CP-09(a)');
+  assert.ok(a?.statement_text, 'CP-09(a).statement_text не має бути null');
+  assert.ok(a.statement_text.includes('резервне копіювання інформації користувачів'));
+  const c = items.find(i => i.assessment_source_id === 'CP-09(c)');
+  assert.ok(c?.statement_text, 'CP-09(c).statement_text не має бути null');
+  assert.ok(c.statement_text.includes('резервне копіювання системної документації'));
+});
+
+test('firstPathSegment: голі літери, крапки, дужки-обгортка', () => {
+  assert.equal(firstPathSegment('а.01(a)[01]'), 'а');
+  assert.equal(firstPathSegment('d.03[02]'), 'd');
+  assert.equal(firstPathSegment('c.2'), 'c');
+  assert.equal(firstPathSegment('(a)'), 'a');
+  assert.equal(firstPathSegment('(c)'), 'c');
+  assert.equal(firstPathSegment('(a)[01]'), 'a');
+  assert.equal(firstPathSegment('(03)'), '03');
 });
 
 test('невибрані enhancements не потрапляють у план', () => {
