@@ -71,3 +71,19 @@ test('buildControlDocument: без значення (UNRESOLVED) — «не ви
   const { right } = buildControlDocument(items);
   assert.deepEqual(right[1].parts[3], { type: 'param', text: 'не визначено', source: 'src-empty' });
 });
+
+test('buildControlDocument: дедуплікує рядки з однаковою міткою пункту (кілька ODP-цілей в одному пункті)', () => {
+  // Реальний випадок: пункт "d" каталогу оцінювання розбитий на кілька assessment-цілей
+  // (по одній на кожен вбудований ODP-параметр), усі з однаковим statement_path-сегментом
+  // і буквально ідентичним statement_text — документ-в'ю має показати пункт лише РАЗ.
+  const dupItems = [
+    { planItem: { kind: 'STATEMENT', statement_path: 'd.01', statement_text: 'Спільний текст пункту d.', odp_values: odpValues } },
+    { planItem: { kind: 'STATEMENT', statement_path: 'd.02', statement_text: 'Спільний текст пункту d.', odp_values: odpValues } },
+    { planItem: { kind: 'STATEMENT', statement_path: 'd.03[01]', statement_text: 'Спільний текст пункту d.', odp_values: odpValues } },
+    { planItem: { kind: 'STATEMENT', statement_path: 'e', statement_text: 'Інший пункт e.', odp_values: odpValues } },
+  ];
+  const { left, right } = buildControlDocument(dupItems);
+  assert.deepEqual(left.map(l => l.label), ['d', 'e']);
+  assert.deepEqual(right.map(l => l.label), ['d', 'e']);
+});
+

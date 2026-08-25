@@ -38,9 +38,20 @@ export function buildControlDocument(items) {
   const odpMap = new Map();
   for (const v of statementItems[0]?.planItem.odp_values ?? []) odpMap.set(v.local_odp_id, v);
 
+  // Каталог оцінювання розбиває один пункт норми на кілька assessment-цілей
+  // (по одній на кожен вбудований ODP), усі — з однаковою першою міткою пункту
+  // й тим самим statement_text. У документ-в'ю пункт має з'явитись лише раз.
+  const seenLabels = new Set();
+  const dedupedItems = statementItems.filter(({ planItem }) => {
+    const label = firstSegmentLabel(planItem.statement_path);
+    if (seenLabels.has(label)) return false;
+    seenLabels.add(label);
+    return true;
+  });
+
   const left = [];
   const right = [];
-  for (const { planItem } of statementItems) {
+  for (const { planItem } of dedupedItems) {
     const label = firstSegmentLabel(planItem.statement_path);
     const segments = splitStatement(planItem.statement_text ?? '');
 
