@@ -160,8 +160,6 @@ th { background: #edf2f7; }
 .assessment-table .odp-subrow { background: #f0fff4; }
 .assessment-table .odp-subrow td { padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #22543d; }
 .assessment-table .odp-meta { display: inline-block; margin-right: 1rem; }
-.step-badge { display: inline-block; background: #2c5282; color: #fff; border-radius: 999px;
-  width: 1.1rem; height: 1.1rem; text-align: center; font-size: 0.65rem; line-height: 1.1rem; margin-right: 0.3rem; }
 
 .assessment-table button.link { background: none; border: none; color: #2c5282; padding: 0; text-decoration: underline; font-size: inherit; }
 .assessment-table button.link:hover { color: #1a365d; }

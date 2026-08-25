@@ -176,7 +176,7 @@ function odpSubrows(planItem) {
 
     return el('tr', { class: 'odp-subrow', ...(title ? { title } : {}) },
       el('td', {}, odp.assessment_odp_id ?? ''),
-      el('td', { colspan: '6' },
+      el('td', { colspan: '4' },
         el('span', { class: 'odp-meta' }, `local: ${odp.local_odp_id}`),
         el('span', { class: 'odp-meta' }, `БПБ: ${baseline}`),
         el('span', { class: 'odp-meta' }, `ЦПБ: ${target}`),
@@ -217,14 +217,6 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     }, label)
   ));
 
-  // БПБ та ЦПБ: лише релевантні цьому пункту ODP; hover — стейтмент, де ODP вживається
-  const odpParts = odpColumnParts(planItem);
-  const odpCell = (list) => list.length
-    ? el('td', {}, ...list.flatMap((p, i) => {
-        const span = el('span', { class: 'odp-value', ...(p.title ? { title: p.title } : {}) }, p.text);
-        return i ? ['; ', span] : [span];
-      }))
-    : el('td', {}, '—');
 
   // Evidence button
   const evidenceCount = result?.evidence_ids?.length ?? 0;
@@ -248,8 +240,6 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
   const row = el('tr', { class: 'assessment-item-row' },
     el('td', {}, toggleBtn),
     el('td', { class: 'objective' }, planItem.resolved_objective ?? ''),
-    odpCell(odpParts.baseline),
-    odpCell(odpParts.target),
     el('td', {}, resultSelect),
     el('td', {}, evidenceBtn),
     conclusionCell
@@ -285,8 +275,6 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     el('tr', {},
       el('th', {}, 'Позначення мети оцінювання'),
       el('th', {}, 'Мета оцінювання'),
-      el('th', {}, el('span', { class: 'step-badge' }, '1'), ' Значення з БПБ'),
-      el('th', {}, el('span', { class: 'step-badge' }, '1'), ' Значення з ЦПБ'),
       el('th', {}, 'Вибір оцінки'),
       el('th', {}, 'Докази / джерела'),
       el('th', {}, 'Висновок')
@@ -300,7 +288,7 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     // Family header row
     tbody.append(
       el('tr', { class: 'group-row family' },
-        el('td', { colspan: '7' }, `${familyGroup.family} — ${familyGroup.family_title}`)
+        el('td', { colspan: '5' }, `${familyGroup.family} — ${familyGroup.family_title}`)
       )
     );
 
@@ -318,14 +306,14 @@ export function renderAssessmentTable(container, { onOpenItem }) {
             rerender();
           }
         },
-          el('td', { colspan: '7' },
+          el('td', { colspan: '5' },
             `${controlGroup.control_id} — ${controlGroup.control_title} `,
             el('span', { class: 'collapse-mark' }, isDocExpanded ? '▲' : '▼'))
         )
       );
 
       if (isDocExpanded) {
-        const docCell = el('td', { colspan: '7' });
+        const docCell = el('td', { colspan: '5' });
         tbody.append(el('tr', { class: 'control-doc-row' }, docCell));
         renderControlDocument(docCell, controlGroup.items);
       }
