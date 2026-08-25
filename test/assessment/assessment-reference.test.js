@@ -22,7 +22,7 @@ test('buildAssessmentReference: структура і нормативний т�
   assert.equal(dsE.text, 'для запитів на створення облікових записів потрібні схвалення від <AC-02_ODP[03] персоналу або ролей>;');
   assert.equal(ac02.examine_objects[0], 'Політика контролю доступу');
   const total = ref.controls.reduce((n, c) => n + c.determinations.length, 0);
-  assert.equal(total, 4227);
+  assert.equal(total, 4238);
 });
 
 test('згенерований файл існує і збігається з builder-ом', async () => {

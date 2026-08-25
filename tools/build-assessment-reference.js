@@ -128,6 +128,74 @@ function applyManualCorrections(controls) {
     },
     { code: 'AC-20b', text: 'заборонено використання <AC-20_ODP[04] типів зовнішніх систем>;' },
   ]);
+
+  // The paragraphs below have NO determinationcontrol record at all anywhere
+  // in the raw source (not even merged into a sibling) — the raw import simply
+  // never captured them. Text is derived either from the ND TZI norm statement
+  // itself (data/nd_tzi.json), rephrased in the same declarative "виконано X"
+  // voice used throughout this catalog, or — where ODP placeholders are
+  // involved — from data/assessment/assessment_odp_adapter.json's semantic
+  // labels (itself derived from the ODP dictionary, independent of this raw
+  // determinationcontrol import).
+
+  // CP-01.d/.e: no source determination record; norm text has no ODP
+  // placeholders, so a direct declarative rephrase is used.
+  append('CP-01', [
+    {
+      code: 'CP-01(d)',
+      text: 'процедури планування безперервної роботи реалізовують політику та заходи планування безперервної роботи;',
+    },
+    {
+      code: 'CP-01(e)',
+      text: 'розроблені, задокументовані та здійснені коригувальні заходи щодо виправлення становища в разі порушень політики планування безперервної роботи.',
+    },
+  ]);
+
+  // MP-07.a: no source determination or ODP_DEFINITION records; the 4 ODPs
+  // are defined via assessment_odp_adapter.json (mp-7_odp.01..04) and are
+  // added here as ODP_DEFINITION determinations, followed by the STATEMENT
+  // item that embeds them, matching the sibling MP-07(b)'s "(x)" id style.
+  append('MP-07', [
+    { code: 'MP-07_ODP[01]', text: 'вибрано одне з наступних ЗНАЧЕНЬ ПАРАМЕТРІВ: {обмежити; заборонити};' },
+    { code: 'MP-07_ODP[02]', text: 'визначено типи носіїв системи, на які поширюється обмеження;' },
+    { code: 'MP-07_ODP[03]', text: 'визначено системи або компоненти системи, на які поширюється обмеження;' },
+    {
+      code: 'MP-07_ODP[04]',
+      text: 'визначено заходи безпеки, що застосовуються для обмеження використання носіїв інформації;',
+    },
+    {
+      code: 'MP-07(a)',
+      text: '<MP-07_ODP[01] вибір: обмежити; заборонити> використання <MP-07_ODP[02] визначених організацією типів носіїв системи> на <MP-07_ODP[03] визначених організацією системах або компонентах системи>, використовуючи <MP-07_ODP[04] визначені організацією заходи безпеки>;',
+    },
+  ]);
+
+  // SC-17.a: no source determination or ODP_DEFINITION record; the ODP is
+  // defined via assessment_odp_adapter.json (sc-17_odp.01, single-ODP control
+  // so no bracket suffix, matching the adapter's own "SC-17_ODP" id).
+  // Sibling item uses the "b." (trailing-dot) id/path style, matched here.
+  append('SC-17', [
+    { code: 'SC-17_ODP', text: 'визначено політику сертифікації, якою керується випуск сертифікатів відкритого ключа;' },
+    {
+      code: 'SC-17a.',
+      text: 'сертифікати відкритого ключа випускаються відповідно до <SC-17_ODP визначеної організацією політики сертифікації>;',
+    },
+  ]);
+
+  // PE-23: entire control has zero records of any kind in the raw source
+  // (no determinations, no examine/interview/test objects). Text derived
+  // directly from the ND TZI norm statement (no ODP placeholders exist for
+  // this control). methods stay empty — no source basis to invent EXAMINE/
+  // INTERVIEW/TEST objects for this control.
+  append('PE-23', [
+    {
+      code: 'PE-23a',
+      text: 'розташування або ділянка об’єкта, де знаходиться система, сплановані з урахуванням фізичних та екологічних ризиків;',
+    },
+    {
+      code: 'PE-23b',
+      text: 'для існуючих об’єктів фізичні та екологічні ризики враховані в організаційній стратегії управління ризиками організації.',
+    },
+  ]);
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];

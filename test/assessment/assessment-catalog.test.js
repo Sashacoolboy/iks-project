@@ -21,7 +21,7 @@ test('каталог: повне покриття, AC-02e item', () => {
   assert.equal(cat.schema.version, '3.0.0');
   assert.equal(cat.controls.length, 1192);
   const totalItems = cat.controls.reduce((n, c) => n + c.items.length, 0);
-  assert.equal(totalItems, 4227);
+  assert.equal(totalItems, 4238);
   const ac02 = cat.controls.find(c => c.control_id === 'AC-02');
   assert.equal(ac02.canonical_control_id, 'AC-2');
   assert.equal(ac02.family_title, 'УПРАВЛІННЯ ДОСТУПОМ');
@@ -34,6 +34,6 @@ test('каталог: повне покриття, AC-02e item', () => {
 
 test('згенерований файл на диску відповідає builder-у', async () => {
   const onDisk = JSON.parse(await readFile(new URL('../../data/assessment/assessment_catalog.json', import.meta.url), 'utf8'));
-  assert.equal(onDisk.controls.reduce((n, c) => n + c.items.length, 0), 4227);
+  assert.equal(onDisk.controls.reduce((n, c) => n + c.items.length, 0), 4238);
   assert.deepEqual(onDisk.methods_labels, { EXAMINE: 'Дослідження', INTERVIEW: 'Співбесіда', TEST: 'Перевірка' });
 });
