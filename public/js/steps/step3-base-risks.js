@@ -104,7 +104,7 @@ export const step = {
         el('td', {}, eff.treatment_strategy), el('td', {}, eff.treatment_plan ?? ''),
         el('td', {}, eff.responsible), el('td', {}, eff.residual_risk ?? ''),
         el('td', {},
-          el('button', { type: 'button', onclick: () => openEditRiskModal(r) }, 'Змінити'),
+          el('button', { type: 'button', onclick: () => openEditRiskModal(r) }, '✎'),
           overrides[r.id] ? el('button', { type: 'button', onclick: () => { resetBaseOverride(r.id); rerender(); } }, 'Скинути') : null,
           el('button', { type: 'button', class: 'link-btn', onclick: () => {
             if (!confirm(`Видалити загрозу «${eff.threat}» (${r.id}) зі списку? Її не можна буде повернути.`)) return;
