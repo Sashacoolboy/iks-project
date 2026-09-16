@@ -22,7 +22,7 @@ export const step = {
           `${a.id}. ${a.name}`))));
     container.replaceChildren(
       el('section', {},
-        el('h2', {}, `Крок 2. Вибір активів (доступно для АС-${state.passport.as_class}: ${visible.length} із 13)`),
+        el('h2', {}, `Крок 2. Вибір активів (доступно для АС-${state.passport.as_class}: ${visible.length} із ${catalogs.assets.length})`),
         ...sections));
   },
 };

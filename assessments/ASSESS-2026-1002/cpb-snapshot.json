@@ -42,10 +42,10 @@
     },
     "selected_assets": [
       "A-01",
+      "A-09",
+      "A-12",
       "A-02",
-      "A-04",
-      "A-03",
-      "A-05"
+      "A-06"
     ],
     "risks": {
       "accepted_base": [
@@ -73,7 +73,7 @@
           "responsible": "Начальник ІБ",
           "control_refs": [],
           "enhancement_suggestions": [],
-          "asset_id": "A-04",
+          "asset_id": "A-12",
           "threat": "Помилки користувача при обробці інформації",
           "vulnerability": "Відсутність інструкцій на робочому місці",
           "impact": 3,
@@ -92,7 +92,7 @@
           "responsible": "Персонал, користувач ІКС",
           "control_refs": [],
           "enhancement_suggestions": [],
-          "asset_id": "A-03",
+          "asset_id": "A-02",
           "threat": "НСД до документів у зоні друку",
           "vulnerability": "Відсутність контролю видачі роздруківок",
           "impact": 4,

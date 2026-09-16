@@ -27,7 +27,7 @@ test('віддає index.html', async () => {
 
 test('віддає каталог даних', async () => {
   const r = await fetch(BASE + '/data/assets_catalog.json');
-  assert.equal((await r.json()).assets.length, 13);
+  assert.equal((await r.json()).assets.length, 24);
 });
 
 test('шаблони: POST → список → GET', async () => {

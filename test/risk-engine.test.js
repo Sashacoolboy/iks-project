@@ -14,8 +14,8 @@ test('калібрування рівнів за еталонними ризик
 });
 
 test('baseRisksFor фільтрує за активами та класом', () => {
-  const r = baseRisksFor(tr, ['A-01', 'A-08'], 1);
-  assert.ok(r.every(x => x.asset_id === 'A-01'));          // A-08 недоступний на АС-1
+  const r = baseRisksFor(tr, ['A-01', 'A-07'], 1);
+  assert.ok(r.every(x => x.asset_id === 'A-01'));          // A-07 недоступний на АС-1
   assert.ok(r.every(x => typeof x.level === 'string' && x.score > 0));
 });
 
