@@ -1758,7 +1758,7 @@ createServer(async (req, res) => {
 }).listen(PORT, '127.0.0.1', () => console.log(`listening on http://127.0.0.1:${PORT}`));
 ```
 
-Увага: тест «index.html» вимагатиме заглушки `public/index.html` — створити мінімальну (`<!doctype html><html><body>Офлайн-Профіль</body></html>`), Task 14 її замінить.
+Увага: тест «index.html» вимагатиме заглушки `public/index.html` — створити мінімальну (`<!doctype html><html><body>Профіль-Аудитор</body></html>`), Task 14 її замінить.
 
 - [ ] **Step 4: Тести зелені** — `npm test` → PASS
 
@@ -1839,11 +1839,11 @@ export const subscribe = (fn) => { listeners.add(fn); return () => listeners.del
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Офлайн-Профіль — формування ЦПБ</title>
+  <title>Профіль-Аудитор — формування ЦПБ</title>
   <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-  <header><h1>Автономний комплекс «Офлайн-Профіль»</h1><nav id="stepper"></nav></header>
+  <header><h1>Автономний комплекс «Профіль-Аудитор»</h1><nav id="stepper"></nav></header>
   <main id="step-container"></main>
   <footer>
     <button id="btn-back" type="button">← Назад</button>
