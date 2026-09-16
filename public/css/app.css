@@ -85,15 +85,26 @@ h3 { font-size: 1.05rem; font-weight: 600; margin-top: var(--space-5); margin-bo
 .mode-switch button.active { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); }
 
 .field { display: block; margin: var(--space-3) 0; font-size: 0.9rem; font-weight: 500; }
-.field input, .field select, .field textarea {
+.field input:not([type="radio"]):not([type="checkbox"]), .field select, .field textarea {
   display: block; width: 100%; max-width: 28rem; margin-top: 0.3rem; padding: 0.45rem 0.6rem;
   border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit;
   background: var(--color-card); color: var(--color-fg);
 }
-.radio, .checkbox { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: var(--space-4); font-weight: 400; }
-fieldset { border: 1px solid var(--color-border); border-radius: var(--radius-md); margin: var(--space-3) 0; background: var(--color-card); padding: var(--space-3); }
+input[type="radio"], input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--color-primary); cursor: pointer; }
+.field-label { display: block; margin-bottom: var(--space-2); }
+.field-label::after { content: ':'; }
+.radio-group { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
+.radio, .checkbox {
+  display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 400;
+  padding: 0.35rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  background: var(--color-card); cursor: pointer; transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.radio:hover, .checkbox:hover { border-color: var(--color-secondary); }
+.radio:has(input:checked), .checkbox:has(input:checked) { border-color: var(--color-primary); background: #eaf1fd; font-weight: 600; }
+.radio:has(input:disabled), .checkbox:has(input:disabled) { opacity: 0.55; cursor: not-allowed; }
+fieldset .checkbox { display: flex; margin: var(--space-2) 0; border: none; padding: 0; background: none; }
+fieldset, .general-section { border: 1px solid var(--color-border); border-radius: var(--radius-md); margin: var(--space-3) 0; background: var(--color-card); padding: var(--space-3); }
 legend { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-muted-fg); padding: 0 var(--space-2); }
-fieldset .checkbox { display: flex; margin: var(--space-2) 0; }
 .tpl-row { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
 .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin: var(--space-3) 0; }
 
