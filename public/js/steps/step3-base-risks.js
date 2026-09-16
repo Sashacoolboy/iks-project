@@ -104,13 +104,16 @@ export const step = {
         el('td', {}, eff.treatment_strategy), el('td', {}, eff.treatment_plan ?? ''),
         el('td', {}, eff.responsible), el('td', {}, eff.residual_risk ?? ''),
         el('td', {},
-          el('button', { type: 'button', onclick: () => openEditRiskModal(r) }, '✎'),
-          overrides[r.id] ? el('button', { type: 'button', onclick: () => { resetBaseOverride(r.id); rerender(); } }, 'Скинути') : null,
-          el('button', { type: 'button', class: 'link-btn', onclick: () => {
-            if (!confirm(`Видалити загрозу «${eff.threat}» (${r.id}) зі списку? Її не можна буде повернути.`)) return;
-            deleteBaseRisk(r.id);
-            rerender();
-          } }, '✕')));
+          el('div', { class: 'row-actions' },
+            el('button', { type: 'button', class: 'icon-btn', title: 'Редагувати', 'aria-label': 'Редагувати',
+              onclick: () => openEditRiskModal(r) }, '✎'),
+            overrides[r.id] ? el('button', { type: 'button', onclick: () => { resetBaseOverride(r.id); rerender(); } }, 'Скинути') : null,
+            el('button', { type: 'button', class: 'icon-btn danger', title: 'Видалити', 'aria-label': 'Видалити',
+              onclick: () => {
+                if (!confirm(`Видалити загрозу «${eff.threat}» (${r.id}) зі списку? Її не можна буде повернути.`)) return;
+                deleteBaseRisk(r.id);
+                rerender();
+              } }, '🗑'))));
     });
 
     // Конструктор нового (кастомного) ризику — відкривається в модальному вікні,
@@ -178,10 +181,11 @@ export const step = {
       el('td', {}, el('select', { class: 'cell-edit',
         onchange: (e) => patchCustomRisk(r.id, { residual_risk: e.target.value }) },
         ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (r.residual_risk ?? ''))))),
-      el('td', {}, el('button', { type: 'button', onclick: () => {
-        setState(s => ({ ...s, risks: { ...s.risks, custom: s.risks.custom.filter(x => x.id !== r.id) } }));
-        rerender();
-      } }, '✕'))));
+      el('td', {}, el('button', { type: 'button', class: 'icon-btn danger', title: 'Видалити', 'aria-label': 'Видалити',
+        onclick: () => {
+          setState(s => ({ ...s, risks: { ...s.risks, custom: s.risks.custom.filter(x => x.id !== r.id) } }));
+          rerender();
+        } }, '🗑'))));
 
     const saveRisksBtn = el('button', { type: 'button', class: 'collapse-safe', onclick: async () => {
       const r = await fetch('/api/export/risks-docx', { method: 'POST', body: JSON.stringify({ state: getState() }) });

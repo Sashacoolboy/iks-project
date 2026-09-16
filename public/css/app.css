@@ -201,6 +201,14 @@ tbody tr:hover { background: #f8fafc; }
 .ctrl-note { font-size: 0.72rem; font-style: italic; color: #7e22ce; }
 .link-btn { border: none; background: none; color: var(--color-primary); padding: 0.15rem 0.3rem; font-size: 0.8rem; text-align: left; border-radius: var(--radius-sm); }
 .link-btn:hover { text-decoration: underline; background: var(--color-muted); }
+
+.row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.9rem; height: 1.9rem; padding: 0; font-size: 0.9rem; line-height: 1; flex-shrink: 0;
+}
+.icon-btn.danger { color: var(--color-destructive); border-color: var(--color-destructive); }
+.icon-btn.danger:hover:not(:disabled) { background: #fef2f2; border-color: var(--color-destructive); }
 .row-enh td { background: #faf5ff; }
 .row-enh-add td { border-top: none; }
 .row-exempt td { background: #fefce8; }
