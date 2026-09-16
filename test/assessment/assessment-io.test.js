@@ -4,7 +4,10 @@ import assert from 'node:assert/strict';
 import { makeAssessment, migrateAssessment, validateAssessmentSchema, nextAssessmentId } from '../../core/assessment/assessment-io.js';
 
 const plan = { items: [{ assessment_source_id: 'AC-02e', control_id: 'AC-02', available_methods: ['EXAMINE'], odp_values: [] }] };
-const approvedRecord = { state: { passport: { ics_name: 'Тест', as_class: 2 }, info_type: 'open_confidential' } };
+const approvedRecord = { state: { passport: { ics_name: 'Тест', as_class: 2, designation: 'ІКС-1/01',
+  system_id: 'SYS-01', owner_info: 'ТОВ «Власник»', developer_info: 'ТОВ «Розробник»',
+  development_basis: 'наказ №1', baseline_profile_info: 'галузевий профіль X', normative_acts: 'НД ТЗІ 2.5-005' },
+  info_type: 'open_confidential' } };
 
 test('makeAssessment v3: schema 3.0.0, results ініціалізовані NOT_ASSESSED', () => {
   const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-002' });
@@ -13,6 +16,17 @@ test('makeAssessment v3: schema 3.0.0, results ініціалізовані NOT_
   assert.deepEqual(a.results[0], { assessment_source_id: 'AC-02e', methods_used: [], result: 'NOT_ASSESSED',
     evidence_ids: [], source_references: [], assessor_comment: '', conclusion: '', finding_ids: [] });
   assert.deepEqual(validateAssessmentSchema(a), []);
+});
+
+test('makeAssessment: metadata переносить ідентифікаційні поля паспорта ІКС (для аудиту)', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-003' });
+  assert.equal(a.metadata.designation, 'ІКС-1/01');
+  assert.equal(a.metadata.system_id, 'SYS-01');
+  assert.equal(a.metadata.owner_info, 'ТОВ «Власник»');
+  assert.equal(a.metadata.developer_info, 'ТОВ «Розробник»');
+  assert.equal(a.metadata.development_basis, 'наказ №1');
+  assert.equal(a.metadata.baseline_profile_info, 'галузевий профіль X');
+  assert.equal(a.metadata.normative_acts, 'НД ТЗІ 2.5-005');
 });
 
 test('migrateAssessment: v1 → v3 enum/evidence/finding', () => {

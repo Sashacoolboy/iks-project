@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { buildReportProjection } from '../../core/assessment/report-projection.js';
 
 const assessment = {
-  id: 'ASSESS-2026-077', metadata: { ics_name: 'АС-2', as_class: 2, info_type: 'open_confidential', assessment_body: 'Орган', assessor_name: 'Оцінювач' },
+  id: 'ASSESS-2026-077', metadata: { ics_name: 'АС-2', as_class: 2, info_type: 'open_confidential', assessment_body: 'Орган', assessor_name: 'Оцінювач',
+    designation: 'ІКС-1/01', system_id: 'SYS-01', owner_info: 'ТОВ «Власник»', developer_info: 'ТОВ «Розробник»',
+    development_basis: 'наказ №1', baseline_profile_info: 'галузевий профіль X', normative_acts: 'НД ТЗІ 2.5-005' },
   cpb_snapshot: { source_approved_name: 'as2', hash: 'abc' },
   warnings: [{ code: 'ODP_UNRESOLVED', control_id: 'AC-02', local_odp_id: 'ac-2_odp.01' }],
   plan: { items: [{ assessment_source_id: 'AC-02e', control_id: 'AC-02', family: 'AC', family_title: 'ДОСТУП',
@@ -24,6 +26,17 @@ test('проєкція: розділи, лейбли, загальний вис�
   assert.equal(p.evidence_register.length, 1);
   assert.ok(p.overall.conclusion_text.includes('не відповідає'));
   assert.deepEqual(p.appendices.unresolved_odp, [{ local_odp_id: 'ac-2_odp.01', control_id: 'AC-02' }]);
+});
+
+test('проєкція: system_info несе ідентифікаційні поля паспорта ІКС (для аудиту)', () => {
+  const p = buildReportProjection({ assessment, cpbSnapshot: { state: {} } });
+  assert.equal(p.system_info.designation, 'ІКС-1/01');
+  assert.equal(p.system_info.system_id, 'SYS-01');
+  assert.equal(p.system_info.owner_info, 'ТОВ «Власник»');
+  assert.equal(p.system_info.developer_info, 'ТОВ «Розробник»');
+  assert.equal(p.system_info.development_basis, 'наказ №1');
+  assert.equal(p.system_info.baseline_profile_info, 'галузевий профіль X');
+  assert.equal(p.system_info.normative_acts, 'НД ТЗІ 2.5-005');
 });
 
 test('висновок tier 2 (partially_satisfied)', () => {

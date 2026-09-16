@@ -39,6 +39,13 @@ export function makeAssessment({ approvedRecord, approvedName, plan, warnings, i
     finalized_by: null,
     metadata: {
       ics_name: approvedRecord.state.passport?.ics_name ?? '',
+      designation: approvedRecord.state.passport?.designation ?? '',
+      system_id: approvedRecord.state.passport?.system_id ?? '',
+      owner_info: approvedRecord.state.passport?.owner_info ?? '',
+      developer_info: approvedRecord.state.passport?.developer_info ?? '',
+      development_basis: approvedRecord.state.passport?.development_basis ?? '',
+      baseline_profile_info: approvedRecord.state.passport?.baseline_profile_info ?? '',
+      normative_acts: approvedRecord.state.passport?.normative_acts ?? '',
       as_class: approvedRecord.state.passport?.as_class ?? null,
       info_type: approvedRecord.state.info_type ?? null,
       assessment_body: '',

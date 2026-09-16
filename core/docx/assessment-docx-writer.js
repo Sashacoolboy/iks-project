@@ -26,8 +26,15 @@ export function buildAssessmentDocx({ projection }) {
   sections.push(par('1. Відомості про інформаційно-комунікаційну систему', { bold: true, sz: 32 }));
   sections.push(par(''));
   sections.push(par(`Найменування ІКС: ${projection.system_info.ics_name}`));
+  if (projection.system_info.designation) sections.push(par(`Умовне позначення: ${projection.system_info.designation}`));
+  if (projection.system_info.system_id) sections.push(par(`Ідентифікатор системи: ${projection.system_info.system_id}`));
+  if (projection.system_info.owner_info) sections.push(par(`Власник або розпорядник системи: ${projection.system_info.owner_info}`));
+  if (projection.system_info.developer_info) sections.push(par(`Виконавець робіт з розробки ЦПБ: ${projection.system_info.developer_info}`));
+  if (projection.system_info.development_basis) sections.push(par(`Підстава розробки: ${projection.system_info.development_basis}`));
+  if (projection.system_info.baseline_profile_info) sections.push(par(`Базовий профіль безпеки: ${projection.system_info.baseline_profile_info}`));
   sections.push(par(`Клас автоматизованої системи: ${projection.system_info.as_class}`));
   sections.push(par(`Тип інформації: ${projection.system_info.info_type}`));
+  if (projection.system_info.normative_acts) sections.push(par(`Перелік нормативно-правових актів: ${projection.system_info.normative_acts}`));
   sections.push(par(''));
 
   // Section 3: Basis and scope

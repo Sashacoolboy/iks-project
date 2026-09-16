@@ -15,7 +15,9 @@ const assessment = {
     info_type: 'open_confidential',
     assessment_body: 'Орган оцінювання',
     assessor_name: 'Оцінювач І.І.',
-    assessment_start_date: '2026-08-15'
+    assessment_start_date: '2026-08-15',
+    designation: 'ІКС-1/01',
+    owner_info: 'ТОВ «Власник»'
   },
   cpb_snapshot: { source_approved_name: 'as2', hash: 'abc123' },
   warnings: [{ code: 'ODP_UNRESOLVED', control_id: 'AC-02', local_odp_id: 'ac-2_odp.01' }],
@@ -94,6 +96,10 @@ test('document.xml містить обовʼязкові розділи та у�
   assert.match(xml, /Звіт за результатами оцінювання/, 'title heading');
   assert.match(xml, /АС-2/, 'ICS name');
   assert.match(xml, /ASSESS-2026-077/, 'assessment ID');
+
+  // Ідентифікаційні поля паспорта ІКС (для аудиту) — рендеряться, коли заповнені
+  assert.match(xml, /ІКС-1\/01/, 'designation');
+  assert.match(xml, /ТОВ.*Власник/, 'owner_info');
 
   // Resolved objective
   assert.match(xml, /перевірити наявність схвалення керівником СЗІ/, 'resolved objective');

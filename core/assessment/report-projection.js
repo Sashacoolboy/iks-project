@@ -91,6 +91,13 @@ export function buildReportProjection({ assessment, cpbSnapshot }) {
   // System info
   const system_info = {
     ics_name: assessment.metadata?.ics_name ?? '',
+    designation: assessment.metadata?.designation ?? '',
+    system_id: assessment.metadata?.system_id ?? '',
+    owner_info: assessment.metadata?.owner_info ?? '',
+    developer_info: assessment.metadata?.developer_info ?? '',
+    development_basis: assessment.metadata?.development_basis ?? '',
+    baseline_profile_info: assessment.metadata?.baseline_profile_info ?? '',
+    normative_acts: assessment.metadata?.normative_acts ?? '',
     as_class: assessment.metadata?.as_class ?? 0,
     info_type: assessment.metadata?.info_type ?? ''
   };
