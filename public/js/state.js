@@ -10,7 +10,8 @@ function load() {
     if (raw) {
       const parsed = JSON.parse(raw);
       const merged = { ...defaultState(), ...parsed };
-      return { ...merged, passport: { ...defaultState().passport, ...merged.passport } };
+      return { ...merged, passport: { ...defaultState().passport, ...merged.passport },
+        risks: { ...defaultState().risks, ...merged.risks } };
     }
   } catch { /* зіпсований стан — почати заново */ }
   return defaultState();

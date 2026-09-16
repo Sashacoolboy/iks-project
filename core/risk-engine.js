@@ -19,6 +19,22 @@ export function baseRisksFor(catalog, selectedAssetIds, asClass) {
     .map(r => annotateRisk(r, catalog.scale));
 }
 
+// Базовий ризик + користувацьке перевизначення полів (`risks.base_overrides[id]`) → перерахований annotateRisk
+export function applyBaseOverride(risk, override, scale) {
+  return override ? annotateRisk({ ...risk, ...override }, scale) : risk;
+}
+
+// Прийняті базові ризики (з урахуванням overrides) + кастомні — єдиний список для таблиці/експорту/посилень
+export function acceptedRisksFor(catalog, selectedAssetIds, asClass, risksState) {
+  const accepted = new Set(risksState.accepted_base);
+  const overrides = risksState.base_overrides ?? {};
+  const base = baseRisksFor(catalog, selectedAssetIds, asClass)
+    .filter(r => accepted.has(r.id))
+    .map(r => applyBaseOverride(r, overrides[r.id], catalog.scale));
+  const custom = risksState.custom.map(r => annotateRisk(r, catalog.scale));
+  return [...base, ...custom];
+}
+
 export function threatDirectory(catalog, assetId = null) {
   const seen = new Set();
   const out = [];

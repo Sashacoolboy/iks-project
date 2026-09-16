@@ -75,7 +75,7 @@ document.getElementById('btn-next').addEventListener('click', () => {
   const modules = await Promise.all([
     import('./steps/step0-registry.js'),
     import('./steps/step1-passport.js'), import('./steps/step2-assets.js'),
-    import('./steps/step3-base-risks.js'), import('./steps/step4-custom-risks.js'),
+    import('./steps/step3-base-risks.js'),
     import('./steps/step5-generate.js'), import('./steps/step6-verify.js'),
     import('./steps/step7-export.js'),
   ]);

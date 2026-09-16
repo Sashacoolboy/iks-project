@@ -5,7 +5,7 @@ export function defaultState() {
       development_basis: '', baseline_profile_info: '', normative_acts: '' },
     global_constants: {},
     selected_assets: [],
-    risks: { accepted_base: [], custom: [] },
+    risks: { accepted_base: [], custom: [], base_overrides: {} },
     info_type: null,
     profile: { param_overrides: {}, enhancements: [], excluded: [], exemption_overrides: [], exemption_note_overrides: {} },
   };
@@ -43,7 +43,8 @@ export function makeApprovedRecord(state, summary = {}) {
 
 export function applyApprovedRecord(record) {
   const merged = { ...defaultState(), ...clone(record.state) };
-  return { ...merged, passport: { ...defaultState().passport, ...merged.passport } };
+  return { ...merged, passport: { ...defaultState().passport, ...merged.passport },
+    risks: { ...defaultState().risks, ...merged.risks } };
 }
 
 const INFO_TYPE_VALUES = ['open_confidential', 'service', 'state_secret'];

@@ -12,7 +12,7 @@ export const step = {
     const showSummary = () => {
       const state = getState();
       if (!state.info_type) {
-        summaryBox.replaceChildren(el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 4.'));
+        summaryBox.replaceChildren(el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 3.'));
         return;
       }
       const doc = buildProfile(state, catalogs);
@@ -42,7 +42,7 @@ export const step = {
       showSummary();
     } }, 'Застосувати шаблонний профіль безпеки (ЦПБ)');
     container.replaceChildren(el('section', {},
-      el('h2', {}, 'Крок 5. Ініціація Цільового профілю безпеки'),
+      el('h2', {}, 'Крок 4. Ініціація Цільового профілю безпеки'),
       el('div', { class: 'actions' }, genBtn, tplSelect, tplBtn),
       summaryBox));
     showSummary();

@@ -17,12 +17,12 @@ export const step = {
     let warnings;
     let canExport = true;
     if (!state.info_type) {
-      warnings = el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 4 та згенеруйте профіль.');
+      warnings = el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 3 та згенеруйте профіль.');
       canExport = false;
     } else {
       const doc = buildProfile(state, catalogs);
       warnings = doc.summary.empty
-        ? el('p', { class: 'warn' }, `Увага: ${doc.summary.empty} пунктів мають незаповнені параметри — поверніться до Кроку 6 або експортуйте з позначкою [не визначено].`)
+        ? el('p', { class: 'warn' }, `Увага: ${doc.summary.empty} пунктів мають незаповнені параметри — поверніться до Кроку 5 або експортуйте з позначкою [не визначено].`)
         : el('p', { class: 'ok' }, 'Усі параметри заповнено.');
     }
 
@@ -61,7 +61,7 @@ export const step = {
     } }, '🖨️ Експорт у DOCX');
 
     container.replaceChildren(el('section', {},
-      el('h2', {}, 'Крок 7. Шаблонізація та Експорт'),
+      el('h2', {}, 'Крок 6. Шаблонізація та Експорт'),
       warnings,
       el('label', { class: 'field' }, 'Імʼя для збереження шаблону/запису', nameInput),
       el('div', { class: 'actions' },

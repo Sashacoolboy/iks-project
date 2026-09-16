@@ -3,15 +3,11 @@ import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { buildProfile, STATUS } from '/core/profile-engine.js';
 import { enhancementsForControl, suggestionsFromRisks } from '/core/enhancement-engine.js';
-import { baseRisksFor, annotateRisk } from '/core/risk-engine.js';
+import { acceptedRisksFor } from '/core/risk-engine.js';
 import { mergeRecord, suggestionsFor as dictSuggestions } from '/core/odp-dictionary.js';
 
 function acceptedAnnotatedRisks(state) {
-  const accepted = new Set(state.risks.accepted_base);
-  return [
-    ...baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class).filter(r => accepted.has(r.id)),
-    ...state.risks.custom.map(r => annotateRisk(r, catalogs.threatsRisks.scale)),
-  ];
+  return acceptedRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class, state.risks);
 }
 
 // Запис факту заповнення у серверний словник (з типом інформації) + локальна копія
@@ -30,8 +26,8 @@ export const step = {
     const state = getState();
     if (!state.info_type) {
       container.replaceChildren(el('section', {},
-        el('h2', {}, 'Крок 6. Верифікація'),
-        el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 4.')));
+        el('h2', {}, 'Крок 5. Верифікація'),
+        el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 3.')));
       return;
     }
     const doc = buildProfile(state, catalogs);
@@ -258,7 +254,7 @@ export const step = {
       el('span', { class: 'badge badge-excluded' }, `Виключено ${doc.summary.excluded}`));
 
     container.replaceChildren(el('section', {},
-      el('h2', {}, 'Крок 6. Верифікація та посилення'),
+      el('h2', {}, 'Крок 5. Верифікація та посилення'),
       summaryBar,
       dictList,
       ...cards));

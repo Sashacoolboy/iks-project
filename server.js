@@ -4,7 +4,7 @@ import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDocx, buildRisksDocx } from './core/docx/docx-writer.js';
 import { buildProfile } from './core/profile-engine.js';
-import { baseRisksFor, annotateRisk } from './core/risk-engine.js';
+import { acceptedRisksFor } from './core/risk-engine.js';
 import { validateTemplate } from './core/template-io.js';
 import { mergeRecord, emptyDictionary } from './core/odp-dictionary.js';
 import { buildAssessmentPlan } from './core/assessment/assessment-plan.js';
@@ -278,11 +278,7 @@ createServer(async (req, res) => {
       if (parts[1] === 'export' && (parts[2] === 'docx' || parts[2] === 'risks-docx') && req.method === 'POST') {
         const { state } = JSON.parse((await readBody(req)).toString('utf8'));
         const catalogs = await catalogsPromise;
-        const accepted = new Set(state.risks.accepted_base);
-        const annotatedRisks = [
-          ...baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class).filter(r => accepted.has(r.id)),
-          ...state.risks.custom.map(r => annotateRisk(r, catalogs.threatsRisks.scale)),
-        ];
+        const annotatedRisks = acceptedRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class, state.risks);
         let buf, prefix;
         if (parts[2] === 'risks-docx') {
           buf = buildRisksDocx({ state, annotatedRisks, assets: catalogs.assets });

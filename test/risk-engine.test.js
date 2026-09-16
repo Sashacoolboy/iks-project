@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeRiskScore, riskLevel, annotateRisk, baseRisksFor, threatDirectory, buildCustomRisk } from '../core/risk-engine.js';
+import { computeRiskScore, riskLevel, annotateRisk, baseRisksFor, threatDirectory, buildCustomRisk,
+  applyBaseOverride, acceptedRisksFor } from '../core/risk-engine.js';
 
 const tr = JSON.parse(readFileSync(new URL('../data/threats_risks.json', import.meta.url)));
 
@@ -40,4 +41,25 @@ test('buildCustomRisk генерує послідовний id та обчисл
   assert.equal(c.id, 'C-002');
   assert.equal(c.custom, true);
   assert.equal(c.level, 'Критичний');
+});
+
+test('applyBaseOverride: без override повертає ризик як є; з override — перераховує score/level', () => {
+  const risk = baseRisksFor(tr, ['A-01'], 1)[0];
+  assert.equal(applyBaseOverride(risk, undefined, tr.scale), risk);
+  const overridden = applyBaseOverride(risk, { impact: 5, likelihood: 0.9, responsible: 'Х' }, tr.scale);
+  assert.equal(overridden.id, risk.id);
+  assert.equal(overridden.responsible, 'Х');
+  assert.equal(overridden.score, computeRiskScore(5, 0.9));
+  assert.equal(overridden.level, riskLevel(computeRiskScore(5, 0.9), tr.scale));
+});
+
+test('acceptedRisksFor: прийняті базові (з overrides) + кастомні, невибрані базові відсутні', () => {
+  const base = baseRisksFor(tr, ['A-01'], 1);
+  const risksState = { accepted_base: [base[0].id], base_overrides: { [base[0].id]: { responsible: 'Перевизначено' } },
+    custom: [{ id: 'C-001', custom: true, asset_id: 'A-01', threat: 'Т', vulnerability: 'В', impact: 3, likelihood: 0.5 }] };
+  const r = acceptedRisksFor(tr, ['A-01'], 1, risksState);
+  assert.equal(r.length, 2);
+  assert.equal(r.find(x => x.id === base[0].id).responsible, 'Перевизначено');
+  assert.ok(r.some(x => x.id === 'C-001'));
+  assert.ok(!r.some(x => x.id === base[1]?.id));
 });
