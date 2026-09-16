@@ -5,7 +5,7 @@ export function defaultState() {
       development_basis: '', baseline_profile_info: '', normative_acts: '' },
     global_constants: {},
     selected_assets: [],
-    risks: { accepted_base: [], custom: [], base_overrides: {} },
+    risks: { accepted_base: [], custom: [], base_overrides: {}, hidden_base: [] },
     info_type: null,
     profile: { param_overrides: {}, enhancements: [], excluded: [], exemption_overrides: [], exemption_note_overrides: {} },
   };

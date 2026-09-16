@@ -76,8 +76,7 @@ document.getElementById('btn-next').addEventListener('click', () => {
     import('./steps/step0-registry.js'),
     import('./steps/step1-passport.js'), import('./steps/step2-assets.js'),
     import('./steps/step3-base-risks.js'),
-    import('./steps/step5-generate.js'), import('./steps/step6-verify.js'),
-    import('./steps/step7-export.js'),
+    import('./steps/step6-verify.js'),
   ]);
   for (const m of modules) registerStep(m.step);
   go(0);

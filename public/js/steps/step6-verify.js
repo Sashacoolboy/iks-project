@@ -1,10 +1,16 @@
-import { el } from '../render/dom.js';
+import { el, option } from '../render/dom.js';
 import { getState, setState } from '../state.js';
-import { catalogs } from '../app.js';
+import { catalogs, goToStep } from '../app.js';
 import { buildProfile, STATUS } from '/core/profile-engine.js';
 import { enhancementsForControl, suggestionsFromRisks } from '/core/enhancement-engine.js';
 import { acceptedRisksFor } from '/core/risk-engine.js';
 import { mergeRecord, suggestionsFor as dictSuggestions } from '/core/odp-dictionary.js';
+import { applyCpbTemplate, validateTemplate, makeIcsTemplate, makeCpbTemplate, makeApprovedRecord } from '/core/template-io.js';
+
+const NAME_RE = /^[a-zа-яіїєґ0-9_\-]+$/i;
+// Дефолтне ім'я з назви ІКС (пробіли → дефіси, недопустимі символи геть)
+const suggestName = (icsName) =>
+  (icsName || '').trim().replace(/\s+/g, '-').replace(/[^a-zа-яіїєґ0-9_\-]/gi, '').slice(0, 60);
 
 function acceptedAnnotatedRisks(state) {
   return acceptedRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class, state.risks);
@@ -20,20 +26,40 @@ function recordToDictionary(paramId, info, value) {
 }
 
 export const step = {
-  id: 'verify', title: 'Верифікація та посилення',
+  id: 'verify', title: 'Верифікація та експорт',
   validate() { return []; },
   render(container) {
     const state = getState();
     if (!state.info_type) {
       container.replaceChildren(el('section', {},
-        el('h2', {}, 'Крок 5. Верифікація'),
-        el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 3.')));
+        el('h2', {}, 'Крок 4. Верифікація'),
+        el('p', { class: 'warn' }, 'Спершу оберіть тип інформації на Кроці 1.')));
       return;
     }
     const doc = buildProfile(state, catalogs);
     const acceptedRisks = acceptedAnnotatedRisks(state);
     const suggestions = suggestionsFromRisks(acceptedRisks);
     const rerender = () => { container.replaceChildren(); step.render(container); };
+
+    // Застосувати раніше збережений шаблонний профіль ЦПБ (ініціація відбувається
+    // автоматично — buildProfile вище вже рахує актуальний стан, кнопка лише
+    // підвантажує готовий набір param_overrides/enhancements)
+    const cpbTplSelect = el('select', {});
+    (async () => {
+      const { items, names } = await (await fetch('/api/templates/cpb')).json();
+      const matching = (items ?? (names ?? []).map(n => ({ name: n, info_type: null })))
+        .filter(i => i.info_type === getState().info_type);
+      cpbTplSelect.replaceChildren(
+        option('', matching.length ? '— шаблон ЦПБ —' : '— немає шаблонів для цього типу інформації —'),
+        ...matching.map(i => option(i.name, i.name)));
+    })();
+    const cpbTplBtn = el('button', { type: 'button', onclick: async () => {
+      if (!cpbTplSelect.value) return;
+      const tpl = await (await fetch(`/api/templates/cpb/${encodeURIComponent(cpbTplSelect.value)}`)).json();
+      if (validateTemplate('cpb', tpl).length) { alert('Шаблон пошкоджено'); return; }
+      setState(s => applyCpbTemplate(s, tpl));
+      rerender();
+    } }, 'Застосувати шаблонний профіль безпеки (ЦПБ)');
 
     // Мапа «захід → ризики, які він покриває» — лише для екрана, у DOCX не потрапляє
     const risksByRef = new Map();
@@ -253,10 +279,63 @@ export const step = {
       el('span', { class: 'badge badge-exempt' }, `Винятків ${doc.summary.exempted}`),
       el('span', { class: 'badge badge-excluded' }, `Виключено ${doc.summary.excluded}`));
 
+    // Шаблони та експорт — фінальна секція внизу сторінки (колишній окремий крок)
+    const statusBox = el('p', { class: 'save-status' });
+    const showStatus = (ok, text) => {
+      statusBox.className = ok ? 'save-status ok' : 'save-status warn';
+      statusBox.textContent = text;
+    };
+    const nameInput = el('input', { type: 'text', class: 'tpl-name',
+      value: suggestName(state.passport.ics_name),
+      placeholder: 'імʼя запису (літери, цифри, дефіс, підкреслення)' });
+    const saveTemplate = async (kind, tpl, label) => {
+      const name = nameInput.value.trim();
+      if (!name) { showStatus(false, 'Вкажіть імʼя запису у полі вище.'); nameInput.focus(); return false; }
+      if (!NAME_RE.test(name)) { showStatus(false, 'Імʼя може містити лише літери, цифри, дефіс і підкреслення (без пробілів).'); nameInput.focus(); return false; }
+      try {
+        const r = await fetch(`/api/templates/${kind}/${encodeURIComponent(name)}`, {
+          method: 'POST', body: JSON.stringify(tpl) });
+        const body = await r.json();
+        showStatus(r.ok, r.ok ? `${label} «${name}» збережено.` : `Помилка: ${body.error}`);
+        return r.ok;
+      } catch (err) {
+        showStatus(false, `Помилка мережі: ${err.message}`);
+        return false;
+      }
+    };
+    const exportBtn = el('button', { type: 'button', class: 'collapse-safe', onclick: async () => {
+      const r = await fetch('/api/export/docx', { method: 'POST', body: JSON.stringify({ state: getState() }) });
+      if (!r.ok) { showStatus(false, 'Помилка експорту: ' + (await r.json()).error); return; }
+      const blob = await r.blob();
+      const a = el('a', { href: URL.createObjectURL(blob),
+        download: decodeURIComponent(r.headers.get('Content-Disposition')?.match(/filename\*=UTF-8''(.+)/)?.[1] ?? 'профіль.docx') });
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showStatus(true, 'DOCX сформовано (також записано у папку exports/).');
+    } }, '🖨️ Експорт у DOCX');
+    const approveBtn = el('button', { type: 'button', class: 'primary', onclick: async () => {
+      const d = buildProfile(getState(), catalogs);
+      const summary = { ...d.summary,
+        risks_count: getState().risks.accepted_base.length + getState().risks.custom.length,
+        enhancements_count: getState().profile.enhancements.length };
+      const ok = await saveTemplate('approved', makeApprovedRecord(getState(), summary), 'Затверджений профіль');
+      // Перехід у Реєстр — там одразу видно щойно затверджений заповнений ЦПБ
+      if (ok) goToStep(0);
+    } }, '✅ Затвердити профіль (в реєстр)');
+
     container.replaceChildren(el('section', {},
-      el('h2', {}, 'Крок 5. Верифікація та посилення'),
+      el('h2', {}, 'Крок 4. Верифікація та експорт'),
+      el('div', { class: 'actions' }, cpbTplSelect, cpbTplBtn),
       summaryBar,
       dictList,
-      ...cards));
+      ...cards,
+      el('hr'),
+      el('h3', {}, 'Шаблони та експорт'),
+      el('label', { class: 'field' }, 'Імʼя для збереження шаблону/запису', nameInput),
+      el('div', { class: 'actions' },
+        el('button', { type: 'button', class: 'collapse-safe', onclick: () => saveTemplate('ics', makeIcsTemplate(getState()), 'Шаблон ІКС') }, '💾 Зберегти як шаблон ІКС'),
+        el('button', { type: 'button', class: 'collapse-safe', onclick: () => saveTemplate('cpb', makeCpbTemplate(getState()), 'Шаблон ЦПБ') }, '💾 Зберегти як шаблон ЦПБ'),
+        exportBtn, approveBtn),
+      statusBox));
   },
 };

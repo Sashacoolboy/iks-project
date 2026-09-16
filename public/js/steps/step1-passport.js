@@ -8,12 +8,19 @@ async function loadTemplateList(select) {
   select.replaceChildren(option('', '— оберіть шаблон —'), ...names.map(n => option(n, n)));
 }
 
+const INFO_OPTIONS = [
+  { value: 'open_confidential', label: 'Відкрита / Конфіденційна інформація' },
+  { value: 'service', label: 'Службова інформація (ДСК)' },
+  { value: 'state_secret', label: 'Державна таємниця (каталог буде додано)', disabled: true },
+];
+
 export const step = {
-  id: 'passport', title: 'Проект та політики',
+  id: 'passport', title: 'Проєкт та політики',
   validate(state) {
     const errors = [];
     if (!state.passport.ics_name.trim()) errors.push('Вкажіть назву ІКС');
     if (!state.passport.cert_body.trim()) errors.push('Вкажіть орган сертифікації');
+    if (!state.info_type) errors.push('Оберіть тип інформації');
     return errors;
   },
   render(container) {
@@ -39,6 +46,12 @@ export const step = {
             selected_assets: s.selected_assets.filter(id =>
               catalogs.assets.find(a => a.id === id)?.min_as_class <= c) })) }),
         `АС-${c}`));
+    const infoRadios = INFO_OPTIONS.map(o => el('label', { class: 'radio' },
+      el('input', { type: 'radio', name: 'info_type', value: o.value,
+        ...(o.disabled ? { disabled: '' } : {}),
+        ...(state.info_type === o.value ? { checked: '' } : {}),
+        onchange: () => setState(s => ({ ...s, info_type: o.value })) }),
+      o.label));
     // Картка глобальних політик — генерується з policy_mapping.json, згруповано
     const groups = new Map();
     for (const gc of catalogs.policyMapping.global_constants) {
@@ -81,6 +94,7 @@ export const step = {
         el('label', { class: 'field' }, 'Орган сертифікації', certInput),
         el('label', { class: 'field' }, 'Перелік нормативно-правових актів', normativeActsInput),
         el('div', { class: 'field' }, 'Клас ІКС відповідно до НД ТЗІ: ', ...classRadios),
+        el('div', { class: 'field' }, 'Тип інформації, що обробляється (обовʼязково): ', ...infoRadios),
         el('h3', {}, 'Картка глобальних політик'),
         ...policyFields));
   },
