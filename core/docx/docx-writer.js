@@ -128,8 +128,15 @@ export function buildDocx({ state, profileDoc, assets, policyMapping }) {
   // 1. Титул
   body.push(par('ЦІЛЬОВИЙ ПРОФІЛЬ БЕЗПЕКИ', { bold: true, align: 'center' }));
   body.push(par(state.passport.ics_name, { bold: true, align: 'center' }));
+  if (state.passport.designation) body.push(par(`Умовне позначення: ${state.passport.designation}`, { align: 'center' }));
+  if (state.passport.system_id) body.push(par(`Ідентифікатор системи: ${state.passport.system_id}`, { align: 'center' }));
+  if (state.passport.owner_info) body.push(par(`Власник або розпорядник системи: ${state.passport.owner_info}`, { align: 'center' }));
+  if (state.passport.developer_info) body.push(par(`Виконавець робіт з розробки ЦПБ: ${state.passport.developer_info}`, { align: 'center' }));
+  if (state.passport.development_basis) body.push(par(`Підстава розробки: ${state.passport.development_basis}`, { align: 'center' }));
+  if (state.passport.baseline_profile_info) body.push(par(`Базовий профіль безпеки: ${state.passport.baseline_profile_info}`, { align: 'center' }));
   body.push(par(`Орган сертифікації: ${state.passport.cert_body}`, { align: 'center' }));
   body.push(par(`Клас автоматизованої системи: АС-${state.passport.as_class}`, { align: 'center' }));
+  if (state.passport.normative_acts) body.push(par(`Перелік нормативно-правових актів: ${state.passport.normative_acts}`, { align: 'center' }));
   if (state.global_constants.organization_policy_id)
     body.push(par(`Введено в дію: ${state.global_constants.organization_policy_id}`, { align: 'center' }));
   // 2. Глобальні політики (людські назви з мапінгу, лише заповнені)

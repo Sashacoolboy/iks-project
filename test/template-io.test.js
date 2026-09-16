@@ -4,7 +4,10 @@ import { defaultState, makeIcsTemplate, applyIcsTemplate, makeCpbTemplate, apply
 
 test('ICS template round-trip', () => {
   const s = defaultState();
-  s.passport = { ics_name: 'ІКС-1', cert_body: 'ДССЗЗІ', as_class: 2 };
+  s.passport = { ics_name: 'ІКС-1', cert_body: 'ДССЗЗІ', as_class: 2,
+    designation: 'ІКС-1/01', system_id: '', owner_info: 'ТОВ «Власник»',
+    developer_info: 'ТОВ «Розробник»', development_basis: 'Наказ № 1',
+    baseline_profile_info: 'Галузевий ПБ', normative_acts: 'НД ТЗІ 2.5-004-99' };
   s.global_constants = { password_rotation_days: '90 днів' };
   s.selected_assets = ['A-01', 'A-08'];
   const tpl = makeIcsTemplate(s);
@@ -35,7 +38,9 @@ test('validateTemplate ловить чужий kind і сміття', () => {
 
 test('approved record round-trip зі summary', () => {
   const s = defaultState();
-  s.passport = { ics_name: 'ІКС-З', cert_body: 'Орган', as_class: 1 };
+  s.passport = { ics_name: 'ІКС-З', cert_body: 'Орган', as_class: 1,
+    designation: '', system_id: '', owner_info: '', developer_info: '',
+    development_basis: '', baseline_profile_info: '', normative_acts: '' };
   s.info_type = 'service';
   s.profile.enhancements = ['AC-2(1)'];
   const rec = makeApprovedRecord(s, { total: 100, autofilled: 40, risks_count: 9 });

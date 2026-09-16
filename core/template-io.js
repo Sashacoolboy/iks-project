@@ -1,6 +1,8 @@
 export function defaultState() {
   return {
-    passport: { ics_name: '', cert_body: '', as_class: 1 },
+    passport: { ics_name: '', cert_body: '', as_class: 1,
+      designation: '', system_id: '', owner_info: '', developer_info: '',
+      development_basis: '', baseline_profile_info: '', normative_acts: '' },
     global_constants: {},
     selected_assets: [],
     risks: { accepted_base: [], custom: [] },
@@ -18,7 +20,7 @@ export function makeIcsTemplate(state) {
 }
 
 export function applyIcsTemplate(state, tpl) {
-  return { ...clone(state), passport: clone(tpl.passport),
+  return { ...clone(state), passport: { ...defaultState().passport, ...clone(tpl.passport) },
     global_constants: clone(tpl.global_constants), selected_assets: clone(tpl.selected_assets) };
 }
 
@@ -40,7 +42,8 @@ export function makeApprovedRecord(state, summary = {}) {
 }
 
 export function applyApprovedRecord(record) {
-  return { ...defaultState(), ...clone(record.state) };
+  const merged = { ...defaultState(), ...clone(record.state) };
+  return { ...merged, passport: { ...defaultState().passport, ...merged.passport } };
 }
 
 const INFO_TYPE_VALUES = ['open_confidential', 'service', 'state_secret'];

@@ -7,7 +7,11 @@ const listeners = new Set();
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return { ...defaultState(), ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const merged = { ...defaultState(), ...parsed };
+      return { ...merged, passport: { ...defaultState().passport, ...merged.passport } };
+    }
   } catch { /* зіпсований стан — почати заново */ }
   return defaultState();
 }

@@ -18,10 +18,19 @@ export const step = {
   },
   render(container) {
     const state = getState();
-    const nameInput = el('input', { type: 'text', value: state.passport.ics_name,
-      oninput: (e) => setState(s => ({ ...s, passport: { ...s.passport, ics_name: e.target.value } })) });
-    const certInput = el('input', { type: 'text', value: state.passport.cert_body,
-      oninput: (e) => setState(s => ({ ...s, passport: { ...s.passport, cert_body: e.target.value } })) });
+    const field = (key) => el('input', { type: 'text', value: state.passport[key] ?? '',
+      oninput: (e) => setState(s => ({ ...s, passport: { ...s.passport, [key]: e.target.value } })) });
+    const nameInput = field('ics_name');
+    const designationInput = field('designation');
+    const systemIdInput = field('system_id');
+    const ownerInfoInput = field('owner_info');
+    const developerInfoInput = field('developer_info');
+    const developmentBasisInput = field('development_basis');
+    const baselineProfileInfoInput = field('baseline_profile_info');
+    const certInput = field('cert_body');
+    const normativeActsInput = el('textarea', { rows: '4',
+      oninput: (e) => setState(s => ({ ...s, passport: { ...s.passport, normative_acts: e.target.value } })) },
+      state.passport.normative_acts ?? '');
     const classRadios = [1, 2, 3].map(c =>
       el('label', { class: 'radio' },
         el('input', { type: 'radio', name: 'as_class', value: String(c),
@@ -61,9 +70,17 @@ export const step = {
       el('section', {},
         el('h2', {}, 'Крок 1. Паспорт ІКС та Глобальні політики'),
         el('div', { class: 'tpl-row' }, tplSelect, tplBtn),
+        el('h3', {}, 'Початкові дані'),
         el('label', { class: 'field' }, 'Назва ІКС', nameInput),
+        el('label', { class: 'field' }, 'Умовне позначення', designationInput),
+        el('label', { class: 'field' }, 'Ідентифікатор системи (за наявності)', systemIdInput),
+        el('label', { class: 'field' }, 'Відомості про власника або розпорядника системи', ownerInfoInput),
+        el('label', { class: 'field' }, 'Відомості про виконавця робіт з розробки ЦПБ', developerInfoInput),
+        el('label', { class: 'field' }, 'Підстава розробки', developmentBasisInput),
+        el('label', { class: 'field' }, 'Відомості про обраний базовий профіль безпеки (галузевий профіль безпеки системи)', baselineProfileInfoInput),
         el('label', { class: 'field' }, 'Орган сертифікації', certInput),
-        el('div', { class: 'field' }, 'Клас ІКС: ', ...classRadios),
+        el('label', { class: 'field' }, 'Перелік нормативно-правових актів', normativeActsInput),
+        el('div', { class: 'field' }, 'Клас ІКС відповідно до НД ТЗІ: ', ...classRadios),
         el('h3', {}, 'Картка глобальних політик'),
         ...policyFields));
   },
