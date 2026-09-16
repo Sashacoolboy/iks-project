@@ -1,7 +1,7 @@
 import { el, option, showModal } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
-import { baseRisksFor, threatDirectory, buildCustomRisk, computeRiskScore, riskLevel, applyBaseOverride } from '/core/risk-engine.js';
+import { baseRisksFor, threatDirectory, buildCustomRisk, computeRiskScore, riskLevel, applyBaseOverride, annotateRisk } from '/core/risk-engine.js';
 
 const STRATEGY_OPTIONS = ['Зменшення', 'Прийняття', 'Уникнення', 'Передача'];
 const RESIDUAL_OPTIONS = ['', 'Дуже низький', 'Низький', 'Середній', 'Високий', 'Критичний'];
@@ -10,6 +10,11 @@ const RESIDUAL_OPTIONS = ['', 'Дуже низький', 'Низький', 'Се
 const patchCustomRisk = (id, patch) =>
   setState(s => ({ ...s, risks: { ...s.risks,
     custom: s.risks.custom.map(r => r.id === id ? { ...r, ...patch } : r) } }));
+
+// Редагування кастомного ризику через модалку — перераховує рівень (score/level), на відміну від patchCustomRisk
+const saveCustomRiskEdit = (id, patch, scale) =>
+  setState(s => ({ ...s, risks: { ...s.risks,
+    custom: s.risks.custom.map(r => r.id === id ? annotateRisk({ ...r, ...patch }, scale) : r) } }));
 
 const setBaseOverride = (id, patch) =>
   setState(s => ({ ...s, risks: { ...s.risks, base_overrides: { ...s.risks.base_overrides, [id]: patch } } }));
@@ -39,11 +44,12 @@ export const step = {
     const hidden = new Set(state.risks.hidden_base ?? []);
     const baseRisks = baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class)
       .filter(r => !hidden.has(r.id));
-    // Перший показ: усі базові ризики прийняті за замовчуванням
-    if (!state.risks.accepted_base.length && baseRisks.length) {
-      setState(s => ({ ...s, risks: { ...s.risks, accepted_base: baseRisks.map(r => r.id) } }));
+    // Чекбокс "прийняти" прибрано з UI — видалення ризику (кнопка "Видалити") тепер єдиний спосіб
+    // виключити базовий ризик, тож усі видимі базові ризики вважаються прийнятими автоматично
+    const baseRiskIds = baseRisks.map(r => r.id);
+    if (state.risks.accepted_base.length !== baseRiskIds.length || baseRiskIds.some(id => !state.risks.accepted_base.includes(id))) {
+      setState(s => ({ ...s, risks: { ...s.risks, accepted_base: baseRiskIds } }));
     }
-    const accepted = new Set(getState().risks.accepted_base);
     const overrides = getState().risks.base_overrides ?? {};
 
     const openEditRiskModal = (risk) => {
@@ -86,17 +92,12 @@ export const step = {
         { title: `Редагування загрози ${risk.id}` });
     };
 
-    const header = el('tr', {}, ...['✓', 'ID', 'Актив', 'Загроза', 'Вразливість', 'Вплив', 'Ймовірність', 'Рівень', 'Стратегія', 'Заходи обробки', 'Відповідальний', 'Залишковий', 'Дії']
+    const header = el('tr', {}, ...['ID', 'Актив', 'Загроза', 'Вразливість', 'Вплив', 'Ймовірність', 'Рівень', 'Стратегія', 'Заходи обробки', 'Відповідальний', 'Залишковий', 'Дії']
       .map(h => el('th', {}, h)));
 
     const baseRows = baseRisks.map(r => {
       const eff = applyBaseOverride(r, overrides[r.id], scale);
       return el('tr', {},
-        el('td', {}, el('input', { type: 'checkbox', ...(accepted.has(r.id) ? { checked: '' } : {}),
-          onchange: (e) => setState(s => ({ ...s, risks: { ...s.risks,
-            accepted_base: e.target.checked
-              ? [...s.risks.accepted_base, r.id]
-              : s.risks.accepted_base.filter(x => x !== r.id) } })) })),
         el('td', {}, r.id), el('td', {}, assetName(eff.asset_id)), el('td', {}, eff.threat),
         el('td', {}, eff.vulnerability), el('td', {}, String(eff.impact)),
         el('td', {}, `${eff.likelihood_label} / ${eff.likelihood}`),
@@ -162,8 +163,48 @@ export const step = {
     };
     const addRiskBtn = el('button', { type: 'button', onclick: openAddRiskModal }, '+ Додати ризик');
 
+    // Редагування кастомного ризику — усі поля (на відміну від точкового редагування
+    // стратегії/заходів/відповідального прямо в таблиці нижче)
+    const openEditCustomRiskModal = (risk) => {
+      const assetSel = el('select', {}, ...state.selected_assets.map(id => option(id, assetName(id), id === risk.asset_id)));
+      const threatInput = el('input', { type: 'text', value: risk.threat });
+      const vulnInput = el('input', { type: 'text', value: risk.vulnerability });
+      const impSel = el('select', {}, ...scale.impact_options.map(o => option(String(o.value), `${o.value} (${o.label})`, o.value === risk.impact)));
+      const likSel = el('select', {}, ...scale.likelihood_options.map(o => option(String(o.value), `${o.label} / ${o.value}`, o.value === risk.likelihood)));
+      const stratSel = el('select', {}, ...STRATEGY_OPTIONS.map(v => option(v, v, v === risk.treatment_strategy)));
+      const planInput = el('input', { type: 'text', value: risk.treatment_plan ?? '', placeholder: 'опишіть заходи обробки…' });
+      const respInput = el('input', { type: 'text', value: risk.responsible ?? '' });
+      const residSel = el('select', {}, ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (risk.residual_risk ?? ''))));
+      const saveBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
+        const likelihood = Number(likSel.value);
+        saveCustomRiskEdit(risk.id, {
+          asset_id: assetSel.value, threat: threatInput.value, vulnerability: vulnInput.value,
+          impact: Number(impSel.value), likelihood,
+          likelihood_label: scale.likelihood_options.find(o => o.value === likelihood)?.label ?? '',
+          treatment_strategy: stratSel.value, treatment_plan: planInput.value, responsible: respInput.value,
+          residual_risk: residSel.value,
+        }, scale);
+        modal.close();
+        rerender();
+      } }, 'Зберегти');
+      const deleteBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
+        if (!confirm(`Видалити загрозу «${risk.threat}» (${risk.id}) зі списку?`)) return;
+        setState(s => ({ ...s, risks: { ...s.risks, custom: s.risks.custom.filter(x => x.id !== risk.id) } }));
+        modal.close();
+        rerender();
+      } }, 'Видалити');
+      const modal = showModal(el('div', { class: 'field-grid' },
+        el('label', {}, 'Актив: ', assetSel), el('label', {}, 'Загроза: ', threatInput),
+        el('label', {}, 'Вразливість: ', vulnInput), el('label', {}, 'Вплив: ', impSel),
+        el('label', {}, 'Ймовірність: ', likSel), el('label', {}, 'Стратегія: ', stratSel),
+        el('label', {}, 'Заходи обробки: ', planInput), el('label', {}, 'Відповідальний: ', respInput),
+        el('label', {}, 'Залишковий ризик: ', residSel),
+        el('div', { class: 'actions' }, saveBtn,
+          el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати'), deleteBtn)),
+        { title: `Редагування загрози ${risk.id}` });
+    };
+
     const customRows = getState().risks.custom.map(r => el('tr', {},
-      el('td', {}, el('input', { type: 'checkbox', checked: '', disabled: '' })),
       el('td', {}, r.id), el('td', {}, assetName(r.asset_id)),
       el('td', {}, el('span', { title: r.vulnerability }, r.threat)),
       el('td', {}, r.vulnerability), el('td', {}, String(r.impact)),
@@ -181,11 +222,16 @@ export const step = {
       el('td', {}, el('select', { class: 'cell-edit',
         onchange: (e) => patchCustomRisk(r.id, { residual_risk: e.target.value }) },
         ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (r.residual_risk ?? ''))))),
-      el('td', {}, el('button', { type: 'button', class: 'icon-btn danger', title: 'Видалити', 'aria-label': 'Видалити',
-        onclick: () => {
-          setState(s => ({ ...s, risks: { ...s.risks, custom: s.risks.custom.filter(x => x.id !== r.id) } }));
-          rerender();
-        } }, '🗑'))));
+      el('td', {},
+        el('div', { class: 'row-actions' },
+          el('button', { type: 'button', class: 'icon-btn', title: 'Редагувати', 'aria-label': 'Редагувати',
+            onclick: () => openEditCustomRiskModal(r) }, '✎'),
+          el('button', { type: 'button', class: 'icon-btn danger', title: 'Видалити', 'aria-label': 'Видалити',
+            onclick: () => {
+              if (!confirm(`Видалити загрозу «${r.threat}» (${r.id}) зі списку?`)) return;
+              setState(s => ({ ...s, risks: { ...s.risks, custom: s.risks.custom.filter(x => x.id !== r.id) } }));
+              rerender();
+            } }, '🗑')))));
 
     const saveRisksBtn = el('button', { type: 'button', class: 'collapse-safe', onclick: async () => {
       const r = await fetch('/api/export/risks-docx', { method: 'POST', body: JSON.stringify({ state: getState() }) });

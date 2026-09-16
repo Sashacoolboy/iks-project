@@ -33,6 +33,16 @@ function approvedItem(it) {
     setState(() => st);
     goToStep(1);
   } }, '⇆ Дублювати');
+  const metaRows = [
+    ['Умовне позначення', it.designation],
+    ['Ідентифікатор системи', it.system_id],
+    ['Власник/розпорядник', it.owner_info],
+    ['Виконавець розробки ЦПБ', it.developer_info],
+  ].filter(([, value]) => value);
+  const meta = metaRows.length
+    ? el('div', { class: 'approved-meta' },
+        ...metaRows.map(([label, value]) => el('span', {}, `${label}: ${value}`)))
+    : null;
   return el('article', { class: 'approved-item' },
     el('header', {},
       el('strong', {}, it.ics_name || it.name),
@@ -40,6 +50,7 @@ function approvedItem(it) {
       el('span', { class: 'badge' }, INFO_LABELS[it.info_type] ?? '—'),
       el('span', { class: 'approved-date' }, it.approved_at ? new Date(it.approved_at).toLocaleDateString('uk-UA') : ''),
       infoBtn, loadBtn, dupBtn),
+    meta,
     details);
 }
 

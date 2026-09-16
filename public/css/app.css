@@ -57,6 +57,7 @@ header { background: var(--color-primary-dark); color: var(--color-on-primary); 
 header h1 { font-size: 1.2rem; font-weight: 700; margin: 0 0 var(--space-2); letter-spacing: 0.01em; }
 
 main { flex: 1; padding: var(--space-5); max-width: 72rem; width: 100%; margin: 0 auto; }
+main.wide { max-width: 90vw; }
 footer { padding: var(--space-3) var(--space-5); background: var(--color-card); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; }
 
 button {
@@ -67,7 +68,8 @@ button {
 button:hover:not(:disabled) { border-color: var(--color-secondary); background: var(--color-muted); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 button.primary { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); font-weight: 600; }
-button.primary:hover:not(:disabled) { background: var(--color-primary-dark); border-color: var(--color-primary-dark); }
+button.primary:hover:not(:disabled) {     background-color: forestgreen;; border-color: var(--color-primary-dark); }
+button#btn-next { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); font-weight: 600; }
 
 h2 { font-size: 1.3rem; font-weight: 700; margin: 0 0 var(--space-4); color: var(--color-fg); }
 h3 { font-size: 1.05rem; font-weight: 600; margin-top: var(--space-5); margin-bottom: var(--space-2); color: var(--color-fg); }
@@ -133,6 +135,7 @@ tbody tr:hover { background: #f8fafc; }
 .approved-item { border-top: 1px solid #bbf7d0; padding: var(--space-2) 0; }
 .approved-item header { background: none; color: inherit; padding: 0; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .approved-date { font-size: 0.8rem; color: var(--color-muted-fg); }
+.approved-meta { font-size: 0.8rem; color: var(--color-muted-fg); margin: 0.3rem 0 0; display: flex; flex-wrap: wrap; gap: 0.15rem 1rem; }
 .approved-details { font-size: 0.85rem; margin: 0.3rem 0 0 var(--space-2); }
 .approved-details p { margin: 0.15rem 0; }
 .src-policy { background: #bbf7d0; }

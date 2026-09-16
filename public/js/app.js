@@ -44,6 +44,7 @@ function go(index) {
   renderStepper();
   const container = document.getElementById('step-container');
   container.replaceChildren();
+  container.classList.toggle('wide', steps[current].id === 'risks');
   const locked = Boolean(getState().approved_view) && current > 0;
   if (locked) {
     const banner = el('div', { class: 'view-banner' },

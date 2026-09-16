@@ -106,6 +106,8 @@ createServer(async (req, res) => {
               if (kind === 'approved') {
                 meta = { name, info_type: obj.state?.info_type ?? null,
                   ics_name: obj.state?.passport?.ics_name ?? '', as_class: obj.state?.passport?.as_class ?? null,
+                  designation: obj.state?.passport?.designation ?? '', system_id: obj.state?.passport?.system_id ?? '',
+                  owner_info: obj.state?.passport?.owner_info ?? '', developer_info: obj.state?.passport?.developer_info ?? '',
                   approved_at: obj.approved_at ?? null, summary: obj.summary ?? {} };
               } else {
                 meta.info_type = obj.info_type ?? null;
