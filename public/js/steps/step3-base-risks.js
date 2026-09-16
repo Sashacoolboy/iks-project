@@ -1,4 +1,4 @@
-import { el, option } from '../render/dom.js';
+import { el, option, showModal } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { baseRisksFor, threatDirectory, buildCustomRisk, computeRiskScore, riskLevel, applyBaseOverride } from '/core/risk-engine.js';
@@ -101,38 +101,51 @@ export const step = {
           overrides[r.id] ? el('button', { type: 'button', onclick: () => { resetBaseOverride(r.id); rerender(); } }, 'Скинути') : null))];
     });
 
-    // Конструктор нового (кастомного) ризику — потрапляє в той самий перелік нижче
-    const assetSel = el('select', {}, ...state.selected_assets.map(id => option(id, assetName(id))));
-    const allThreatsChk = el('input', { type: 'checkbox' });
-    const threatSel = el('select', {});
-    let dir = [];
-    const refreshThreats = () => {
-      dir = threatDirectory(catalogs.threatsRisks, allThreatsChk.checked ? null : assetSel.value);
-      threatSel.replaceChildren(...dir.map((t, i) => option(String(i), `${t.threat} / ${t.vulnerability}`)));
+    // Конструктор нового (кастомного) ризику — відкривається в модальному вікні,
+    // додана карта потрапляє в той самий перелік нижче
+    const openAddRiskModal = () => {
+      const assetSel = el('select', {}, ...state.selected_assets.map(id => option(id, assetName(id))));
+      const allThreatsChk = el('input', { type: 'checkbox' });
+      const threatSel = el('select', {});
+      let dir = [];
+      const refreshThreats = () => {
+        dir = threatDirectory(catalogs.threatsRisks, allThreatsChk.checked ? null : assetSel.value);
+        threatSel.replaceChildren(...dir.map((t, i) => option(String(i), `${t.threat} / ${t.vulnerability}`)));
+      };
+      assetSel.addEventListener('change', refreshThreats);
+      allThreatsChk.addEventListener('change', refreshThreats);
+      refreshThreats();
+      const likSel = el('select', {}, ...scale.likelihood_options.map(o => option(String(o.value), `${o.label} / ${o.value}`)));
+      const impSel = el('select', {}, ...scale.impact_options.map(o => option(String(o.value), `${o.value} (${o.label})`)));
+      const preview = el('span', { class: 'badge' }, '—');
+      const updatePreview = () => {
+        const score = computeRiskScore(Number(impSel.value), Number(likSel.value));
+        preview.textContent = `${riskLevel(score, scale)} (${score})`;
+      };
+      likSel.addEventListener('change', updatePreview);
+      impSel.addEventListener('change', updatePreview);
+      updatePreview();
+      const addBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
+        const t = dir[Number(threatSel.value)];
+        if (!t) return;
+        const existing = [...getState().risks.custom.map(r => r.id)];
+        const risk = buildCustomRisk({ asset_id: assetSel.value, threat: t.threat, vulnerability: t.vulnerability,
+          impact: Number(impSel.value), likelihood: Number(likSel.value),
+          likelihood_label: scale.likelihood_options.find(o => o.value === Number(likSel.value)).label }, existing, scale);
+        setState(s => ({ ...s, risks: { ...s.risks, custom: [...s.risks.custom, risk] } }));
+        modal.close();
+        rerender();
+      } }, 'Додати до переліку');
+      const modal = showModal(el('div', { class: 'field-grid' },
+        el('label', {}, 'Актив: ', assetSel), el('label', {}, 'Загроза: ', threatSel),
+        el('label', { class: 'checkbox' }, allThreatsChk, 'усі загрози'),
+        el('label', {}, 'Ймовірність: ', likSel), el('label', {}, 'Вплив: ', impSel),
+        el('label', {}, 'Рівень: ', preview),
+        el('div', { class: 'actions' }, addBtn,
+          el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати'))),
+        { title: 'Додати ризик' });
     };
-    assetSel.addEventListener('change', refreshThreats);
-    allThreatsChk.addEventListener('change', refreshThreats);
-    refreshThreats();
-    const likSel = el('select', {}, ...scale.likelihood_options.map(o => option(String(o.value), `${o.label} / ${o.value}`)));
-    const impSel = el('select', {}, ...scale.impact_options.map(o => option(String(o.value), `${o.value} (${o.label})`)));
-    const preview = el('span', { class: 'badge' }, '—');
-    const updatePreview = () => {
-      const score = computeRiskScore(Number(impSel.value), Number(likSel.value));
-      preview.textContent = `${riskLevel(score, scale)} (${score})`;
-    };
-    likSel.addEventListener('change', updatePreview);
-    impSel.addEventListener('change', updatePreview);
-    updatePreview();
-    const addBtn = el('button', { type: 'button', onclick: () => {
-      const t = dir[Number(threatSel.value)];
-      if (!t) return;
-      const existing = [...getState().risks.custom.map(r => r.id)];
-      const risk = buildCustomRisk({ asset_id: assetSel.value, threat: t.threat, vulnerability: t.vulnerability,
-        impact: Number(impSel.value), likelihood: Number(likSel.value),
-        likelihood_label: scale.likelihood_options.find(o => o.value === Number(likSel.value)).label }, existing, scale);
-      setState(s => ({ ...s, risks: { ...s.risks, custom: [...s.risks.custom, risk] } }));
-      rerender();
-    } }, '+ Додати ризик до переліку');
+    const addRiskBtn = el('button', { type: 'button', onclick: openAddRiskModal }, '+ Додати ризик');
 
     const customRows = getState().risks.custom.map(r => el('tr', {},
       el('td', {}, el('input', { type: 'checkbox', checked: '', disabled: '' })),
@@ -177,12 +190,8 @@ export const step = {
 
     container.replaceChildren(el('section', {},
       el('h2', {}, `Крок 3. Ризики (${baseRows.length + customRows.length} у переліку — базові та кастомні)`),
+      el('div', { class: 'actions' }, addRiskBtn),
       el('table', { class: 'risk-table' }, header, ...baseRows, ...customRows),
-      el('div', { class: 'constructor' },
-        el('label', {}, 'Актив: ', assetSel), el('label', {}, 'Загроза: ', threatSel),
-        el('label', { class: 'checkbox' }, allThreatsChk, 'усі загрози'),
-        el('label', {}, 'Ймовірність: ', likSel), el('label', {}, 'Вплив: ', impSel),
-        el('label', {}, 'Рівень: ', preview), addBtn),
       el('div', { class: 'actions' }, saveRisksBtn),
       el('h3', {}, 'Тип інформації, що обробляється (обовʼязково)'),
       ...infoRadios));

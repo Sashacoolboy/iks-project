@@ -129,6 +129,15 @@ th { background: #edf2f7; }
 .risk-edit-form { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; padding: 0.5rem 0; }
 .risk-edit-form label { font-size: 0.82rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .risk-edit-form .actions { margin: 0.2rem 0 0; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(26, 32, 44, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+.modal-panel { background: #fff; border-radius: 8px; padding: 1rem 1.25rem; max-width: 34rem; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.modal-header h3 { margin: 0; }
+.modal-close { background: none; border: none; font-size: 1.1rem; line-height: 1; cursor: pointer; color: #718096; padding: 0.2rem; }
+.modal-close:hover { color: #2d3748; }
+.modal-body .field-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+.modal-body label { font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .req-cell button {background: #ddd; border: 1px solid #cbd5e0; border-radius: 4px; padding: 0.2rem 0.4rem; font-size: 0.75rem; color: #2c5282; margin-top: 10px;}
 .add.link-btn {padding: 10px 15px; color: #000; cursor: default; font-size: 1em; font-weight: 700;}
 /* Task 13: Assessment table styles */
