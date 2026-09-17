@@ -8,6 +8,7 @@ export function riskLevel(score, scale) {
 }
 
 export function annotateRisk(risk, scale) {
+  if (risk.impact == null || risk.likelihood == null) return { ...risk, score: null, level: null };
   const score = computeRiskScore(risk.impact, risk.likelihood);
   return { ...risk, score, level: riskLevel(score, scale) };
 }
@@ -44,6 +45,14 @@ export function threatDirectory(catalog, assetId = null) {
     if (!seen.has(key)) { seen.add(key); out.push({ threat: r.threat, vulnerability: r.vulnerability }); }
   }
   return out.sort((a, b) => a.threat.localeCompare(b.threat, 'uk'));
+}
+
+// Каталожний запис за парою загроза/вразливість (і, за потреби, активом) — джерело
+// автозаповнення полів при додаванні ризику "з переліку" (public/js/risk-form.js)
+export function findCatalogRisk(catalog, assetId, threat, vulnerability) {
+  return catalog.risks.find(r =>
+    r.threat === threat && r.vulnerability === vulnerability &&
+    (assetId ? r.asset_id === assetId : true)) ?? null;
 }
 
 export function buildCustomRisk(input, existingIds, scale) {

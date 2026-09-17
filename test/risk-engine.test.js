@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computeRiskScore, riskLevel, annotateRisk, baseRisksFor, threatDirectory, buildCustomRisk,
-  applyBaseOverride, acceptedRisksFor } from '../core/risk-engine.js';
+  applyBaseOverride, acceptedRisksFor, findCatalogRisk } from '../core/risk-engine.js';
 
 const tr = JSON.parse(readFileSync(new URL('../data/threats_risks.json', import.meta.url)));
 
@@ -62,4 +62,25 @@ test('acceptedRisksFor: прийняті базові (з overrides) + каст�
   assert.equal(r.find(x => x.id === base[0].id).responsible, 'Перевизначено');
   assert.ok(r.some(x => x.id === 'C-001'));
   assert.ok(!r.some(x => x.id === base[1]?.id));
+});
+
+test('annotateRisk: без impact/likelihood повертає level=null, score=null', () => {
+  const r = annotateRisk({ id: 'C-999', threat: 'Т', vulnerability: 'В' }, tr.scale);
+  assert.equal(r.level, null);
+  assert.equal(r.score, null);
+});
+
+test('annotateRisk: з обома полями рахує як і раніше', () => {
+  const r = annotateRisk({ id: 'C-998', threat: 'Т', vulnerability: 'В', impact: 4, likelihood: 0.5 }, tr.scale);
+  assert.equal(r.level, 'Високий');
+});
+
+test('findCatalogRisk знаходить запис за активом і темою; без активу шукає серед усіх; без збігу — null', () => {
+  const base = baseRisksFor(tr, ['A-01'], 1)[0];
+  const foundWithAsset = findCatalogRisk(tr, base.asset_id, base.threat, base.vulnerability);
+  assert.equal(foundWithAsset.id, base.id);
+  const foundAnyAsset = findCatalogRisk(tr, null, base.threat, base.vulnerability);
+  assert.equal(foundAnyAsset.id, base.id);
+  assert.equal(findCatalogRisk(tr, 'A-99', base.threat, base.vulnerability), null);
+  assert.equal(findCatalogRisk(tr, null, 'нема такої', 'теж нема'), null);
 });
