@@ -26,10 +26,18 @@ export const step = {
     // попередній вибір користувача відновлюється, якщо актив обрати знову.
     const toggleAsset = (assetId, checked) => setState(s => {
       if (!checked) return { ...s, selected_assets: s.selected_assets.filter(x => x !== assetId) };
+      const defaulted = new Set(s.risks.defaulted_assets ?? []);
+      // Автозаповнення accepted_base відбувається лише РАЗ на актив (перше позначення) —
+      // повторне позначення того самого активу довіряє поточному accepted_base як є,
+      // інакше явно знятий користувачем ризик мовчки повертався б при кожному повторному виборі активу.
+      if (defaulted.has(assetId)) {
+        return { ...s, selected_assets: [...s.selected_assets, assetId] };
+      }
       const toAdd = risksForAsset(assetId, s.passport.as_class)
         .map(r => r.id).filter(id => !s.risks.accepted_base.includes(id));
       return { ...s, selected_assets: [...s.selected_assets, assetId],
-        risks: { ...s.risks, accepted_base: [...s.risks.accepted_base, ...toAdd] } };
+        risks: { ...s.risks, accepted_base: [...s.risks.accepted_base, ...toAdd],
+          defaulted_assets: [...defaulted, assetId] } };
     });
 
     const sections = [...groups.entries()].map(([category, assets]) =>
