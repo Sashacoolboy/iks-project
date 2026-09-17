@@ -75,7 +75,7 @@ export const step = {
       if (!confirm('Почати новий проєкт ІКС? Незбережений стан майстра буде очищено.')) return;
       resetState();
       goToStep(1);
-    } }, '➕ Додати новий ІКС проєкт');
+    } }, '+ Додати новий ІКС проєкт');
     const continueBtn = el('button', { type: 'button', onclick: () => goToStep(1) }, 'Продовжити поточний проєкт →');
     container.replaceChildren(el('section', {},
       el('h2', {}, 'Реєстр затверджених ІКС та ЦПБ'),
