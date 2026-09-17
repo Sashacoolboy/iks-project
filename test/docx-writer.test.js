@@ -89,3 +89,16 @@ test('buildRisksDocx — окремий валідний документ реє
   const header = execFileSync('unzip', ['-p', file, 'word/header1.xml'], { encoding: 'utf8' });
   assert.match(header, /Для службового користування/);
 });
+
+test('buildRisksDocx — ризик без оцінки показує «—»/«Не оцінено», не «undefined»', () => {
+  const buf = buildRisksDocx({ state: input.state, assets: input.assets,
+    annotatedRisks: [{ id: 'C-001', asset_id: 'A-01', threat: 'Власна загроза', vulnerability: 'Власна вразливість',
+      impact: undefined, likelihood: undefined, likelihood_label: '', level: null,
+      treatment_strategy: '', treatment_plan: '', responsible: '', residual_risk: '' }] });
+  const dir = mkdtempSync(join(tmpdir(), 'riskstest2-'));
+  const file = join(dir, 'r2.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.doesNotMatch(xml, /undefined/);
+  assert.match(xml, /Не оцінено/);
+});

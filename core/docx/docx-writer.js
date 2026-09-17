@@ -233,8 +233,9 @@ export function buildRisksDocx({ state, annotatedRisks, assets }) {
       .map(h => cell(h, { bold: true, align: 'center' })), { header: true }),
     ...annotatedRisks.map(r => row([
       cell(r.id), cell(assetName(r.asset_id)), cell(r.threat), cell(r.vulnerability),
-      cell(String(r.impact), { align: 'center' }), cell(`${r.likelihood_label} / ${r.likelihood}`),
-      cell(r.level, { align: 'center' }), cell(r.treatment_strategy), cell(r.treatment_plan),
+      cell(r.impact != null ? String(r.impact) : '—', { align: 'center' }),
+      cell(r.likelihood != null ? `${r.likelihood_label} / ${r.likelihood}` : '—'),
+      cell(r.level ?? 'Не оцінено', { align: 'center' }), cell(r.treatment_strategy), cell(r.treatment_plan),
       cell(r.responsible), cell(r.residual_risk ?? ''),
     ])),
   ]));
