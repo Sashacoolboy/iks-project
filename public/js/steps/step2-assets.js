@@ -5,8 +5,6 @@ import { filterAssetsByClass, groupByCategory } from '/core/asset-catalog.js';
 import { baseRisksFor } from '/core/risk-engine.js';
 import { openRiskFormModal } from '../risk-form.js';
 
-const assetName = (id) => catalogs.assets.find(a => a.id === id)?.name ?? id;
-
 export const step = {
   id: 'assets', title: 'Активи',
   validate(state) { return state.selected_assets.length ? [] : ['Оберіть щонайменше один актив']; },
@@ -62,40 +60,35 @@ export const step = {
 
     const sections = [...groups.entries()].map(([category, assets]) =>
       el('fieldset', {}, el('legend', {}, category),
-        ...assets.map(a => el('label', { class: 'checkbox' },
-          el('input', { type: 'checkbox', value: a.id,
-            ...(state.selected_assets.includes(a.id) ? { checked: '' } : {}),
-            onchange: (e) => { toggleAsset(a.id, e.target.checked); rerender(); } }),
-          `${a.id}. ${a.name}`))));
-
-    const riskPanel = state.selected_assets.length
-      ? el('div', { class: 'risk-preview' },
-          el('h3', {}, `Ризики обраних активів (${state.selected_assets.reduce((n, id) =>
-            n + risksForAsset(id, state.passport.as_class).length, 0)})`),
-          ...state.selected_assets.map(assetId => {
-            const risks = risksForAsset(assetId, state.passport.as_class);
-            return el('fieldset', {}, el('legend', {}, assetName(assetId)),
-              risks.length
-                ? el('div', {}, ...risks.map(r => el('label', { class: 'checkbox' },
-                    el('input', { type: 'checkbox',
-                      ...(state.risks.accepted_base.includes(r.id) ? { checked: '' } : {}),
-                      onchange: (e) => setState(s => ({ ...s, risks: { ...s.risks,
-                        accepted_base: e.target.checked
-                          ? [...s.risks.accepted_base, r.id]
-                          : s.risks.accepted_base.filter(x => x !== r.id) } })) }),
-                    `${r.threat} — ${r.vulnerability}`,
-                    el('span', { class: `badge lvl-${r.level.replace(/ /g, '-')}` }, r.level))))
-                : el('p', { class: 'hint' }, 'Немає готових загроз у довіднику для цього активу.'),
-              el('button', { type: 'button',
-                onclick: () => openRiskFormModal({ presetAssetId: assetId, onSaved: rerender }) },
-                '+ Додати свій ризик до цього активу'));
-          }))
-      : null;
+        ...assets.flatMap(a => {
+          const checkboxRow = el('label', { class: 'checkbox' },
+            el('input', { type: 'checkbox', value: a.id,
+              ...(state.selected_assets.includes(a.id) ? { checked: '' } : {}),
+              onchange: (e) => { toggleAsset(a.id, e.target.checked); rerender(); } }),
+            `${a.id}. ${a.name}`);
+          if (!state.selected_assets.includes(a.id)) return [checkboxRow];
+          const risks = risksForAsset(a.id, state.passport.as_class);
+          const riskPanel = el('div', { class: 'risk-preview' },
+            risks.length
+              ? el('div', {}, ...risks.map(r => el('label', { class: 'checkbox' },
+                  el('input', { type: 'checkbox',
+                    ...(state.risks.accepted_base.includes(r.id) ? { checked: '' } : {}),
+                    onchange: (e) => setState(s => ({ ...s, risks: { ...s.risks,
+                      accepted_base: e.target.checked
+                        ? [...s.risks.accepted_base, r.id]
+                        : s.risks.accepted_base.filter(x => x !== r.id) } })) }),
+                  `${r.threat} — ${r.vulnerability}`,
+                  el('span', { class: `badge lvl-${r.level.replace(/ /g, '-')}` }, r.level))))
+              : el('p', { class: 'hint' }, 'Немає готових загроз у довіднику для цього активу.'),
+            el('button', { type: 'button',
+              onclick: () => openRiskFormModal({ presetAssetId: a.id, onSaved: rerender }) },
+              '+ Додати свій ризик до цього активу'));
+          return [checkboxRow, riskPanel];
+        })));
 
     container.replaceChildren(
       el('section', {},
         el('h2', {}, `Крок 2. Вибір активів (доступно для АС-${state.passport.as_class}: ${visible.length} із ${catalogs.assets.length})`),
-        ...sections,
-        riskPanel));
+        ...sections));
   },
 };
