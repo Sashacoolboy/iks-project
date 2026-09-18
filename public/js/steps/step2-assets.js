@@ -1,4 +1,4 @@
-import { el, option } from '../render/dom.js';
+import { el } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { filterAssetsByClass, groupByCategory } from '/core/asset-catalog.js';
@@ -11,8 +11,28 @@ export const step = {
   id: 'assets', title: 'Активи',
   validate(state) { return state.selected_assets.length ? [] : ['Оберіть щонайменше один актив']; },
   render(container) {
-    const state = getState();
     const rerender = () => { container.replaceChildren(); step.render(container); };
+    const hidden0 = new Set(getState().risks.hidden_base ?? []);
+    const risksForAsset0 = (assetId, asClass) =>
+      baseRisksFor(catalogs.threatsRisks, [assetId], asClass).filter(r => !hidden0.has(r.id));
+    // Активи, обрані поза цим кроком (завантажений шаблон ІКС, старий локальний стан
+    // до появи цієї фічі) ще не мають запису в defaulted_assets — донараховуємо їм
+    // типове включення ризиків тут-таки, при рендері, а не лише в toggleAsset.
+    setState(s => {
+      const defaulted = new Set(s.risks.defaulted_assets ?? []);
+      const pending = s.selected_assets.filter(id => !defaulted.has(id));
+      if (!pending.length) return s;
+      let accepted = [...s.risks.accepted_base];
+      for (const assetId of pending) {
+        for (const r of risksForAsset0(assetId, s.passport.as_class)) {
+          if (!accepted.includes(r.id)) accepted.push(r.id);
+        }
+        defaulted.add(assetId);
+      }
+      return { ...s, risks: { ...s.risks, accepted_base: accepted, defaulted_assets: [...defaulted] } };
+    });
+
+    const state = getState();
     const visible = filterAssetsByClass(catalogs.assets, state.passport.as_class);
     const groups = groupByCategory(visible);
     const hidden = new Set(state.risks.hidden_base ?? []);

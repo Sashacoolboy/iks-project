@@ -89,17 +89,24 @@ export function openRiskFormModal({ presetAssetId, onSaved } = {}) {
     el('div', { class: 'actions' }, addManualBtn,
       el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати')));
 
-  const tabCatalog = el('button', { type: 'button', class: 'active', onclick: () => {
+  const showCatalogTab = () => {
     tabCatalog.classList.add('active'); tabManual.classList.remove('active');
     catalogBody.hidden = false; manualBody.hidden = true;
-  } }, 'З переліку');
-  const tabManual = el('button', { type: 'button', onclick: () => {
+  };
+  const showManualTab = () => {
     tabManual.classList.add('active'); tabCatalog.classList.remove('active');
     manualBody.hidden = false; catalogBody.hidden = true;
-  } }, 'Власна загроза');
+  };
+  const tabCatalog = el('button', { type: 'button', onclick: showCatalogTab }, 'З переліку');
+  const tabManual = el('button', { type: 'button', onclick: showManualTab }, 'Власна загроза');
 
   const modal = showModal(el('div', {},
     el('div', { class: 'mode-switch' }, tabCatalog, tabManual),
     catalogBody, manualBody),
     { title: 'Додати ризик' });
+
+  // Якщо для активу за замовчуванням у каталозі немає жодної загрози — "З переліку"
+  // відкривається порожнім і кнопка додавання мовчки нічого не робить; одразу показуємо
+  // "Власна загроза", де додавання завжди можливе.
+  if (dir.length === 0) showManualTab(); else showCatalogTab();
 }
