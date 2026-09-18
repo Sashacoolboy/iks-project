@@ -86,7 +86,7 @@ export const step = {
       const covered = lookup(risksByRef, ctrlId);
       if (covered.length) return el('div', { class: 'risk-chips' },
         ...covered.map(r => el('span', {
-          class: `risk-chip lvl-${r.level.replaceAll(' ', '-')}`,
+          class: `risk-chip lvl-${(r.level ?? '').replaceAll(' ', '-')}`,
           'data-tip': `Покриває ризик ${r.id} (${r.level}): ${r.threat}${r.vulnerability ? ' — ' + r.vulnerability : ''}`,
         }, r.id)));
       // Контролі-політики (XX-1) — організаційна основа всього класу, а не окремих ризиків

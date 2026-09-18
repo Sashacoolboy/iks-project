@@ -45,7 +45,7 @@ export const step = {
     const hidden = new Set(state.risks.hidden_base ?? []);
     const accepted = new Set(state.risks.accepted_base);
     // Позначку "включити в роботу" тепер робить користувач на Кроці 2 (чекбокси в
-    // панелі перегляду ризиків активу) — тут просто показуємо то, що вже позначено.
+    // панелі перегляду ризиків активу) — тут просто показуємо те, що вже позначено.
     const baseRisks = baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class)
       .filter(r => !hidden.has(r.id) && accepted.has(r.id));
     const overrides = getState().risks.base_overrides ?? {};

@@ -101,4 +101,5 @@ test('buildRisksDocx — ризик без оцінки показує «—»/�
   const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
   assert.doesNotMatch(xml, /undefined/);
   assert.match(xml, /Не оцінено/);
+  assert.match(xml, /—/);
 });
