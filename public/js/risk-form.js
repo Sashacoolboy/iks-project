@@ -69,12 +69,14 @@ export function openRiskFormModal({ presetAssetId, onSaved } = {}) {
   const manualAssetSel = el('select', {}, ...assetIds.map(id => option(id, assetName(id), id === presetAssetId)));
   const manualThreatInput = el('input', { type: 'text', placeholder: 'опишіть загрозу…' });
   const manualVulnInput = el('input', { type: 'text', placeholder: 'опишіть вразливість…' });
+  const manualPicker = controlPicker(catalogs.ndTzi, []);
   const addManualBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
     if (!manualThreatInput.value.trim()) { alert('Вкажіть загрозу'); return; }
     const existing = [...getState().risks.custom.map(r => r.id)];
     const risk = buildCustomRisk({
       asset_id: manualAssetSel.value, threat: manualThreatInput.value.trim(),
       vulnerability: manualVulnInput.value.trim(), likelihood_label: '',
+      control_refs: manualPicker.getSelected(),
     }, existing, scale);
     setState(s => ({ ...s, risks: { ...s.risks, custom: [...s.risks.custom, risk] } }));
     modal.close();
@@ -85,6 +87,7 @@ export function openRiskFormModal({ presetAssetId, onSaved } = {}) {
     el('label', {}, 'Актив: ', manualAssetSel),
     el('label', {}, 'Загроза: ', manualThreatInput),
     el('label', {}, 'Вразливість: ', manualVulnInput),
+    el('label', {}, 'Заходи захисту (НД ТЗІ): ', manualPicker.el),
     el('p', { class: 'hint' }, 'Вплив і ймовірність можна буде задати пізніше, редагуючи цей ризик на Кроці 3.'),
     el('div', { class: 'actions' }, addManualBtn,
       el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати')));
@@ -109,4 +112,67 @@ export function openRiskFormModal({ presetAssetId, onSaved } = {}) {
   // відкривається порожнім і кнопка додавання мовчки нічого не робить; одразу показуємо
   // "Власна загроза", де додавання завжди можливе.
   if (dir.length === 0) showManualTab(); else showCatalogTab();
+}
+
+// Спільний UI-компонент вибору базових заходів захисту (без посилень) з НД ТЗІ —
+// використовується і в модалі додавання ризику (вище), і в Кроці 2/3 для редагування
+// control_refs існуючого ризику (базового чи кастомного).
+export function controlPicker(ndTzi, initialIds = []) {
+  const controls = ndTzi.document.security_families
+    .flatMap(fam => fam.controls.map(c => ({ id: c.canonical_id, title: c.title })))
+    .sort((a, b) => a.id.localeCompare(b.id));
+  let selected = [...initialIds];
+
+  const chipsRow = el('div', { class: 'ctrl-chips' });
+  const listBox = el('div', { class: 'ctrl-list' });
+  const searchInput = el('input', { type: 'text', placeholder: 'пошук за ID або назвою…' });
+
+  const renderChips = () => {
+    chipsRow.replaceChildren(...selected.map(id => el('span', { class: 'badge ctrl-chip' }, id,
+      el('button', { type: 'button', class: 'chip-remove', onclick: () => toggle(id, false) }, '✕'))));
+  };
+
+  const renderList = () => {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = q
+      ? controls.filter(c => c.id.toLowerCase().includes(q) || c.title.toLowerCase().includes(q))
+      : controls;
+    listBox.replaceChildren(...filtered.map(c => el('label', { class: 'checkbox' },
+      el('input', { type: 'checkbox', ...(selected.includes(c.id) ? { checked: '' } : {}),
+        onchange: (e) => toggle(c.id, e.target.checked) }),
+      `${c.id} — ${c.title}`)));
+  };
+
+  function toggle(id, checked) {
+    selected = checked ? [...selected, id] : selected.filter(x => x !== id);
+    renderChips();
+    renderList();
+  }
+
+  searchInput.addEventListener('input', renderList);
+  renderChips();
+  renderList();
+
+  const pickerEl = el('div', { class: 'control-picker' }, chipsRow, searchInput, listBox);
+  return { el: pickerEl, getSelected: () => [...selected] };
+}
+
+// Легкий модал редагування ЛИШЕ заходів захисту базового ризику — викликається з Кроку 2
+// (панель перегляду ризиків активу), де повне редагування ризику не потрібне.
+export function openControlsOnlyModal(risk, { onSaved } = {}) {
+  const override = getState().risks.base_overrides?.[risk.id];
+  const initialIds = override?.control_refs ?? risk.control_refs ?? [];
+  const picker = controlPicker(catalogs.ndTzi, initialIds);
+  const saveBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
+    setState(s => ({ ...s, risks: { ...s.risks, base_overrides: {
+      ...s.risks.base_overrides,
+      [risk.id]: { ...(s.risks.base_overrides[risk.id] ?? {}), control_refs: picker.getSelected() },
+    } } }));
+    modal.close();
+    onSaved?.();
+  } }, 'Зберегти');
+  const modal = showModal(el('div', {}, picker.el,
+    el('div', { class: 'actions' }, saveBtn,
+      el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати'))),
+    { title: `Заходи захисту — ${risk.id}` });
 }
