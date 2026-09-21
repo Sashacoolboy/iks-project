@@ -131,3 +131,51 @@ test('відповідь на динамічне питання (словник 
   const hit = doc.items.some(i => i.controls.some(c => c.statementLines.some(l => l.text.includes('ДИНАМІЧНЕ-42'))));
   assert.ok(hit, 'динамічна відповідь не потрапила у текст');
 });
+
+const threatsRisks = read('threats_risks.json');
+const emptyRisksState = { accepted_base: [], base_overrides: {}, hidden_base: [], defaulted_assets: [], custom: [] };
+
+test('additional_controls: порожній, якщо risks/threatsRisks не передано (зворотна сумісність)', () => {
+  const doc = buildProfile(baseState, catalogs);
+  assert.deepEqual(doc.additional_controls, []);
+});
+
+test('additional_controls: кастомний ризик з control_ref поза БПБ зʼявляється окремо', () => {
+  const state = { ...baseState, selected_assets: ['A-01'],
+    risks: { ...emptyRisksState, custom: [{ id: 'C-001', custom: true, asset_id: 'A-01',
+      threat: 'Т', vulnerability: 'В', impact: 3, likelihood: 0.5, control_refs: ['AC-9'] }] } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.additional_controls.length, 1);
+  assert.equal(doc.additional_controls[0].id, 'AC-9');
+  assert.equal(doc.additional_controls[0].family, 'AC');
+  assert.deepEqual(doc.additional_controls[0].risk_ids, ['C-001']);
+});
+
+test('additional_controls: control_ref, що вже мандований БПБ, не дублюється', () => {
+  const state = { ...baseState, selected_assets: ['A-01'],
+    risks: { ...emptyRisksState, custom: [{ id: 'C-001', custom: true, asset_id: 'A-01',
+      threat: 'Т', vulnerability: 'В', impact: 3, likelihood: 0.5, control_refs: ['AC-2'] }] } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.additional_controls.length, 0);
+});
+
+test('additional_controls: override базового ризику з control_ref поза БПБ зʼявляється окремо', () => {
+  const r0 = threatsRisks.risks.find(r => r.asset_id === 'A-01');
+  const state = { ...baseState, selected_assets: ['A-01'],
+    risks: { ...emptyRisksState, accepted_base: [r0.id], base_overrides: { [r0.id]: { control_refs: ['AC-9'] } } } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.additional_controls.length, 1);
+  assert.equal(doc.additional_controls[0].id, 'AC-9');
+  assert.deepEqual(doc.additional_controls[0].risk_ids, [r0.id]);
+});
+
+test('additional_controls: два ризики з однаковим позабпбшним control_ref обʼєднуються в один запис', () => {
+  const r0 = threatsRisks.risks.find(r => r.asset_id === 'A-01');
+  const state = { ...baseState, selected_assets: ['A-01'],
+    risks: { ...emptyRisksState, accepted_base: [r0.id], base_overrides: { [r0.id]: { control_refs: ['AC-9'] } },
+      custom: [{ id: 'C-001', custom: true, asset_id: 'A-01', threat: 'Т', vulnerability: 'В',
+        impact: 3, likelihood: 0.5, control_refs: ['AC-9'] }] } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.additional_controls.length, 1);
+  assert.deepEqual(doc.additional_controls[0].risk_ids.sort(), [r0.id, 'C-001'].sort());
+});

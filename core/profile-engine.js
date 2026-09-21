@@ -1,5 +1,6 @@
 import { buildPolicyParamIndex, resolveParamValue, renderText, PARAM_RE } from './policy-autofill.js';
 import { dynamicPolicyIndex } from './odp-dictionary.js';
+import { acceptedRisksFor } from './risk-engine.js';
 
 export const INFO_TYPES = { open_confidential: 'bpb_open_confidential', service: 'bpb_service', state_secret: null };
 
@@ -177,5 +178,41 @@ export function buildProfile(state, catalogs) {
     empty: items.filter(i => i.status === STATUS.APPLIED && i.controls.some(c => c.emptyParams.length)).length,
     autofilled: items.filter(i => i.status === STATUS.APPLIED && i.controls.every(c => c.emptyParams.length === 0)).length,
   };
-  return { items, summary };
+
+  // Заходи, обрані для прийнятих ризиків (базових з урахуванням override + кастомних),
+  // яких ще немає в мандованому БПБ профілі — Крок 4/DOCX показують їх окремо, розподілено по родинах.
+  let additional_controls = [];
+  if (catalogs.threatsRisks && state.risks && state.selected_assets) {
+    const mandatedControlIds = new Set(items.flatMap(i => i.controls.map(c => c.id)));
+    const familyTitle = new Map(catalogs.ndTzi.document.security_families.map(f => [f.id, f.title]));
+    const controlMeta = new Map();
+    for (const fam of catalogs.ndTzi.document.security_families)
+      for (const c of fam.controls) controlMeta.set(c.canonical_id, { title: c.title, family: fam.id });
+
+    const accepted = acceptedRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class, state.risks);
+    const contributingRisks = new Map(); // controlId -> Set<riskId>
+    for (const r of accepted)
+      for (const ref of r.control_refs ?? [])
+        if (!mandatedControlIds.has(ref)) {
+          if (!contributingRisks.has(ref)) contributingRisks.set(ref, new Set());
+          contributingRisks.get(ref).add(r.id);
+        }
+
+    additional_controls = [...contributingRisks.entries()]
+      .filter(([id]) => controlMeta.has(id))
+      .map(([id, riskIds]) => {
+        const meta = controlMeta.get(id);
+        const ndControl = nd.get(id);
+        const emptyParams = [];
+        const resolve = makeResolver(new Map(), emptyParams);
+        return {
+          id, family: meta.family, familyName: familyTitle.get(meta.family) ?? meta.family,
+          title: meta.title, statementLines: statementLinesFor(ndControl, resolve),
+          risk_ids: [...riskIds].sort(),
+        };
+      })
+      .sort((a, b) => a.id.localeCompare(b.id));
+  }
+
+  return { items, summary, additional_controls };
 }
