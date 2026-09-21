@@ -168,9 +168,30 @@ export function buildDocx({ state, profileDoc, assets, policyMapping }) {
     cell('Захід захисту', { bold: true, align: 'center', pct: w4 }),
     cell('Налаштований зміст заходу захисту', { bold: true, align: 'center', pct: w5 }),
   ], { header: true })];
+  const additionalByFamily = new Map();
+  for (const ac of profileDoc.additional_controls ?? []) {
+    if (!additionalByFamily.has(ac.family)) additionalByFamily.set(ac.family, []);
+    additionalByFamily.get(ac.family).push(ac);
+  }
+  const additionalRowsFor = (family) => {
+    const list = additionalByFamily.get(family);
+    if (!list?.length) return [];
+    const rows = [row([cell('Додатково, з реєстру ризиків', { bold: true, italic: true, span: 5 })])];
+    for (const ac of list) {
+      const paragraphs = ac.statementLines.map(statementParXml).join('') || par(ac.title);
+      const idParagraphs = par(ac.id, { align: 'center' }) + par(ac.title, { italic: true, align: 'center', sz: 20 });
+      rows.push(row([
+        cell('', { pct: w1 }), cell('', { pct: w2 }), cell('', { pct: w3 }),
+        cellXml(idParagraphs, { pct: w4 }),
+        cellXml(paragraphs + par(`Ризики: ${ac.risk_ids.join(', ')}`, { italic: true, sz: 20 }), { pct: w5 }),
+      ]));
+    }
+    return rows;
+  };
   let currentClass = null;
   for (const item of profileDoc.items) {
     if (item.classId !== currentClass) {
+      if (currentClass !== null) profileRows.push(...additionalRowsFor(currentClass));
       currentClass = item.classId;
       profileRows.push(row([
         cell(`${item.className.toUpperCase()} (${item.classId})`, { bold: true, align: 'center', span: 5 }),
@@ -210,6 +231,18 @@ export function buildDocx({ state, profileDoc, assets, policyMapping }) {
         cellXml(entry.paragraphs, { pct: w5 }),
       ]));
     });
+  }
+  if (currentClass !== null) profileRows.push(...additionalRowsFor(currentClass));
+
+  // Родини, для яких у profileDoc.items взагалі немає жодного рядка — новий міні-class-card
+  const presentClassIds = new Set(profileDoc.items.map(i => i.classId));
+  for (const [family, list] of additionalByFamily) {
+    if (presentClassIds.has(family)) continue;
+    const familyName = list[0]?.familyName ?? family;
+    profileRows.push(row([
+      cell(`${familyName.toUpperCase()} (${family})`, { bold: true, align: 'center', span: 5 }),
+    ]));
+    profileRows.push(...additionalRowsFor(family));
   }
   body.push(table(profileRows));
   // 5. Підписи

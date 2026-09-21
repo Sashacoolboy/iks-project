@@ -103,3 +103,48 @@ test('buildRisksDocx — ризик без оцінки показує «—»/�
   assert.match(xml, /Не оцінено/);
   assert.match(xml, /—/);
 });
+
+test('buildDocx: без additional_controls документ не змінюється (немає нового блоку)', () => {
+  const buf = buildDocx(input);
+  const dir = mkdtempSync(join(tmpdir(), 'docxtest-noextra-'));
+  const file = join(dir, 't.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.doesNotMatch(xml, /Додатково, з реєстру ризиків/);
+});
+
+test('buildDocx: additional_controls зʼявляються під своїм класом, коли клас уже присутній', () => {
+  const withExtra = { ...input, profileDoc: { ...input.profileDoc,
+    additional_controls: [
+      { id: 'AC-9', family: 'AC', familyName: 'Управління доступом',
+        title: 'Сповіщення про попередній вхід (доступ)',
+        statementLines: [{ label: 'a.', depth: 0, text: 'Текст AC-9', parts: [{ type: 'text', value: 'Текст AC-9' }] }],
+        risk_ids: ['R-013'] },
+    ] } };
+  const buf = buildDocx(withExtra);
+  const dir = mkdtempSync(join(tmpdir(), 'docxtest-extra1-'));
+  const file = join(dir, 't.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.match(xml, /Додатково, з реєстру ризиків/);
+  assert.match(xml, /AC-9/);
+  assert.match(xml, /Ризики: R-013/);
+});
+
+test('buildDocx: родина, відсутня серед items, отримує новий міні-заголовок класу', () => {
+  const withExtra = { ...input, profileDoc: { ...input.profileDoc,
+    additional_controls: [
+      { id: 'PM-1', family: 'PM', familyName: 'Менеджмент інформаційної безпеки',
+        title: 'Програма (концепція) інформаційної безпеки',
+        statementLines: [{ label: '', depth: 0, text: 'Текст PM-1', parts: [{ type: 'text', value: 'Текст PM-1' }] }],
+        risk_ids: ['C-001'] },
+    ] } };
+  const buf = buildDocx(withExtra);
+  const dir = mkdtempSync(join(tmpdir(), 'docxtest-extra2-'));
+  const file = join(dir, 't.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.match(xml, /МЕНЕДЖМЕНТ ІНФОРМАЦІЙНОЇ БЕЗПЕКИ \(PM\)/);
+  assert.match(xml, /PM-1/);
+  assert.match(xml, /Ризики: C-001/);
+});
