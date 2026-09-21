@@ -2,7 +2,7 @@ import { el, option, showModal } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { baseRisksFor, applyBaseOverride, annotateRisk } from '/core/risk-engine.js';
-import { openRiskFormModal } from '../risk-form.js';
+import { openRiskFormModal, controlPicker } from '../risk-form.js';
 
 const STRATEGY_OPTIONS = ['Зменшення', 'Прийняття', 'Уникнення', 'Передача'];
 const RESIDUAL_OPTIONS = ['', 'Дуже низький', 'Низький', 'Середній', 'Високий', 'Критичний'];
@@ -17,7 +17,7 @@ const saveCustomRiskEdit = (id, patch, scale) =>
   setState(s => ({ ...s, risks: { ...s.risks,
     custom: s.risks.custom.map(r => r.id === id ? annotateRisk({ ...r, ...patch }, scale) : r) } }));
 
-const setBaseOverride = (id, patch) =>
+export const setBaseOverride = (id, patch) =>
   setState(s => ({ ...s, risks: { ...s.risks, base_overrides: { ...s.risks.base_overrides, [id]: patch } } }));
 
 const resetBaseOverride = (id) =>
@@ -61,6 +61,7 @@ export const step = {
       const planInput = el('input', { type: 'text', value: eff.treatment_plan ?? '', placeholder: 'опишіть заходи обробки…' });
       const respInput = el('input', { type: 'text', value: eff.responsible ?? '' });
       const residSel = el('select', {}, ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (eff.residual_risk ?? ''))));
+      const picker = controlPicker(catalogs.ndTzi, eff.control_refs ?? []);
       const saveBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
         const likelihood = Number(likSel.value);
         setBaseOverride(risk.id, {
@@ -68,7 +69,7 @@ export const step = {
           impact: Number(impSel.value), likelihood,
           likelihood_label: scale.likelihood_options.find(o => o.value === likelihood)?.label ?? '',
           treatment_strategy: stratSel.value, treatment_plan: planInput.value, responsible: respInput.value,
-          residual_risk: residSel.value,
+          residual_risk: residSel.value, control_refs: picker.getSelected(),
         });
         modal.close();
         rerender();
@@ -85,12 +86,13 @@ export const step = {
         el('label', {}, 'Ймовірність: ', likSel), el('label', {}, 'Стратегія: ', stratSel),
         el('label', {}, 'Заходи обробки: ', planInput), el('label', {}, 'Відповідальний: ', respInput),
         el('label', {}, 'Залишковий ризик: ', residSel),
+        el('label', {}, 'Заходи захисту (НД ТЗІ): ', picker.el),
         el('div', { class: 'actions' }, saveBtn,
           el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати'), deleteBtn)),
         { title: `Редагування загрози ${risk.id}` });
     };
 
-    const header = el('tr', {}, ...['ID', 'Актив', 'Загроза', 'Вразливість', 'Вплив', 'Ймовірність', 'Рівень', 'Стратегія', 'Заходи обробки', 'Відповідальний', 'Залишковий', 'Дії']
+    const header = el('tr', {}, ...['ID', 'Актив', 'Загроза', 'Вразливість', 'Вплив', 'Ймовірність', 'Рівень', 'Стратегія', 'Заходи обробки', 'Відповідальний', 'Залишковий', 'Заходи захисту', 'Дії']
       .map(h => el('th', {}, h)));
 
     const baseRows = baseRisks.map(r => {
@@ -102,6 +104,7 @@ export const step = {
         el('td', {}, el('span', { class: `badge lvl-${eff.level.replace(/ /g, '-')}` }, eff.level)),
         el('td', {}, eff.treatment_strategy), el('td', {}, eff.treatment_plan ?? ''),
         el('td', {}, eff.responsible), el('td', {}, eff.residual_risk ?? ''),
+        el('td', {}, (eff.control_refs ?? []).join(', ') || '—'),
         el('td', {},
           el('div', { class: 'row-actions' },
             el('button', { type: 'button', class: 'icon-btn', title: 'Редагувати', 'aria-label': 'Редагувати',
@@ -129,6 +132,7 @@ export const step = {
       const planInput = el('input', { type: 'text', value: risk.treatment_plan ?? '', placeholder: 'опишіть заходи обробки…' });
       const respInput = el('input', { type: 'text', value: risk.responsible ?? '' });
       const residSel = el('select', {}, ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (risk.residual_risk ?? ''))));
+      const picker = controlPicker(catalogs.ndTzi, risk.control_refs ?? []);
       const saveBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
         const likelihood = Number(likSel.value);
         saveCustomRiskEdit(risk.id, {
@@ -136,7 +140,7 @@ export const step = {
           impact: Number(impSel.value), likelihood,
           likelihood_label: scale.likelihood_options.find(o => o.value === likelihood)?.label ?? '',
           treatment_strategy: stratSel.value, treatment_plan: planInput.value, responsible: respInput.value,
-          residual_risk: residSel.value,
+          residual_risk: residSel.value, control_refs: picker.getSelected(),
         }, scale);
         modal.close();
         rerender();
@@ -153,6 +157,7 @@ export const step = {
         el('label', {}, 'Ймовірність: ', likSel), el('label', {}, 'Стратегія: ', stratSel),
         el('label', {}, 'Заходи обробки: ', planInput), el('label', {}, 'Відповідальний: ', respInput),
         el('label', {}, 'Залишковий ризик: ', residSel),
+        el('label', {}, 'Заходи захисту (НД ТЗІ): ', picker.el),
         el('div', { class: 'actions' }, saveBtn,
           el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати'), deleteBtn)),
         { title: `Редагування загрози ${risk.id}` });
@@ -178,6 +183,7 @@ export const step = {
       el('td', {}, el('select', { class: 'cell-edit',
         onchange: (e) => patchCustomRisk(r.id, { residual_risk: e.target.value }) },
         ...RESIDUAL_OPTIONS.map(v => option(v, v === '' ? '—' : v, v === (r.residual_risk ?? ''))))),
+      el('td', {}, (r.control_refs ?? []).join(', ') || '—'),
       el('td', {},
         el('div', { class: 'row-actions' },
           el('button', { type: 'button', class: 'icon-btn', title: 'Редагувати', 'aria-label': 'Редагувати',
