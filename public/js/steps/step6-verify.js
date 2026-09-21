@@ -156,6 +156,27 @@ export const step = {
       byClass.get(item.classId).items.push(item);
     }
 
+    // Заходи з реєстру ризиків, яких немає в мандованому БПБ профілі — розподілено по родинах
+    const additionalByFamily = new Map();
+    for (const ac of doc.additional_controls ?? []) {
+      if (!additionalByFamily.has(ac.family)) additionalByFamily.set(ac.family, []);
+      additionalByFamily.get(ac.family).push(ac);
+    }
+    const additionalRowsFor = (family) => {
+      const list = additionalByFamily.get(family);
+      if (!list?.length) return [];
+      const rows = [el('tr', { class: 'row-extra-header' },
+        el('td', { colspan: '4' }, el('strong', {}, 'Додатково, з реєстру ризиків')))];
+      for (const ac of list) {
+        rows.push(el('tr', { class: 'row-extra' },
+          el('td', {}, ''), el('td', {}, ''),
+          el('td', { class: 'ctrl-cell' }, ac.id, el('div', { class: 'ctrl-note' }, ac.title)),
+          el('td', {}, ...renderLines(ac.statementLines),
+            el('p', { class: 'hint' }, `Ризики: ${ac.risk_ids.join(', ')}`))));
+      }
+      return rows;
+    };
+
     const itemRows = (item) => {
       const rows = [];
       const excludeBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
@@ -261,7 +282,8 @@ export const step = {
     for (const [classId, group] of byClass) {
       const tbl = el('table', { class: 'verify-table' },
         el('tr', {}, ...['№', 'Вимога', 'Захід', 'Налаштований зміст заходу захисту'].map(h => el('th', {}, h))),
-        ...group.items.flatMap(itemRows));
+        ...group.items.flatMap(itemRows),
+        ...additionalRowsFor(classId));
       const toggle = el('span', { class: 'collapse-mark' }, '▲');
       const header = el('header', { class: 'class-card-header', onclick: () => {
         tbl.hidden = !tbl.hidden;
@@ -269,6 +291,21 @@ export const step = {
       } },
         el('strong', {}, `${group.className} (${classId})`),
         el('span', { class: 'req-count' }, `${group.items.length} вимог `, toggle));
+      cards.push(el('div', { class: 'class-card' }, header, tbl));
+    }
+
+    for (const [family, list] of additionalByFamily) {
+      if (byClass.has(family)) continue;
+      const tbl = el('table', { class: 'verify-table' },
+        el('tr', {}, ...['№', 'Вимога', 'Захід', 'Налаштований зміст заходу захисту'].map(h => el('th', {}, h))),
+        ...additionalRowsFor(family));
+      const toggle = el('span', { class: 'collapse-mark' }, '▲');
+      const header = el('header', { class: 'class-card-header', onclick: () => {
+        tbl.hidden = !tbl.hidden;
+        toggle.textContent = tbl.hidden ? '▼' : '▲';
+      } },
+        el('strong', {}, `${list[0]?.familyName ?? family} (${family})`),
+        el('span', { class: 'req-count' }, `${list.length} заходів `, toggle));
       cards.push(el('div', { class: 'class-card' }, header, tbl));
     }
 
