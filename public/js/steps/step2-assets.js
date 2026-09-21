@@ -3,7 +3,7 @@ import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { filterAssetsByClass, groupByCategory } from '/core/asset-catalog.js';
 import { baseRisksFor } from '/core/risk-engine.js';
-import { openRiskFormModal } from '../risk-form.js';
+import { openRiskFormModal, openControlsOnlyModal } from '../risk-form.js';
 
 export const step = {
   id: 'assets', title: 'Активи',
@@ -68,17 +68,23 @@ export const step = {
             `${a.id}. ${a.name}`);
           if (!state.selected_assets.includes(a.id)) return [checkboxRow];
           const risks = risksForAsset(a.id, state.passport.as_class);
+          const controlRefsFor = (r) => state.risks.base_overrides?.[r.id]?.control_refs ?? r.control_refs ?? [];
           const riskPanel = el('div', { class: 'risk-preview' },
             risks.length
-              ? el('div', {}, ...risks.map(r => el('label', { class: 'checkbox' },
-                  el('input', { type: 'checkbox',
-                    ...(state.risks.accepted_base.includes(r.id) ? { checked: '' } : {}),
-                    onchange: (e) => setState(s => ({ ...s, risks: { ...s.risks,
-                      accepted_base: e.target.checked
-                        ? [...s.risks.accepted_base, r.id]
-                        : s.risks.accepted_base.filter(x => x !== r.id) } })) }),
-                  `${r.threat} — ${r.vulnerability}`,
-                  el('span', { class: `badge lvl-${r.level.replace(/ /g, '-')}` }, r.level))))
+              ? el('div', {}, ...risks.map(r => el('div', { class: 'risk-row' },
+                  el('label', { class: 'checkbox' },
+                    el('input', { type: 'checkbox',
+                      ...(state.risks.accepted_base.includes(r.id) ? { checked: '' } : {}),
+                      onchange: (e) => setState(s => ({ ...s, risks: { ...s.risks,
+                        accepted_base: e.target.checked
+                          ? [...s.risks.accepted_base, r.id]
+                          : s.risks.accepted_base.filter(x => x !== r.id) } })) }),
+                    `${r.threat} — ${r.vulnerability}`,
+                    el('span', { class: `badge lvl-${r.level.replace(/ /g, '-')}` }, r.level)),
+                  el('button', { type: 'button', class: 'link-btn ctrl-link', onclick: (e) => {
+                    e.preventDefault();
+                    openControlsOnlyModal(r, { onSaved: rerender });
+                  } }, controlRefsFor(r).length ? `Заходи: ${controlRefsFor(r).join(', ')}` : 'Заходи: —'))))
               : el('p', { class: 'hint' }, 'Немає готових загроз у довіднику для цього активу.'),
             el('button', { type: 'button',
               onclick: () => openRiskFormModal({ presetAssetId: a.id, onSaved: rerender }) },
