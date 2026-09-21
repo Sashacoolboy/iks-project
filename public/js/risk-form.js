@@ -137,10 +137,12 @@ export function controlPicker(ndTzi, initialIds = []) {
     const filtered = q
       ? controls.filter(c => c.id.toLowerCase().includes(q) || c.title.toLowerCase().includes(q))
       : controls;
+    const scrollTop = listBox.scrollTop;
     listBox.replaceChildren(...filtered.map(c => el('label', { class: 'checkbox' },
       el('input', { type: 'checkbox', ...(selected.includes(c.id) ? { checked: '' } : {}),
         onchange: (e) => toggle(c.id, e.target.checked) }),
       `${c.id} — ${c.title}`)));
+    listBox.scrollTop = scrollTop;
   };
 
   function toggle(id, checked) {
@@ -160,7 +162,7 @@ export function controlPicker(ndTzi, initialIds = []) {
 // Легкий модал редагування ЛИШЕ заходів захисту базового ризику — викликається з Кроку 2
 // (панель перегляду ризиків активу), де повне редагування ризику не потрібне.
 export function openControlsOnlyModal(risk, { onSaved } = {}) {
-  const override = getState().risks.base_overrides?.[risk.id];
+  const override = getState().risks.base_overrides[risk.id];
   const initialIds = override?.control_refs ?? risk.control_refs ?? [];
   const picker = controlPicker(catalogs.ndTzi, initialIds);
   const saveBtn = el('button', { type: 'button', class: 'primary', onclick: () => {

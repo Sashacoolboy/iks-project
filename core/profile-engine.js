@@ -183,7 +183,7 @@ export function buildProfile(state, catalogs) {
   // яких ще немає в мандованому БПБ профілі — Крок 4/DOCX показують їх окремо, розподілено по родинах.
   let additional_controls = [];
   if (catalogs.threatsRisks && state.risks && state.selected_assets) {
-    const mandatedControlIds = new Set(items.flatMap(i => i.controls.map(c => c.id)));
+    const mandatedControlIds = new Set(items.filter(i => i.status === STATUS.APPLIED).flatMap(i => i.controls.map(c => c.id)));
     const familyTitle = new Map(catalogs.ndTzi.document.security_families.map(f => [f.id, f.title]));
     const controlMeta = new Map();
     for (const fam of catalogs.ndTzi.document.security_families)
@@ -205,8 +205,13 @@ export function buildProfile(state, catalogs) {
         const ndControl = nd.get(id);
         const emptyParams = [];
         const resolve = makeResolver(new Map(), emptyParams);
+        // BPB-клас з тим самим id, якщо є, — авторитетне групування (nd_tzi родина є лише "вміщуючою")
+        const prefix = id.split('-')[0];
+        const bpbMatch = items.find(i => i.classId === prefix);
+        const family = bpbMatch ? prefix : meta.family;
+        const familyName = bpbMatch ? bpbMatch.className : (familyTitle.get(family) ?? family);
         return {
-          id, family: meta.family, familyName: familyTitle.get(meta.family) ?? meta.family,
+          id, family, familyName,
           title: meta.title, statementLines: statementLinesFor(ndControl, resolve),
           risk_ids: [...riskIds].sort(),
         };

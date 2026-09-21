@@ -179,3 +179,29 @@ test('additional_controls: два ризики з однаковим позаб�
   assert.equal(doc.additional_controls.length, 1);
   assert.deepEqual(doc.additional_controls[0].risk_ids.sort(), [r0.id, 'C-001'].sort());
 });
+
+test('additional_controls: CA-*/PT-* групуються за власним БПБ-класом, а не за nd_tzi родиною', () => {
+  const state = { ...baseState, selected_assets: ['A-01'],
+    risks: { ...emptyRisksState, custom: [{ id: 'C-001', custom: true, asset_id: 'A-01',
+      threat: 'Т', vulnerability: 'В', impact: 3, likelihood: 0.5, control_refs: ['CA-4'] }] } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.items.filter(i => i.classId === 'CA' && i.controls.some(c => c.id === 'CA-4')).length, 0,
+    'CA-4 не має бути мандований БПБ-профілем для цього тесту');
+  assert.equal(doc.additional_controls.length, 1);
+  assert.equal(doc.additional_controls[0].family, 'CA');
+  assert.equal(doc.additional_controls[0].familyName, 'Оцінювання, акредитація та моніторинг безпеки');
+});
+
+test('additional_controls: контроль виключеної (excluded) дії не зникає безслідно, а зʼявляється тут', () => {
+  const doc1 = buildProfile(baseState, catalogs);
+  const item = doc1.items.find(i => i.status === 'Застосовується (автозаповнено)' && i.controls.length > 0);
+  const controlId = item.controls[0].id;
+  const state = { ...baseState, selected_assets: ['A-01'],
+    profile: { ...baseState.profile, excluded: [item.key] },
+    risks: { ...emptyRisksState, custom: [{ id: 'C-001', custom: true, asset_id: 'A-01',
+      threat: 'Т', vulnerability: 'В', impact: 3, likelihood: 0.5, control_refs: [controlId] }] } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.items.find(i => i.key === item.key).status, 'Не застосовується (вручну)');
+  assert.ok(doc.additional_controls.some(ac => ac.id === controlId),
+    'контроль виключеної дії має зʼявитися в additional_controls, а не зникнути');
+});
