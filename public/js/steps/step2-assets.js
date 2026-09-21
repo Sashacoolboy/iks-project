@@ -84,7 +84,7 @@ export const step = {
                   el('button', { type: 'button', class: 'link-btn ctrl-link', onclick: (e) => {
                     e.preventDefault();
                     openControlsOnlyModal(r, { onSaved: rerender });
-                  } }, controlRefsFor(r).length ? `Заходи: ${controlRefsFor(r).join(', ')}` : 'Заходи: —'))))
+                  } }, (controlRefsFor(r).length ? `Заходи: ${controlRefsFor(r).join(', ')}` : 'Заходи: —') + ' ✎'))))
               : el('p', { class: 'hint' }, 'Немає готових загроз у довіднику для цього активу.'),
             el('button', { type: 'button',
               onclick: () => openRiskFormModal({ presetAssetId: a.id, onSaved: rerender }) },
