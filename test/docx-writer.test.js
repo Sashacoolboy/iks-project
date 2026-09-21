@@ -148,3 +148,29 @@ test('buildDocx: родина, відсутня серед items, отримує
   assert.match(xml, /PM-1/);
   assert.match(xml, /Ризики: C-001/);
 });
+
+test('buildDocx: звичайний захід підписаний бейджем «БПБ»', () => {
+  const buf = buildDocx(input);
+  const dir = mkdtempSync(join(tmpdir(), 'docxtest-classnote-'));
+  const file = join(dir, 't.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.match(xml, /<w:t xml:space="preserve">БПБ<\/w:t>/);
+  assert.doesNotMatch(xml, /ЦПБ/);
+});
+
+test('buildDocx: додатковий (позабпбшний) захід підписаний бейджем «ЦПБ»', () => {
+  const withExtra = { ...input, profileDoc: { ...input.profileDoc,
+    additional_controls: [
+      { id: 'AC-9', family: 'AC', familyName: 'Управління доступом',
+        title: 'Сповіщення про попередній вхід (доступ)',
+        statementLines: [{ label: 'a.', depth: 0, text: 'Текст AC-9', parts: [{ type: 'text', value: 'Текст AC-9' }] }],
+        risk_ids: ['R-013'] },
+    ] } };
+  const buf = buildDocx(withExtra);
+  const dir = mkdtempSync(join(tmpdir(), 'docxtest-added-'));
+  const file = join(dir, 't.docx');
+  writeFileSync(file, buf);
+  const xml = execFileSync('unzip', ['-p', file, 'word/document.xml'], { encoding: 'utf8' });
+  assert.match(xml, /ЦПБ/);
+});

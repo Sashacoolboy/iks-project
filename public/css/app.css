@@ -230,7 +230,7 @@ tbody tr:hover { background: #f8fafc; }
   border-left: 3px solid var(--color-border); background: var(--color-muted);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
-.risk-preview .checkbox { justify-content: space-between; width: 100%; }
+.risk-preview .checkbox { width: 100%; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4); }
 .modal-panel { background: var(--color-card); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); max-width: 34rem; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3); }
@@ -351,9 +351,12 @@ tbody tr:hover { background: #f8fafc; }
 
 /* Крок 2: рядок ризику + кнопка «Заходи» поруч (не всередині чекбокс-лейбла) */
 .risk-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; width: 100%; }
+.risk-row .badge {display: none}
 .risk-row .checkbox { flex: 1; }
 .ctrl-link { flex-shrink: 0; white-space: nowrap; font-size: 0.75rem; }
 
 /* Крок 4 / DOCX-паралельний блок "Додатково, з реєстру ризиків" */
 .row-extra-header td { background: var(--color-muted); font-style: italic; font-weight: 600; }
 .row-extra td { background: #faf5ff; }
+.badge-bpb-class { background: var(--color-muted); color: var(--color-muted-fg); font-family: ui-monospace, monospace; margin-left: 0.3rem; }
+.badge-added { background: #7e22ce; color: #fff; margin-left: 0.3rem; }

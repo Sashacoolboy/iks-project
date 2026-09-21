@@ -170,7 +170,7 @@ export const step = {
       for (const ac of list) {
         rows.push(el('tr', { class: 'row-extra' },
           el('td', {}, ''), el('td', {}, ''),
-          el('td', { class: 'ctrl-cell' }, ac.id, el('div', { class: 'ctrl-note' }, ac.title)),
+          el('td', { class: 'ctrl-cell' }, ac.id, el('span', { class: 'badge badge-added' }, 'ЦПБ'), el('div', { class: 'ctrl-note' }, ac.title)),
           el('td', {}, ...renderLines(ac.statementLines),
             el('p', { class: 'hint' }, `Ризики: ${ac.risk_ids.join(', ')}`))));
       }
@@ -260,7 +260,7 @@ export const step = {
         const cells = [];
         if (first) { cells.push(numCell(totalRows), reqCell(totalRows)); first = false; }
         cells.push(
-          el('td', { class: 'ctrl-cell' }, c.id, riskChips(c.id)),
+          el('td', { class: 'ctrl-cell' }, c.id, el('span', { class: 'badge badge-bpb-class' }, 'БПБ'), riskChips(c.id)),
           el('td', {}, ...renderLines(c.statementLines)));
         rows.push(el('tr', {}, ...cells));
       }

@@ -112,7 +112,7 @@ function controlRowsFor(item) {
   const entries = [];
   for (const c of item.controls) {
     const paragraphs = c.statementLines.map(statementParXml).join('') || '<w:p/>';
-    entries.push({ id: c.id, note: null, paragraphs });
+    entries.push({ id: c.id, note: 'БПБ', paragraphs });
   }
   for (const e of item.enhancements) {
     const paragraphs = (e.lines ?? []).map(statementParXml).join('') || par(e.title);
@@ -179,7 +179,9 @@ export function buildDocx({ state, profileDoc, assets, policyMapping }) {
     const rows = [row([cell('Додатково, з реєстру ризиків', { bold: true, italic: true, span: 5 })])];
     for (const ac of list) {
       const paragraphs = ac.statementLines.map(statementParXml).join('') || par(ac.title);
-      const idParagraphs = par(ac.id, { align: 'center' }) + par(ac.title, { italic: true, align: 'center', sz: 20 });
+      const idParagraphs = par(ac.id, { align: 'center' }) +
+        par('ЦПБ', { bold: true, align: 'center', sz: 20 }) +
+        par(ac.title, { italic: true, align: 'center', sz: 20 });
       rows.push(row([
         cell('', { pct: w1 }), cell('', { pct: w2 }), cell('', { pct: w3 }),
         cellXml(idParagraphs, { pct: w4 }),
