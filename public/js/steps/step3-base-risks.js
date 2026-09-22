@@ -44,11 +44,17 @@ export const step = {
 
     const hidden = new Set(state.risks.hidden_base ?? []);
     const accepted = new Set(state.risks.accepted_base);
+    const overrides = getState().risks.base_overrides ?? {};
+    // Сортування таблиці: спочатку за активом, далі за загрозою, далі за вразливістю
+    const byAssetThreatVuln = (a, b) =>
+      assetName(a.asset_id).localeCompare(assetName(b.asset_id), 'uk') ||
+      (a.threat ?? '').localeCompare(b.threat ?? '', 'uk') ||
+      (a.vulnerability ?? '').localeCompare(b.vulnerability ?? '', 'uk');
     // Позначку "включити в роботу" тепер робить користувач на Кроці 2 (чекбокси в
     // панелі перегляду ризиків активу) — тут просто показуємо те, що вже позначено.
     const baseRisks = baseRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class)
-      .filter(r => !hidden.has(r.id) && accepted.has(r.id));
-    const overrides = getState().risks.base_overrides ?? {};
+      .filter(r => !hidden.has(r.id) && accepted.has(r.id))
+      .sort((a, b) => byAssetThreatVuln(applyBaseOverride(a, overrides[a.id], scale), applyBaseOverride(b, overrides[b.id], scale)));
 
     const openEditRiskModal = (risk) => {
       const eff = applyBaseOverride(risk, overrides[risk.id], scale);
@@ -163,7 +169,7 @@ export const step = {
         { title: `Редагування загрози ${risk.id}` });
     };
 
-    const customRows = getState().risks.custom.map(r => el('tr', {},
+    const customRows = [...getState().risks.custom].sort(byAssetThreatVuln).map(r => el('tr', {},
       el('td', {}, r.id), el('td', {}, assetName(r.asset_id)),
       el('td', {}, el('span', { title: r.vulnerability }, r.threat)),
       el('td', {}, r.vulnerability), el('td', {}, r.impact != null ? String(r.impact) : '—'),
