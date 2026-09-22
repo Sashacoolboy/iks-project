@@ -211,10 +211,47 @@ export const step = {
       URL.revokeObjectURL(a.href);
     } }, '💾 Зберегти реєстр ризиків (DOCX)');
 
+    // Аналітика покриття: скільки заходів захисту визначено ризиками (базовими+кастомними
+    // з урахуванням override) відповідають БПБ, і які заходи БПБ ще не мають обґрунтування ризиком
+    const bpbCatalog = catalogs.bpb[state.info_type];
+    const bpbIds = new Set();
+    if (bpbCatalog)
+      for (const sc of bpbCatalog.security_classes)
+        for (const action of sc.actions)
+          for (const sa of action.security_actions) bpbIds.add(sa.control.base_id);
+    const ndControlTitles = new Map();
+    for (const fam of catalogs.ndTzi.document.security_families)
+      for (const c of fam.controls) ndControlTitles.set(c.canonical_id, c.title);
+    const riskControlIds = new Set([
+      ...baseRisks.flatMap(r => applyBaseOverride(r, overrides[r.id], scale).control_refs ?? []),
+      ...getState().risks.custom.flatMap(r => r.control_refs ?? []),
+    ]);
+    const matchedCount = [...riskControlIds].filter(id => bpbIds.has(id)).length;
+    const extraCount = riskControlIds.size - matchedCount;
+    const uncoveredIds = [...bpbIds].filter(id => !riskControlIds.has(id)).sort((a, b) => a.localeCompare(b));
+
+    const uncoveredList = el('div', { class: 'analytics-uncovered', hidden: true },
+      ...uncoveredIds.map(id => el('div', { class: 'analytics-uncovered-item' },
+        el('span', { class: 'badge badge-bpb-class' }, id), ' ', ndControlTitles.get(id) ?? id)));
+    const toggleUncoveredBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
+      uncoveredList.hidden = !uncoveredList.hidden;
+      toggleUncoveredBtn.textContent = uncoveredList.hidden
+        ? `Переглянути невключені заходи (${uncoveredIds.length})`
+        : 'Сховати невключені заходи';
+    } }, `Переглянути невключені заходи (${uncoveredIds.length})`);
+    const analyticsBlock = bpbCatalog
+      ? el('div', { class: 'risk-analytics' },
+          el('p', {}, 'Заходів захисту визначено ризиками: ', el('strong', {}, String(riskControlIds.size)),
+            ` (з них відповідають БПБ: ${matchedCount}, додатково поза БПБ: ${extraCount})`),
+          el('p', {}, 'БПБ містить: ', el('strong', {}, String(bpbIds.size)), ' заходів захисту'),
+          el('div', { class: 'actions' }, toggleUncoveredBtn), uncoveredList)
+      : el('p', { class: 'hint' }, 'Немає каталогу БПБ для цього типу інформації — аналітика недоступна.');
+
     container.replaceChildren(el('section', {},
       el('h2', {}, `Крок 3. Ризики (${baseRows.length + customRows.length} у переліку — базові та кастомні)`),
       el('div', { class: 'actions' }, addRiskBtn),
       el('table', { class: 'risk-table' }, header, ...baseRows, ...customRows),
-      el('div', { class: 'actions' }, saveRisksBtn)));
+      el('div', { class: 'actions' }, saveRisksBtn),
+      analyticsBlock));
   },
 };
