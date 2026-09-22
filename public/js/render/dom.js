@@ -13,20 +13,6 @@ export function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
-// Аналог el() для SVG-елементів (потребують createElementNS, а не createElement)
-export function svgEl(tag, attrs = {}, ...children) {
-  const node = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs))
-    if (v !== null && v !== undefined) node.setAttribute(k, v);
-  for (const c of children.flat()) {
-    if (c === null || c === undefined) continue;
-    node.append(typeof c === 'string' ? document.createTextNode(c) : c);
-  }
-  return node;
-}
-
 export const option = (value, label, selected = false) =>
   el('option', selected ? { value, selected: '' } : { value }, label);
 

@@ -1,4 +1,4 @@
-import { el, option, showModal, svgEl } from '../render/dom.js';
+import { el, option, showModal } from '../render/dom.js';
 import { getState, setState } from '../state.js';
 import { catalogs } from '../app.js';
 import { baseRisksFor, applyBaseOverride, annotateRisk } from '/core/risk-engine.js';
@@ -23,36 +23,23 @@ export const setBaseOverride = (id, patch) =>
 const resetBaseOverride = (id) =>
   setState(s => { const o = { ...s.risks.base_overrides }; delete o[id]; return { ...s, risks: { ...s.risks, base_overrides: o } }; });
 
-// Схематична діаграма Ейлера покриття: два кола (БПБ, заходи з ризиків), розмір ≈ √n
-// заходів, відстань між центрами — за часткою перетину (matched / менший з двох наборів)
-function coverageVenn(bpbTotal, riskTotal, matched) {
-  const maxR = 68, minR = 24, pad = 12, labelGap = 16;
-  const scale = (n) => Math.round(Math.max(minR, Math.min(maxR, 18 + Math.sqrt(n) * 5)));
-  const rA = scale(bpbTotal);
-  const rB = scale(riskTotal);
-  const minSize = Math.min(bpbTotal, riskTotal) || 1;
-  const overlapFrac = Math.min(1, matched / minSize);
-  const maxDist = rA + rB;
-  const minDist = Math.abs(rA - rB);
-  const dist = Math.round(maxDist - overlapFrac * (maxDist - minDist));
-  const bigR = Math.max(rA, rB);
-  const cy = pad + labelGap + bigR;
-  const cx1 = pad + rA;
-  const cx2 = cx1 + dist;
-  const width = pad + rA + dist + rB + pad;
-  const height = pad + labelGap + bigR * 2 + pad;
-  const overlapping = matched > 0 && dist < rA + rB;
-  const overlapMidX = Math.round(((cx2 - rB) + (cx1 + rA)) / 2);
-
-  return svgEl('svg', { viewBox: `0 0 ${width} ${height}`, class: 'venn-svg', role: 'img',
-      'aria-label': `Перетин заходів: БПБ ${bpbTotal}, ризики ${riskTotal}, спільно ${matched}` },
-    svgEl('circle', { cx: cx1, cy, r: rA, class: 'venn-circle venn-bpb' }),
-    svgEl('circle', { cx: cx2, cy, r: rB, class: 'venn-circle venn-risk' }),
-    svgEl('text', { x: cx1, y: cy - rA - 8, 'text-anchor': 'middle', class: 'venn-label' }, `БПБ (${bpbTotal})`),
-    svgEl('text', { x: cx2, y: cy - rB - 8, 'text-anchor': 'middle', class: 'venn-label' }, `Ризики (${riskTotal})`),
-    overlapping
-      ? svgEl('text', { x: overlapMidX, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'middle', class: 'venn-count' }, String(matched))
-      : null);
+// Сегментований прогрес-бар покриття: уся довжина — заходи БПБ, перша частина —
+// охоплені ризиками, решта — ще не мають обґрунтування ризиком
+function coverageBar(bpbTotal, matched) {
+  const total = bpbTotal || 1;
+  const matchedPct = Math.round((matched / total) * 100);
+  const gapPct = 100 - matchedPct;
+  const gapCount = bpbTotal - matched;
+  return el('div', { class: 'coverage-bar-wrap' },
+    el('div', { class: 'coverage-bar', role: 'img',
+        'aria-label': `Покриття БПБ ризиками: ${matched} з ${bpbTotal} (${matchedPct}%)` },
+      matched ? el('div', { class: 'coverage-bar-segment coverage-bar-matched', style: `width:${matchedPct}%` },
+        matchedPct >= 12 ? String(matched) : '') : null,
+      gapCount ? el('div', { class: 'coverage-bar-segment coverage-bar-gap', style: `width:${gapPct}%` },
+        gapPct >= 12 ? String(gapCount) : '') : null),
+    el('div', { class: 'coverage-bar-legend' },
+      el('span', {}, el('i', { class: 'legend-dot legend-matched' }), `Охоплено ризиками (${matched})`),
+      el('span', {}, el('i', { class: 'legend-dot legend-gap' }), `Не охоплено (${gapCount})`)));
 }
 
 // Видалення базового ризику зі списку — незворотне (на відміну від Скинути): прибирає з
@@ -282,7 +269,7 @@ export const step = {
           el('p', {}, 'Заходів захисту визначено ризиками: ', el('strong', {}, String(riskControlIds.size)),
             ` (з них відповідають БПБ: ${matchedCount}, додатково поза БПБ: ${extraCount})`),
           el('p', {}, 'БПБ містить: ', el('strong', {}, String(bpbIds.size)), ' заходів захисту'),
-          coverageVenn(bpbIds.size, riskControlIds.size, matchedCount),
+          coverageBar(bpbIds.size, matchedCount),
           el('div', { class: 'actions' }, toggleUncoveredBtn), uncoveredList)
       : el('p', { class: 'hint' }, 'Немає каталогу БПБ для цього типу інформації — аналітика недоступна.');
 
