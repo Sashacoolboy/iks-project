@@ -229,10 +229,15 @@ export const step = {
     const matchedCount = [...riskControlIds].filter(id => bpbIds.has(id)).length;
     const extraCount = riskControlIds.size - matchedCount;
     const uncoveredIds = [...bpbIds].filter(id => !riskControlIds.has(id)).sort((a, b) => a.localeCompare(b));
+    // Архітектурні винятки для поточного класу АС — без них захід мандований безумовно і потрапить у ЦПБ автоматично
+    const exemptBaseIds = new Set((catalogs.exemptions.exemptions ?? [])
+      .filter(e => e.applies_to_classes.includes(state.passport.as_class))
+      .map(e => e.control_ref));
 
     const uncoveredList = el('div', { class: 'analytics-uncovered', hidden: true },
       ...uncoveredIds.map(id => el('div', { class: 'analytics-uncovered-item' },
-        el('span', { class: 'badge badge-bpb-class' }, id), ' ', ndControlTitles.get(id) ?? id)));
+        el('span', { class: 'badge badge-bpb-class' }, id), ' ', ndControlTitles.get(id) ?? id,
+        !exemptBaseIds.has(id) ? el('span', { class: 'badge badge-auto-bpb' }, 'Буде включено БПБ') : null)));
     const toggleUncoveredBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
       uncoveredList.hidden = !uncoveredList.hidden;
       toggleUncoveredBtn.textContent = uncoveredList.hidden

@@ -366,3 +366,4 @@ tbody tr:hover { background: #f8fafc; }
 .risk-analytics p { margin: 0.2rem 0; }
 .analytics-uncovered { margin-top: var(--space-2); max-height: 16rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.3rem; }
 .analytics-uncovered-item { font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid var(--color-border); }
+.badge-auto-bpb { background: var(--color-accent); color: #fff; margin-left: 0.3rem; }
