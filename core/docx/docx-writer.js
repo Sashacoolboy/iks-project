@@ -181,7 +181,7 @@ export function buildDocx({ state, profileDoc, assets, policyMapping }) {
       const paragraphs = ac.statementLines.map(statementParXml).join('') || par(ac.title);
       const idParagraphs = par(ac.id, { align: 'center' }) +
         par('ЦПБ', { bold: true, align: 'center', sz: 20 }) +
-        par(ac.title, { italic: true, align: 'center', sz: 20 });
+        par(ac.isEnhancement ? `${ac.title} (посилення)` : ac.title, { italic: true, align: 'center', sz: 20 });
       rows.push(row([
         cell('', { pct: w1 }), cell('', { pct: w2 }), cell('', { pct: w3 }),
         cellXml(idParagraphs, { pct: w4 }),

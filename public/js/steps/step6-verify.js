@@ -170,7 +170,8 @@ export const step = {
       for (const ac of list) {
         rows.push(el('tr', { class: 'row-extra' },
           el('td', {}, ''), el('td', {}, ''),
-          el('td', { class: 'ctrl-cell' }, ac.id, el('span', { class: 'badge badge-added' }, 'ЦПБ'), el('div', { class: 'ctrl-note' }, ac.title)),
+          el('td', { class: 'ctrl-cell' }, ac.id, el('span', { class: 'badge badge-added' }, 'ЦПБ'),
+            el('div', { class: 'ctrl-note' }, ac.isEnhancement ? `${ac.title} (посилення)` : ac.title)),
           el('td', {}, ...renderLines(ac.statementLines),
             el('p', { class: 'hint' }, `Ризики: ${ac.risk_ids.join(', ')}`))));
       }

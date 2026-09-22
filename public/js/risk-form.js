@@ -114,13 +114,20 @@ export function openRiskFormModal({ presetAssetId, onSaved } = {}) {
   if (dir.length === 0) showManualTab(); else showCatalogTab();
 }
 
-// Спільний UI-компонент вибору базових заходів захисту (без посилень) з НД ТЗІ —
+// Спільний UI-компонент вибору заходів захисту (базових і посилень) з НД ТЗІ —
 // використовується і в модалі додавання ризику (вище), і в Кроці 2/3 для редагування
-// control_refs існуючого ризику (базового чи кастомного).
+// control_refs існуючого ризику (базового чи кастомного). Посилення показуються одразу
+// під своїм базовим заходом; вибір посилення автоматично додає його базовий захід
+// (посилення без базового заходу не має сенсу), зняття базового заходу знімає й усі
+// вибрані посилення цього заходу.
 export function controlPicker(ndTzi, initialIds = []) {
   const controls = ndTzi.document.security_families
-    .flatMap(fam => fam.controls.map(c => ({ id: c.canonical_id, title: c.title })))
+    .flatMap(fam => fam.controls.flatMap(c => [
+      { id: c.canonical_id, title: c.title, baseId: c.canonical_id, isEnhancement: false },
+      ...(c.children ?? []).map(ch => ({ id: ch.canonical_id, title: ch.title, baseId: c.canonical_id, isEnhancement: true })),
+    ]))
     .sort((a, b) => a.id.localeCompare(b.id));
+  const byId = new Map(controls.map(c => [c.id, c]));
   let selected = [...initialIds];
 
   const chipsRow = el('div', { class: 'ctrl-chips' });
@@ -138,15 +145,27 @@ export function controlPicker(ndTzi, initialIds = []) {
       ? controls.filter(c => c.id.toLowerCase().includes(q) || c.title.toLowerCase().includes(q))
       : controls;
     const scrollTop = listBox.scrollTop;
-    listBox.replaceChildren(...filtered.map(c => el('label', { class: 'checkbox' },
+    listBox.replaceChildren(...filtered.map(c => el('label', { class: `checkbox${c.isEnhancement ? ' ctrl-enh' : ''}` },
       el('input', { type: 'checkbox', ...(selected.includes(c.id) ? { checked: '' } : {}),
         onchange: (e) => toggle(c.id, e.target.checked) }),
-      `${c.id} — ${c.title}`)));
+      `${c.isEnhancement ? '↳ ' : ''}${c.id} — ${c.title}`)));
     listBox.scrollTop = scrollTop;
   };
 
   function toggle(id, checked) {
-    selected = checked ? [...selected, id] : selected.filter(x => x !== id);
+    const entry = byId.get(id);
+    if (checked) {
+      if (!selected.includes(id)) selected = [...selected, id];
+      // Посилення без базового заходу не має сенсу — базовий захід додається автоматично
+      if (entry?.isEnhancement && !selected.includes(entry.baseId)) selected = [...selected, entry.baseId];
+    } else {
+      selected = selected.filter(x => x !== id);
+      // Зняття базового заходу знімає й усі вибрані посилення цього заходу
+      if (entry && !entry.isEnhancement) {
+        const enhIds = controls.filter(c => c.isEnhancement && c.baseId === id).map(c => c.id);
+        selected = selected.filter(x => !enhIds.includes(x));
+      }
+    }
     renderChips();
     renderList();
   }

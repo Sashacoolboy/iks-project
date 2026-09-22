@@ -214,11 +214,12 @@ export const step = {
     // Аналітика покриття: скільки заходів захисту визначено ризиками (базовими+кастомними
     // з урахуванням override) відповідають БПБ, і які заходи БПБ ще не мають обґрунтування ризиком
     const bpbCatalog = catalogs.bpb[state.info_type];
-    const bpbIds = new Set();
+    const bpbIds = new Set(); // базові id — для лічильника "БПБ містить" і списку невключених
+    const bpbExactIds = new Set(); // точні id (включно посилення) — для перевірки "вже в БПБ"
     if (bpbCatalog)
       for (const sc of bpbCatalog.security_classes)
         for (const action of sc.actions)
-          for (const sa of action.security_actions) bpbIds.add(sa.control.base_id);
+          for (const sa of action.security_actions) { bpbIds.add(sa.control.base_id); bpbExactIds.add(sa.control.id); }
     const ndControlTitles = new Map();
     for (const fam of catalogs.ndTzi.document.security_families)
       for (const c of fam.controls) ndControlTitles.set(c.canonical_id, c.title);
@@ -226,7 +227,7 @@ export const step = {
       ...baseRisks.flatMap(r => applyBaseOverride(r, overrides[r.id], scale).control_refs ?? []),
       ...getState().risks.custom.flatMap(r => r.control_refs ?? []),
     ]);
-    const matchedCount = [...riskControlIds].filter(id => bpbIds.has(id)).length;
+    const matchedCount = [...riskControlIds].filter(id => bpbExactIds.has(id)).length;
     const extraCount = riskControlIds.size - matchedCount;
     const uncoveredIds = [...bpbIds].filter(id => !riskControlIds.has(id)).sort((a, b) => a.localeCompare(b));
     // Архітектурні винятки для поточного класу АС — без них захід мандований безумовно і потрапить у ЦПБ автоматично

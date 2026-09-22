@@ -348,6 +348,7 @@ tbody tr:hover { background: #f8fafc; }
 .chip-remove { border: none; background: none; color: inherit; cursor: pointer; font-size: 0.7rem; padding: 0; line-height: 1; }
 .ctrl-list { max-height: 12rem; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 0.4rem 0.6rem; display: flex; flex-direction: column; gap: 0.15rem; }
 .ctrl-list label.checkbox { font-weight: 400; font-size: 0.85rem; }
+.ctrl-list label.ctrl-enh { margin-left: 1.2rem; color: var(--color-muted-fg); font-size: 0.8rem; }
 
 /* Крок 2: рядок ризику + кнопка «Заходи» поруч (не всередині чекбокс-лейбла) */
 .risk-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; width: 100%; }

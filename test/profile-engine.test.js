@@ -205,3 +205,15 @@ test('additional_controls: контроль виключеної (excluded) ді
   assert.ok(doc.additional_controls.some(ac => ac.id === controlId),
     'контроль виключеної дії має зʼявитися в additional_controls, а не зникнути');
 });
+
+test('additional_controls: посилення поза БПБ зʼявляється окремо з isEnhancement=true, навіть якщо його базовий захід мандований', () => {
+  // AC-2 мандований bpb_service.json (потрапляє у звичайний профіль), але AC-2(1) — ні
+  const state = { ...baseState, selected_assets: ['A-01'],
+    risks: { ...emptyRisksState, custom: [{ id: 'C-001', custom: true, asset_id: 'A-01',
+      threat: 'Т', vulnerability: 'В', impact: 3, likelihood: 0.5, control_refs: ['AC-2', 'AC-2(1)'] }] } };
+  const doc = buildProfile(state, { ...catalogs, threatsRisks });
+  assert.equal(doc.additional_controls.length, 1, 'AC-2 вже мандований і не має дублюватись, лишається лише AC-2(1)');
+  assert.equal(doc.additional_controls[0].id, 'AC-2(1)');
+  assert.equal(doc.additional_controls[0].isEnhancement, true);
+  assert.equal(doc.additional_controls[0].family, 'AC');
+});

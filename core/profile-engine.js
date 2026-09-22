@@ -187,7 +187,11 @@ export function buildProfile(state, catalogs) {
     const familyTitle = new Map(catalogs.ndTzi.document.security_families.map(f => [f.id, f.title]));
     const controlMeta = new Map();
     for (const fam of catalogs.ndTzi.document.security_families)
-      for (const c of fam.controls) controlMeta.set(c.canonical_id, { title: c.title, family: fam.id });
+      for (const c of fam.controls) {
+        controlMeta.set(c.canonical_id, { title: c.title, family: fam.id, isEnhancement: false });
+        for (const ch of c.children ?? [])
+          controlMeta.set(ch.canonical_id, { title: ch.title, family: fam.id, isEnhancement: true });
+      }
 
     const accepted = acceptedRisksFor(catalogs.threatsRisks, state.selected_assets, state.passport.as_class, state.risks);
     const contributingRisks = new Map(); // controlId -> Set<riskId>
@@ -211,7 +215,7 @@ export function buildProfile(state, catalogs) {
         const family = bpbMatch ? prefix : meta.family;
         const familyName = bpbMatch ? bpbMatch.className : (familyTitle.get(family) ?? family);
         return {
-          id, family, familyName,
+          id, family, familyName, isEnhancement: meta.isEnhancement,
           title: meta.title, statementLines: statementLinesFor(ndControl, resolve),
           risk_ids: [...riskIds].sort(),
         };
