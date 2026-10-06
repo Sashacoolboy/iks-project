@@ -19,7 +19,12 @@ export function validateAssessment(assessment) {
   const errs = [];
   const evidenceIds = new Set((assessment.evidence ?? []).map(e => e.evidence_id));
   const findingIds = new Set((assessment.findings ?? []).map(f => f.finding_id));
+  const excludedControlIds = new Set(
+    (assessment.plan?.checklist ?? []).filter(c => c.included === false).map(c => c.control_id)
+  );
+  const controlIdBySourceId = new Map((assessment.plan?.items ?? []).map(i => [i.assessment_source_id, i.control_id]));
   for (const r of assessment.results ?? []) {
+    if (excludedControlIds.has(controlIdBySourceId.get(r.assessment_source_id))) continue;
     errs.push(...validateResult(r, { findings: assessment.findings ?? [] }));
     for (const id of r.evidence_ids) if (!evidenceIds.has(id)) errs.push(`${r.assessment_source_id}: посилання на неіснуючий доказ ${id}`);
     for (const id of r.finding_ids) if (!findingIds.has(id)) errs.push(`${r.assessment_source_id}: посилання на неіснуючий недолік ${id}`);

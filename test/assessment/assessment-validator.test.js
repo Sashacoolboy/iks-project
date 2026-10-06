@@ -18,3 +18,33 @@ test('validateAssessment: referential integrity', () => {
     evidence: [], findings: [] };
   assert.ok(validateAssessment(a).some(e => e.includes('EV-404')));
 });
+
+test('validateAssessment: виключений на рівні чекліста control_id звільняє результат від валідації', () => {
+  const a = {
+    plan: {
+      items: [{ assessment_source_id: 'x', control_id: 'AT-02' }],
+      checklist: [{ control_id: 'AT-02', included: false }],
+    },
+    results: [{ assessment_source_id: 'x', result: 'SATISFIED', evidence_ids: [], finding_ids: [], assessor_comment: '' }],
+    evidence: [], findings: [],
+  };
+  assert.deepEqual(validateAssessment(a), [], 'SATISFIED без evidence мало б падати, але control_id виключено');
+});
+
+test('validateAssessment: не-виключені результати валідуються як і раніше', () => {
+  const a = {
+    plan: {
+      items: [{ assessment_source_id: 'x', control_id: 'AT-02' }],
+      checklist: [{ control_id: 'AT-02', included: true }],
+    },
+    results: [{ assessment_source_id: 'x', result: 'SATISFIED', evidence_ids: [], finding_ids: [], assessor_comment: '' }],
+    evidence: [], findings: [],
+  };
+  assert.ok(validateAssessment(a).length > 0);
+});
+
+test('validateAssessment: без plan.checklist (старі записи) — поведінка як і раніше', () => {
+  const a = { results: [{ assessment_source_id: 'x', result: 'NOT_ASSESSED', evidence_ids: ['EV-404'], finding_ids: [], assessor_comment: '' }],
+    evidence: [], findings: [] };
+  assert.ok(validateAssessment(a).some(e => e.includes('EV-404')));
+});
