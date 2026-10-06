@@ -276,6 +276,7 @@ tbody tr:hover { background: #f8fafc; }
 .assessment-table .group-row.family { background: var(--color-primary-dark); color: #fff; font-size: 0.95rem; }
 .assessment-table .group-row.control { background: var(--color-muted); color: var(--color-fg); font-size: 0.88rem; }
 .assessment-table .group-row.control { cursor: pointer; }
+.assessment-table .checklist-statement-row td { background: var(--color-muted); font-size: 0.85rem; padding: var(--space-2) var(--space-3); }
 .assessment-table .control-doc-row td { background: #fefce8; padding: var(--space-3) var(--space-4); }
 .control-doc-legend { font-size: 0.75rem; color: var(--color-muted-fg); margin-bottom: var(--space-2); }
 .control-doc-legend .param { padding: 0 0.5rem; margin-right: 0.2rem; border-radius: var(--radius-sm); }

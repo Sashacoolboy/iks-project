@@ -2,6 +2,44 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { groupPlanItems, RESULT_LABELS, METHOD_LABELS, relevantOdpEntries, odpColumnTexts, odpColumnParts, usageTitle, statementTitle, buildDictionaryRecord, firstSegmentLabel } from '../../public/js/assessment/assessment-table.js';
 
+test('groupPlanItems: виключений control_id (plan.checklist included:false) приховується повністю', () => {
+  const assessment = {
+    plan: {
+      items: [
+        { assessment_source_id: 'a1', control_id: 'AT-02', family: 'AT', family_title: 'Обізнаність', control_title: 'X' },
+        { assessment_source_id: 'a2', control_id: 'AT-03', family: 'AT', family_title: 'Обізнаність', control_title: 'Y' },
+      ],
+      checklist: [
+        { control_id: 'AT-02', included: false, verification_statement: 'текст AT-02' },
+        { control_id: 'AT-03', included: true, verification_statement: 'текст AT-03' },
+      ],
+    },
+    results: [],
+  };
+  const groups = groupPlanItems(assessment);
+  const controlIds = groups.flatMap(g => g.controls.map(c => c.control_id));
+  assert.deepEqual(controlIds, ['AT-03']);
+});
+
+test('groupPlanItems: приєднує узгоджену інструкцію перевірки (checklist_statement) до control-групи', () => {
+  const assessment = {
+    plan: {
+      items: [{ assessment_source_id: 'a1', control_id: 'AT-02', family: 'AT', family_title: 'Обізнаність', control_title: 'X' }],
+      checklist: [{ control_id: 'AT-02', included: true, verification_statement: 'Перевірити журнал навчання' }],
+    },
+    results: [],
+  };
+  const [group] = groupPlanItems(assessment);
+  assert.equal(group.controls[0].checklist_statement, 'Перевірити журнал навчання');
+});
+
+test('groupPlanItems: без plan.checklist (старі записи) — нічого не приховується, checklist_statement null', () => {
+  const assessment = { plan: { items: [{ assessment_source_id: 'a1', control_id: 'AT-02', family: 'AT', family_title: 'X', control_title: 'Y' }] }, results: [] };
+  const [group] = groupPlanItems(assessment);
+  assert.equal(group.controls[0].control_id, 'AT-02');
+  assert.equal(group.controls[0].checklist_statement, null);
+});
+
 test('firstSegmentLabel: розпізнає формат [a]/[b] (напр. AC-05) так само, як a/a.[01]/d.03[02]', () => {
   assert.equal(firstSegmentLabel('[a]'), 'a');
   assert.equal(firstSegmentLabel('[b]'), 'b');

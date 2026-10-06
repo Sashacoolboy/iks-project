@@ -24,10 +24,14 @@ export const METHOD_LABELS = {
  */
 export function groupPlanItems(assessment) {
   const resultsById = new Map((assessment.results ?? []).map(r => [r.assessment_source_id, r]));
+  const checklistByControlId = new Map((assessment.plan?.checklist ?? []).map(c => [c.control_id, c]));
   const groups = [];
   const groupByFamily = new Map();
 
   for (const planItem of assessment.plan?.items ?? []) {
+    const checklistEntry = checklistByControlId.get(planItem.control_id);
+    if (checklistEntry?.included === false) continue;
+
     let familyGroup = groupByFamily.get(planItem.family);
     if (!familyGroup) {
       familyGroup = {
@@ -45,6 +49,7 @@ export function groupPlanItems(assessment) {
       controlGroup = {
         control_id: planItem.control_id,
         control_title: planItem.control_title,
+        checklist_statement: checklistEntry?.verification_statement ?? null,
         items: []
       };
       familyGroup._byControl.set(planItem.control_id, controlGroup);
@@ -311,6 +316,13 @@ export function renderAssessmentTable(container, { onOpenItem }) {
             el('span', { class: 'collapse-mark' }, isDocExpanded ? '▲' : '▼'))
         )
       );
+
+      if (controlGroup.checklist_statement) {
+        tbody.append(
+          el('tr', { class: 'checklist-statement-row' },
+            el('td', { colspan: '5' }, el('em', {}, controlGroup.checklist_statement)))
+        );
+      }
 
       if (isDocExpanded) {
         const docCell = el('td', { colspan: '5' });

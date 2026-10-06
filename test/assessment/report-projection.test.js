@@ -56,3 +56,12 @@ test('висновок tier 4 (clean)', () => {
   const p = buildReportProjection({ assessment: a4, cpbSnapshot: { state: {} } });
   assert.equal(p.overall.conclusion_text, 'ІКС відповідає вимогам ЦПБ');
 });
+
+test('buildReportProjection: виключений control_id (plan.checklist included:false) не потрапляє у звіт', () => {
+  const excludedAssessment = {
+    ...assessment,
+    plan: { ...assessment.plan, checklist: [{ control_id: 'AC-02', included: false }] },
+  };
+  const p = buildReportProjection({ assessment: excludedAssessment, cpbSnapshot: { state: {} } });
+  assert.equal(p.families.length, 0, 'AC-02 — єдиний контроль у фікстурі — має зникнути повністю');
+});

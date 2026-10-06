@@ -27,10 +27,15 @@ export const SEVERITY_LABELS = {
  */
 function groupPlanItems(assessment) {
   const resultsById = new Map((assessment.results ?? []).map(r => [r.assessment_source_id, r]));
+  const excludedControlIds = new Set(
+    (assessment.plan?.checklist ?? []).filter(c => c.included === false).map(c => c.control_id)
+  );
   const groups = [];
   const groupByFamily = new Map();
 
   for (const planItem of assessment.plan?.items ?? []) {
+    if (excludedControlIds.has(planItem.control_id)) continue;
+
     let familyGroup = groupByFamily.get(planItem.family);
     if (!familyGroup) {
       familyGroup = {
