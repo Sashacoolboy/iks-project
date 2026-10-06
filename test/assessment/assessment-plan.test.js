@@ -139,3 +139,12 @@ test('odp_values: semantic_label/semantic_source_text з адаптера', () =
   assert.equal(odp1.semantic_label, 'визначеною організацією відповідальною особою або роллю');
   assert.equal(odp1.semantic_source_text, '[Призначення: визначеною організацією відповідальною особою або роллю]');
 });
+
+test('ND_NODE_MISSING warning has correct structure if triggered', () => {
+  const missing = warnings.filter(w => w.code === 'ND_NODE_MISSING');
+  if (missing.length > 0) {
+    // If the warning occurs, verify it has the correct structure
+    assert.ok(missing.every(w => w.control_id && typeof w.control_id === 'string'), 
+      'ND_NODE_MISSING warnings must have control_id field');
+  }
+});

@@ -125,7 +125,10 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
     if (CPB_STATUS_MAP[statusKey] !== 'APPLIED') continue;
     const canonicalId = normalizeControlId(controlId);
     const ndNode = ndNodes.get(canonicalId);
-    if (!ndNode) continue; // не знайдено в НД ТЗІ — не повинно траплятись для застосовних заходів
+    if (!ndNode) {
+      warnings.push({ code: 'ND_NODE_MISSING', control_id: denormalizeControlId(controlId) });
+      continue;
+    }
     const refEntry = checklistEntries[canonicalId];
     let verification_statement = null;
     let source_status = 'MANUAL_REQUIRED';
