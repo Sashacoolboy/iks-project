@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeAssessment } from '../../core/assessment/assessment-io.js';
 import { addEvidence, removeEvidence, EVIDENCE_TYPES } from '../../core/assessment/evidence.js';
-import { finalizeAssessment } from '../../core/assessment/assessment-run.js';
+import { finalizeAssessment, approvePlan } from '../../core/assessment/assessment-run.js';
 
 const plan = { items: [{ assessment_source_id: 'AC-02e', control_id: 'AC-02', available_methods: ['EXAMINE'], odp_values: [] }] };
 const base = () => makeAssessment({ approvedRecord: { state: { passport: {}, info_type: 'open_confidential' } }, approvedName: 'x', plan, warnings: [], id: 'ASSESS-2026-050' });
@@ -16,7 +16,7 @@ test('addEvidence: id, лінк до result, sandbox path', () => {
   assert.deepEqual(assessment.results[0].evidence_ids, ['EV-001']);
   assert.throws(() => addEvidence(base(), 'AC-02e', { ...fields, type: 'MALWARE' }), /тип/i);
   assert.throws(() => addEvidence(base(), 'AC-02e', { ...fields, source: { kind: 'LOCAL_FILE', path: '../secret' } }), /шлях/i);
-  assert.throws(() => addEvidence(finalizeAssessment(base()), 'AC-02e', fields), /фіналізован/i);
+  assert.throws(() => addEvidence(finalizeAssessment(approvePlan(base())), 'AC-02e', fields), /фіналізован/i);
   assert.equal(EVIDENCE_TYPES.length, 12);
 });
 
