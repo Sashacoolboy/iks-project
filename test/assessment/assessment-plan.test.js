@@ -140,11 +140,8 @@ test('odp_values: semantic_label/semantic_source_text з адаптера', () =
   assert.equal(odp1.semantic_source_text, '[Призначення: визначеною організацією відповідальною особою або роллю]');
 });
 
-test('ND_NODE_MISSING warning has correct structure if triggered', () => {
+test('ND_NODE_MISSING warning: pushed with control_id when a control is applicable but missing from ND TZI data', () => {
   const missing = warnings.filter(w => w.code === 'ND_NODE_MISSING');
-  if (missing.length > 0) {
-    // If the warning occurs, verify it has the correct structure
-    assert.ok(missing.every(w => w.control_id && typeof w.control_id === 'string'), 
-      'ND_NODE_MISSING warnings must have control_id field');
-  }
+  assert.ok(missing.length > 0, 'фікстура AC-02 повинна відтворювати цей випадок (AC-11(01))');
+  assert.ok(missing.every(w => w.control_id && typeof w.control_id === 'string'));
 });
