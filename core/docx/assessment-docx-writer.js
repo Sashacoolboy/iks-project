@@ -183,7 +183,7 @@ export function buildAssessmentDocx({ projection }) {
   return packAssessmentDocx(documentXml, projection.title.date);
 }
 
-function packAssessmentDocx(documentXml, dateStr) {
+export function packAssessmentDocx(documentXml, dateStr) {
   // Parse date for reproducibility (YYYY-MM-DD)
   let fixedDate;
   if (dateStr) {
