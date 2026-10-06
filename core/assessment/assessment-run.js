@@ -8,6 +8,11 @@ function assertMutable(assessment) {
   if (assessment.status === 'FINALIZED') throw new Error('оцінювання фіналізовано — зміни заборонені');
 }
 
+export function approvePlan(assessment) {
+  if (assessment.status !== 'PLANNING') throw new Error('план можна погодити лише зі статусу PLANNING');
+  return { ...assessment, status: 'IN_PROGRESS', updated_at: new Date().toISOString() };
+}
+
 export function updateResult(assessment, assessmentSourceId, patch) {
   assertMutable(assessment);
   const i = assessment.results.findIndex(r => r.assessment_source_id === assessmentSourceId);
@@ -27,6 +32,7 @@ export function updateResult(assessment, assessmentSourceId, patch) {
 
 export function finalizeAssessment(assessment, { finalizedBy = '' } = {}) {
   assertMutable(assessment);
+  if (assessment.status === 'PLANNING') throw new Error('план ще не погоджено (PLANNING) — спершу розпочніть оцінювання');
   const now = new Date().toISOString();
   return { ...assessment, status: 'FINALIZED', finalized_at: now, finalized_by: finalizedBy, updated_at: now };
 }

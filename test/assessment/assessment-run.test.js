@@ -1,15 +1,14 @@
-// test/assessment/assessment-run.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeAssessment } from '../../core/assessment/assessment-io.js';
-import { updateResult, finalizeAssessment, RESULT_VALUES } from '../../core/assessment/assessment-run.js';
+import { updateResult, finalizeAssessment, approvePlan, RESULT_VALUES } from '../../core/assessment/assessment-run.js';
 
 const plan = { items: [{ assessment_source_id: 'AC-02e', control_id: 'AC-02', available_methods: ['EXAMINE', 'TEST'], odp_values: [] }] };
 const approvedRecord = { state: { passport: {}, info_type: 'open_confidential' } };
 const base = () => makeAssessment({ approvedRecord, approvedName: 'x', plan, warnings: [], id: 'ASSESS-2026-009' });
 
 test('updateResult: enum, методи, immutability, before/after', () => {
-  const a = base();
+  const a = approvePlan(base());
   const { assessment, before, after } = updateResult(a, 'AC-02e', { result: 'SATISFIED', methods_used: ['EXAMINE'] });
   assert.equal(after.result, 'SATISFIED');
   assert.equal(before.result, 'NOT_ASSESSED');
@@ -21,8 +20,21 @@ test('updateResult: enum, методи, immutability, before/after', () => {
   assert.deepEqual(RESULT_VALUES, ['NOT_ASSESSED', 'SATISFIED', 'PARTIALLY_SATISFIED', 'NOT_SATISFIED', 'NOT_APPLICABLE']);
 });
 
+test('approvePlan: PLANNING → IN_PROGRESS, інакше — помилка', () => {
+  const a = base();
+  assert.equal(a.status, 'PLANNING');
+  const approved = approvePlan(a);
+  assert.equal(approved.status, 'IN_PROGRESS');
+  assert.equal(a.status, 'PLANNING', 'вихідний не мутований');
+  assert.throws(() => approvePlan(approved), /PLANNING/);
+});
+
+test('finalizeAssessment: заборонено, поки план не погоджено (PLANNING)', () => {
+  assert.throws(() => finalizeAssessment(base(), { finalizedBy: 'x' }), /план|PLANNING/i);
+});
+
 test('finalizeAssessment: read-only після FINALIZED', () => {
-  const a = finalizeAssessment(base(), { finalizedBy: 'Оцінювач' });
+  const a = finalizeAssessment(approvePlan(base()), { finalizedBy: 'Оцінювач' });
   assert.equal(a.status, 'FINALIZED');
   assert.ok(a.finalized_at);
   assert.throws(() => updateResult(a, 'AC-02e', { result: 'SATISFIED' }), /finalized|фіналізован/i);
