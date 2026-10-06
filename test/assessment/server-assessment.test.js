@@ -59,6 +59,8 @@ test('POST /api/assessments створює v3 assessment з snapshot hash, catal
   // Перевірка assessment v3
   const a = JSON.parse(readFileSync(join(dir, 'assessment.json'), 'utf8'));
   assert.equal(a.schema_version, '3.0.0');
+  assert.equal(a.status, 'PLANNING', 'нові оцінювання стартують у статусі PLANNING');
+  assert.ok(Array.isArray(a.plan.checklist) && a.plan.checklist.length > 0, 'plan.checklist має бути заповнений');
   assert.ok(a.cpb_snapshot.hash, 'cpb_snapshot.hash має бути встановлено');
 
   // Перевірка catalog-version.json
@@ -68,6 +70,7 @@ test('POST /api/assessments створює v3 assessment з snapshot hash, catal
   assert.ok(catVer.hashes['assessment_catalog.json'], 'має містити хеш assessment_catalog.json');
   assert.ok(catVer.hashes['assessment_reference.json'], 'має містити хеш assessment_reference.json');
   assert.ok(catVer.hashes['generic_parameter_defaults.json'], 'має містити хеш generic_parameter_defaults.json');
+  assert.ok(catVer.hashes['checklist_reference.json'], 'має містити хеш checklist_reference.json');
 
   // Перевірка audit-log
   const audit = JSON.parse(readFileSync(join(dir, 'audit-log.json'), 'utf8'));
@@ -76,6 +79,30 @@ test('POST /api/assessments створює v3 assessment з snapshot hash, catal
   assert.equal(audit[0].action, 'ASSESSMENT_CREATED');
   assert.equal(audit[0].entity_id, createdId);
   assert.equal(audit[0].actor, 'Тестувальник');
+});
+
+test('POST /api/assessments/:id/approve-plan переводить PLANNING → IN_PROGRESS (необхідно перед усіма подальшими тестами в цьому файлі)', async () => {
+  const before = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
+  assert.equal(before.status, 'PLANNING');
+
+  const r = await fetch(BASE + '/api/assessments/' + createdId + '/approve-plan', { method: 'POST', body: '{}' });
+  assert.equal(r.status, 200);
+
+  const after = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
+  assert.equal(after.status, 'IN_PROGRESS');
+
+  const audit = JSON.parse(readFileSync(join(ROOT, 'assessments', createdId, 'audit-log.json'), 'utf8'));
+  assert.ok(audit.some(e => e.action === 'PLAN_APPROVED'));
+
+  // Повторний виклик → 409
+  const r2 = await fetch(BASE + '/api/assessments/' + createdId + '/approve-plan', { method: 'POST', body: '{}' });
+  assert.equal(r2.status, 409);
+});
+
+test('POST /api/assessments/:id/export/checklist-docx доступний у будь-якому статусі', async () => {
+  const r = await fetch(BASE + '/api/assessments/' + createdId + '/export/checklist-docx', { method: 'POST' });
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('content-type'), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 });
 
 test('GET /api/assessments/:id мігрує v1→v3 і перезаписує файл', async () => {

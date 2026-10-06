@@ -9,12 +9,14 @@ import { validateTemplate } from './core/template-io.js';
 import { mergeRecord, emptyDictionary } from './core/odp-dictionary.js';
 import { buildAssessmentPlan } from './core/assessment/assessment-plan.js';
 import { makeAssessment, serializeAssessment, deserializeAssessment, validateAssessmentSchema, nextAssessmentId, migrateAssessment } from './core/assessment/assessment-io.js';
-import { finalizeAssessment } from './core/assessment/assessment-run.js';
+import { finalizeAssessment, approvePlan } from './core/assessment/assessment-run.js';
 import { validateAssessment } from './core/assessment/assessment-validator.js';
 import { makeAuditEntry, appendAuditEntry } from './core/assessment/audit-trail.js';
 import { sha256, buildCatalogVersion } from './core/assessment/versioning.js';
 import { buildAssessmentDocx } from './core/docx/assessment-docx-writer.js';
 import { buildReportProjection } from './core/assessment/report-projection.js';
+import { buildChecklistProjection } from './core/assessment/checklist-projection.js';
+import { buildChecklistDocx } from './core/docx/checklist-docx-writer.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT ?? 3000);
@@ -162,11 +164,13 @@ createServer(async (req, res) => {
           const catalogs = await catalogsPromise;
           const assessmentCatalog = JSON.parse(await readFile(join(ROOT, 'data', 'assessment', 'assessment_catalog.json'), 'utf8'));
           const adapter = JSON.parse(await readFile(join(ROOT, 'data', 'assessment', 'assessment_odp_adapter.json'), 'utf8'));
-          const { items, warnings } = buildAssessmentPlan({ approvedState: approvedRecord.state, catalogs, assessmentCatalog, adapter });
+          const checklistReferenceText = await readFile(join(ROOT, 'data', 'assessment', 'checklist_reference.json'), 'utf8');
+          const checklistReference = JSON.parse(checklistReferenceText);
+          const { items, checklist, warnings } = buildAssessmentPlan({ approvedState: approvedRecord.state, catalogs, assessmentCatalog, adapter, checklistReference });
           await mkdir(assessDir, { recursive: true });
           const existing = (await readdir(assessDir, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => d.name);
           const id = nextAssessmentId(existing);
-          const assessment = makeAssessment({ approvedRecord, approvedName, plan: { items }, warnings, id });
+          const assessment = makeAssessment({ approvedRecord, approvedName, plan: { items, checklist }, warnings, id });
           const dir = join(assessDir, id);
           await mkdir(join(dir, 'evidence'), { recursive: true });
           const snapshotText = JSON.stringify(approvedRecord, null, 2);
@@ -177,6 +181,7 @@ createServer(async (req, res) => {
             'assessment_catalog.json': await readFile(join(ROOT, 'data', 'assessment', 'assessment_catalog.json'), 'utf8'),
             'assessment_reference.json': await readFile(join(ROOT, 'data', 'assessment', 'assessment_reference.json'), 'utf8'),
             'generic_parameter_defaults.json': await readFile(join(ROOT, 'data', 'generic_parameter_defaults.json'), 'utf8'),
+            'checklist_reference.json': checklistReferenceText,
           };
           await writeFile(join(dir, 'catalog-version.json'), JSON.stringify(buildCatalogVersion({ files: dataFiles }), null, 2));
           await writeFile(join(dir, 'assessment.json'), serializeAssessment(assessment));
@@ -209,7 +214,7 @@ createServer(async (req, res) => {
           body.cpb_snapshot = existing.cpb_snapshot;
           body.updated_at = new Date().toISOString();
           await writeFile(join(dir, 'assessment.json'), serializeAssessment(body));
-          await appendAudit(dir, makeAuditEntry({ actor: body.actor_name ?? '', action: 'RESULT_UPDATED', entity_id: body.id,
+          await appendAudit(dir, makeAuditEntry({ actor: body.actor_name ?? '', action: existing.status === 'PLANNING' ? 'PLAN_EDITED' : 'RESULT_UPDATED', entity_id: body.id,
             before: { updated_at: existing.updated_at }, after: { updated_at: body.updated_at } }));
           return json(res, 200, { ok: true });
         }
@@ -253,6 +258,15 @@ createServer(async (req, res) => {
           await appendAudit(dir, makeAuditEntry({ actor: body.finalized_by ?? '', action: 'ASSESSMENT_FINALIZED', entity_id: a.id }));
           return json(res, 200, { ok: true });
         }
+        if (parts[3] === 'approve-plan' && parts.length === 4 && req.method === 'POST') {
+          const a = await readAssessmentGuarded(dir);
+          if (a.status !== 'PLANNING') return json(res, 409, { error: 'план можна погодити лише зі статусу PLANNING' });
+          const body = JSON.parse((await readBody(req)).toString('utf8') || '{}');
+          const approved = approvePlan(a);
+          await writeFile(join(dir, 'assessment.json'), serializeAssessment(approved));
+          await appendAudit(dir, makeAuditEntry({ actor: body.actor ?? '', action: 'PLAN_APPROVED', entity_id: a.id }));
+          return json(res, 200, { ok: true });
+        }
         if (parts[3] === 'audit' && parts.length === 4 && req.method === 'GET') {
           try { return json(res, 200, { entries: JSON.parse(await readFile(join(dir, 'audit-log.json'), 'utf8')) }); }
           catch { return json(res, 200, { entries: [] }); }
@@ -272,6 +286,18 @@ createServer(async (req, res) => {
           res.writeHead(200, {
             'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(assessment.id + '.docx')}`,
+          });
+          return res.end(buf);
+        }
+        if (parts[3] === 'export' && parts[4] === 'checklist-docx' && req.method === 'POST') {
+          let assessment;
+          try { assessment = JSON.parse(await readFile(join(dir, 'assessment.json'), 'utf8')); }
+          catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
+          const projection = buildChecklistProjection({ assessment });
+          const buf = buildChecklistDocx({ projection });
+          res.writeHead(200, {
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(assessment.id + '-checklist.docx')}`,
           });
           return res.end(buf);
         }
