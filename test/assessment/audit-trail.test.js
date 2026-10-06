@@ -9,7 +9,12 @@ test('makeAuditEntry: структура і валідація action', () => {
   assert.equal(e.action, 'RESULT_UPDATED');
   assert.deepEqual(e.before, { result: 'NOT_ASSESSED' });
   assert.throws(() => makeAuditEntry({ actor: 'x', action: 'HACKED', entity_id: 'y' }), /action/i);
-  assert.equal(AUDIT_ACTIONS.length, 9);
+  assert.equal(AUDIT_ACTIONS.length, 11);
+});
+
+test('PLAN_APPROVED і PLAN_EDITED — валідні дії', () => {
+  assert.equal(makeAuditEntry({ actor: 'x', action: 'PLAN_APPROVED', entity_id: 'ASSESS-2026-001' }).action, 'PLAN_APPROVED');
+  assert.equal(makeAuditEntry({ actor: 'x', action: 'PLAN_EDITED', entity_id: 'ASSESS-2026-001' }).action, 'PLAN_EDITED');
 });
 
 test('appendAuditEntry не мутує вихідний масив', () => {
