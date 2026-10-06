@@ -3,6 +3,7 @@ import { normalizeControlId, denormalizeControlId } from './control-id.js';
 import { indexAdapter } from './odp-adapter.js';
 import { resolveEffectiveValue, baselineValue } from './effective-value-resolver.js';
 import { resolveAssessmentObjective } from './objective-resolver.js';
+import { resolveChecklistStatement } from './checklist-resolver.js';
 
 function cpbApplicableControlIds(approvedState, catalogs) {
   const bpb = catalogs.bpb[approvedState.info_type];
@@ -70,6 +71,18 @@ function ndFullStatementText(flat) {
   return flat.map(l => (l.seg ? `${l.seg}) ` : '') + l.text).join('\n');
 }
 
+// canonical_id (базовий захід АБО посилення) → { family, family_title, control_title } — для plan.checklist
+function indexNdNodes(ndTzi) {
+  const map = new Map();
+  for (const fam of ndTzi.document.security_families)
+    for (const c of fam.controls) {
+      map.set(c.canonical_id, { family: c.family, family_title: fam.title, control_title: c.title });
+      for (const ch of c.children ?? [])
+        map.set(ch.canonical_id, { family: c.family, family_title: fam.title, control_title: ch.title });
+    }
+  return map;
+}
+
 /**
  * buildAssessmentPlan (v3)
  * @param {object} params
@@ -79,11 +92,12 @@ function ndFullStatementText(flat) {
  * @param {object} params.adapter – ODP adapter document
  * @returns {{ items: Array, warnings: Array }}
  */
-export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter }) {
+export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter, checklistReference = { entries: {} } }) {
   const items = [];
   const warnings = [];
   const adapterIndex = indexAdapter(adapter);
   const ndStatements = indexNdStatements(catalogs.ndTzi);
+  const ndNodes = indexNdNodes(catalogs.ndTzi);
   const cpb = { info_type: approvedState.info_type, profile: approvedState.profile };
   const genericDefaults = catalogs.genericDefaults;
   const applicable = cpbApplicableControlIds(approvedState, catalogs);
@@ -104,6 +118,37 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
     const hit = adapterIndex.byLocalId.get(localOdpId)?.[0];
     return hit ? effectiveFor(hit.entry) : { status: 'UNRESOLVED', value: null };
   };
+
+  const checklistEntries = checklistReference.entries ?? {};
+  const checklist = [];
+  for (const [controlId, statusKey] of applicable) {
+    if (CPB_STATUS_MAP[statusKey] !== 'APPLIED') continue;
+    const canonicalId = normalizeControlId(controlId);
+    const ndNode = ndNodes.get(canonicalId);
+    if (!ndNode) continue; // не знайдено в НД ТЗІ — не повинно траплятись для застосовних заходів
+    const refEntry = checklistEntries[canonicalId];
+    let verification_statement = null;
+    let source_status = 'MANUAL_REQUIRED';
+    if (refEntry) {
+      const { resolved_statement } = resolveChecklistStatement({
+        template: refEntry.verification_statement,
+        effectiveValueFor: (localOdpId) => effectiveValueFor(localOdpId),
+      });
+      verification_statement = resolved_statement;
+      source_status = 'GENERATED';
+    }
+    checklist.push({
+      canonical_control_id: canonicalId,
+      control_id: denormalizeControlId(canonicalId),
+      family: ndNode.family,
+      family_title: ndNode.family_title,
+      control_title: ndNode.control_title,
+      verification_statement,
+      source_status,
+      included: true,
+      exclusion_reason: null,
+    });
+  }
 
   for (const [controlId, statusKey] of applicable) {
     const cpbStatus = CPB_STATUS_MAP[statusKey];
@@ -212,5 +257,5 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
     return true;
   });
 
-  return { items, warnings: dedup };
+  return { items, checklist, warnings: dedup };
 }

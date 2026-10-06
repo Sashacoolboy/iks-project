@@ -14,8 +14,34 @@ const assessmentCatalog = await read('data/assessment/assessment_catalog.json');
 const adapter = await read('data/assessment/assessment_odp_adapter.json');
 const as2 = await read('data/FIXTURES/АС-2.json');
 const approvedState = { info_type: as2.info_type, profile: as2.profile, passport: { as_class: 2, ics_name: 'АС-2' } };
+const checklistReference = JSON.parse(await readFile(new URL('../../data/assessment/checklist_reference.json', import.meta.url), 'utf8'));
 
-const { items, warnings } = buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter });
+const { items, checklist, warnings } = buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter, checklistReference });
+
+test('plan.checklist: один запис на APPLIED control/enhancement, не на statement_path', () => {
+  assert.ok(checklist.length > 0);
+  const ids = checklist.map(c => c.canonical_control_id);
+  assert.equal(new Set(ids).size, ids.length, 'без дублікатів control/enhancement');
+  // AT-2 застосовний в АС-2 фікстурі — має прийти з довідника як GENERATED
+  const at2 = checklist.find(c => c.canonical_control_id === 'AT-2');
+  assert.ok(at2, 'AT-2 має бути в чеклісті (застосовний в АС-2)');
+  assert.equal(at2.source_status, 'GENERATED');
+  assert.ok(at2.verification_statement.includes('Перевірити програму навчання'));
+  assert.equal(at2.included, true);
+  assert.equal(at2.exclusion_reason, null);
+});
+
+test('plan.checklist: заходи без запису в довіднику → MANUAL_REQUIRED, verification_statement null', () => {
+  const noRef = checklist.find(c => c.source_status === 'MANUAL_REQUIRED');
+  assert.ok(noRef, 'мають бути заходи поза пілотним довідником (поки лише AT покрито)');
+  assert.equal(noRef.verification_statement, null);
+});
+
+test('buildAssessmentPlan без checklistReference (backward-compat) — усі MANUAL_REQUIRED', () => {
+  const { checklist: c2 } = buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter });
+  assert.ok(c2.length > 0);
+  assert.ok(c2.every(c => c.source_status === 'MANUAL_REQUIRED' && c.verification_statement === null));
+});
 
 test('план містить лише applicable контролі, без EXEMPT/EXCLUDED items', () => {
   assert.ok(items.length > 0);
