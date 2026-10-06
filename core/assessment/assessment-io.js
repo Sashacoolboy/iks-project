@@ -33,7 +33,7 @@ export function makeAssessment({ approvedRecord, approvedName, plan, warnings, i
     id: id ?? nextAssessmentId([]),
     created_at: now,
     updated_at: now,
-    status: 'IN_PROGRESS',
+    status: 'PLANNING',
     started_by: startedBy,
     finalized_at: null,
     finalized_by: null,
@@ -60,7 +60,7 @@ export function makeAssessment({ approvedRecord, approvedName, plan, warnings, i
       hash: '',
     },
     warnings: warnings ?? [],
-    plan: { items: plan.items },
+    plan: { items: plan.items, checklist: plan.checklist ?? [] },
     results: plan.items.map(i => emptyResult(i.assessment_source_id)),
     evidence: [],
     findings: [],
@@ -76,7 +76,10 @@ const V1_CONCLUSION_MAP = {
 };
 
 export function migrateAssessment(obj) {
-  if (obj?.schema_version?.startsWith('3.')) return obj;
+  if (obj?.schema_version?.startsWith('3.')) {
+    if (Array.isArray(obj.plan?.checklist)) return obj;
+    return { ...obj, plan: { ...obj.plan, checklist: [] } };
+  }
   const now = new Date().toISOString();
   const evidence = [];
   const findings = [];
@@ -150,7 +153,7 @@ export function migrateAssessment(obj) {
     started_by: obj.started_by ?? '',
     finalized_at: obj.finalized_at ?? null,
     finalized_by: obj.finalized_by ?? null,
-    plan: { items: planItems },
+    plan: { items: planItems, checklist: [] },
     results,
     evidence,
     findings,
@@ -173,6 +176,7 @@ export function validateAssessmentSchema(obj) {
   if (!obj.id) errs.push('Відсутній id');
   if (!obj.schema_version?.startsWith('3.')) errs.push('Очікується schema_version 3.x');
   if (!Array.isArray(obj.plan?.items)) errs.push('plan.items має бути масивом');
+  if (!Array.isArray(obj.plan?.checklist)) errs.push('plan.checklist має бути масивом');
   if (!Array.isArray(obj.results)) errs.push('results має бути масивом');
   else
     for (const r of obj.results)

@@ -51,7 +51,42 @@ test('migrateAssessment: v1 → v3 enum/evidence/finding', () => {
   assert.deepEqual(r.finding_ids, ['F-001']);
   const planItem = a.plan.items.find(i => i.assessment_source_id === 'AC-02.e');
   assert.equal(planItem.resolved_objective, 'текст');
+  assert.deepEqual(a.plan.checklist, [], 'v1→v3 міграція додає порожній plan.checklist');
   // v3 проходить без змін
+  assert.equal(migrateAssessment(a), a);
+});
+
+test('makeAssessment v3: статус PLANNING (не IN_PROGRESS), plan.checklist присутній', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-004' });
+  assert.equal(a.status, 'PLANNING');
+  assert.deepEqual(a.plan.checklist, []);
+});
+
+test('makeAssessment: передає checklist, якщо наданий', () => {
+  const planWithChecklist = { ...plan, checklist: [{ canonical_control_id: 'AT-2', control_id: 'AT-02', family: 'AT',
+    family_title: 'Обізнаність', control_title: 'X', verification_statement: 'текст', source_status: 'GENERATED',
+    included: true, exclusion_reason: null }] };
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan: planWithChecklist, warnings: [], id: 'ASSESS-2026-005' });
+  assert.equal(a.plan.checklist.length, 1);
+  assert.equal(validateAssessmentSchema(a).length, 0);
+});
+
+test('validateAssessmentSchema: вимагає plan.checklist як масив', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-006' });
+  a.plan.checklist = 'не масив';
+  assert.ok(validateAssessmentSchema(a).some(e => e.includes('plan.checklist')));
+});
+
+test('migrateAssessment: v3-об\u02BCєкт без plan.checklist отримує backfill []', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-007' });
+  delete a.plan.checklist;
+  const migrated = migrateAssessment(a);
+  assert.deepEqual(migrated.plan.checklist, []);
+  assert.notEqual(migrated, a, 'має повернути новий обʼєкт при backfill');
+});
+
+test('migrateAssessment: v3-об\u02BCєкт з наявним plan.checklist — identity (без змін)', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-008' });
   assert.equal(migrateAssessment(a), a);
 });
 
