@@ -6,8 +6,14 @@ export function mountAssessmentApp(rootEl) {
   const view = (id) => {
     rootEl.replaceChildren();
     if (!id) return renderLanding(rootEl, { onOpen: (openedId) => view(openedId) });
-    loadAssessment(id).then(() => import('./assessment-item.js')).then(({ renderDashboard }) =>
-      renderDashboard(rootEl, { onBack: () => view(null) }));
+    loadAssessment(id).then((assessment) => {
+      if (assessment.status === 'PLANNING') {
+        return import('./plan-review.js').then(({ renderPlanReview }) =>
+          renderPlanReview(rootEl, { onApproved: () => view(id) }));
+      }
+      return import('./assessment-item.js').then(({ renderDashboard }) =>
+        renderDashboard(rootEl, { onBack: () => view(null) }));
+    });
   };
   view(null);
 }

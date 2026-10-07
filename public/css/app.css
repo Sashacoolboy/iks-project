@@ -379,3 +379,9 @@ tbody tr:hover { background: #f8fafc; }
 .analytics-uncovered { margin-top: var(--space-2); max-height: 16rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.3rem; }
 .analytics-uncovered-item { font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid var(--color-border); }
 .badge-auto-bpb { background: var(--color-accent); color: #fff; margin-left: 0.3rem; }
+
+.badge-planning { background: #0369a1; color: #fff; }
+.checklist-row { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3); margin: var(--space-3) 0; }
+.checklist-row header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
+.checklist-row textarea { width: 100%; min-height: 4rem; padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; }
+.checklist-family { margin: var(--space-4) 0; }
