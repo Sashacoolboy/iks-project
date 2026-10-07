@@ -30,6 +30,7 @@ after(() => {
   if (createdId) {
     rmSync(join('assessments', createdId), { recursive: true, force: true });
     rmSync(join('exports/assessments', createdId + '.docx'), { force: true });
+    rmSync(join('exports/assessments', createdId + '-checklist.docx'), { force: true });
   }
   if (v1AssessmentId) {
     rmSync(join('assessments', v1AssessmentId), { recursive: true, force: true });
@@ -110,6 +111,10 @@ test('POST /api/assessments/:id/export/checklist-docx доступний у бу
   const r = await fetch(BASE + '/api/assessments/' + createdId + '/export/checklist-docx', { method: 'POST' });
   assert.equal(r.status, 200);
   assert.equal(r.headers.get('content-type'), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+  assert.ok(existsSync(join(ROOT, 'exports/assessments', createdId + '-checklist.docx')), 'checklist docx має бути збережено на диск');
+  const audit = JSON.parse(readFileSync(join(ROOT, 'assessments', createdId, 'audit-log.json'), 'utf8'));
+  assert.ok(audit.some(e => e.action === 'CHECKLIST_EXPORTED'), 'має бути audit запис CHECKLIST_EXPORTED');
 });
 
 test('GET /api/assessments/:id мігрує v1→v3 і перезаписує файл', async () => {
@@ -184,6 +189,20 @@ test('PUT server-owned fields: клієнт не може змінити status,
   const updated = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
   assert.equal(updated.status, originalStatus, 'status має залишитися незмінним');
   assert.equal(updated.cpb_snapshot.hash, originalCpbHash, 'cpb_snapshot.hash має залишитися незмінним');
+
+  // Спроба змінити plan.checklist після погодження плану (статус вже не PLANNING) — має бути заблоковано
+  const beforeChecklist = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
+  const originalIncluded = beforeChecklist.plan.checklist[0].included;
+  beforeChecklist.plan.checklist[0].included = !originalIncluded;
+
+  const r2 = await fetch(BASE + '/api/assessments/' + createdId, {
+    method: 'PUT',
+    body: JSON.stringify(beforeChecklist),
+  });
+  assert.equal(r2.status, 200, 'PUT має пройти успішно');
+
+  const afterChecklist = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
+  assert.equal(afterChecklist.plan.checklist[0].included, originalIncluded, 'plan.checklist не можна змінити після виходу з PLANNING');
 });
 
 test('POST /api/assessments/:id/finalize з невалідними results → 400 з errors', async () => {

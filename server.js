@@ -212,6 +212,7 @@ createServer(async (req, res) => {
           body.finalized_by = existing.finalized_by;
           body.created_at = existing.created_at;
           body.cpb_snapshot = existing.cpb_snapshot;
+          if (existing.status !== 'PLANNING') body.plan = { ...body.plan, checklist: existing.plan.checklist };
           body.updated_at = new Date().toISOString();
           await writeFile(join(dir, 'assessment.json'), serializeAssessment(body));
           await appendAudit(dir, makeAuditEntry({ actor: body.actor_name ?? '', action: existing.status === 'PLANNING' ? 'PLAN_EDITED' : 'RESULT_UPDATED', entity_id: body.id,
@@ -298,6 +299,9 @@ createServer(async (req, res) => {
           catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
           const projection = buildChecklistProjection({ assessment });
           const buf = buildChecklistDocx({ projection });
+          await mkdir(join(ROOT, 'exports', 'assessments'), { recursive: true });
+          await writeFile(join(ROOT, 'exports', 'assessments', `${assessment.id}-checklist.docx`), buf);
+          await appendAudit(dir, makeAuditEntry({ actor: '', action: 'CHECKLIST_EXPORTED', entity_id: assessment.id }));
           res.writeHead(200, {
             'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(assessment.id + '-checklist.docx')}`,
