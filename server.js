@@ -259,7 +259,10 @@ createServer(async (req, res) => {
           return json(res, 200, { ok: true });
         }
         if (parts[3] === 'approve-plan' && parts.length === 4 && req.method === 'POST') {
-          const a = await readAssessmentGuarded(dir);
+          let a;
+          try {
+            a = await readAssessmentGuarded(dir);
+          } catch { return json(res, 404, { error: 'оцінювання не знайдено' }); }
           if (a.status !== 'PLANNING') return json(res, 409, { error: 'план можна погодити лише зі статусу PLANNING' });
           const body = JSON.parse((await readBody(req)).toString('utf8') || '{}');
           const approved = approvePlan(a);

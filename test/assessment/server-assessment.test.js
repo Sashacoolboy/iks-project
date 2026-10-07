@@ -99,6 +99,13 @@ test('POST /api/assessments/:id/approve-plan переводить PLANNING → I
   assert.equal(r2.status, 409);
 });
 
+test('POST /api/assessments/:id/approve-plan на неіснуючий id → 404', async () => {
+  const r = await fetch(BASE + '/api/assessments/ASSESS-2026-777/approve-plan', { method: 'POST', body: '{}' });
+  assert.equal(r.status, 404);
+  const body = await r.json();
+  assert.equal(body.error, 'оцінювання не знайдено');
+});
+
 test('POST /api/assessments/:id/export/checklist-docx доступний у будь-якому статусі', async () => {
   const r = await fetch(BASE + '/api/assessments/' + createdId + '/export/checklist-docx', { method: 'POST' });
   assert.equal(r.status, 200);
