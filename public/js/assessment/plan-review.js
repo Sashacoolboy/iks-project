@@ -33,8 +33,11 @@ function patchChecklistEntry(controlId, patch) {
 function renderRow(entry) {
   const textarea = el('textarea', {
     rows: '3',
-    oninput: (e) => patchChecklistEntry(entry.control_id, { verification_statement: e.target.value }),
   }, entry.verification_statement ?? '');
+
+  textarea.addEventListener('blur', () => {
+    patchChecklistEntry(entry.control_id, { verification_statement: textarea.value });
+  });
 
   const includeCheckbox = el('input', {
     type: 'checkbox',
