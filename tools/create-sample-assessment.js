@@ -36,19 +36,21 @@ const catalogs = {
 
 const assessmentCatalog = await read('data/assessment/assessment_catalog.json');
 const adapter = await read('data/assessment/assessment_odp_adapter.json');
+const checklistReference = await read('data/assessment/checklist_reference.json');
 
-const { items, warnings } = buildAssessmentPlan({
+const { items, checklist, warnings } = buildAssessmentPlan({
   approvedState: approvedRecord.state,
   catalogs,
   assessmentCatalog,
-  adapter
+  adapter,
+  checklistReference
 });
 
 const id = 'ASSESS-2026-900'; // сумісний з ASSESSMENT_ID_RE сервера
 const assessment = makeAssessment({
   approvedRecord,
   approvedName: 'as2-fixture',
-  plan: { items },
+  plan: { items, checklist },
   warnings,
   id,
   startedBy: 'sample-generator'
