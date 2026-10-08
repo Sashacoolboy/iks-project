@@ -64,7 +64,7 @@ test('makeAssessment v3: статус PLANNING (не IN_PROGRESS), plan.checklis
 
 test('makeAssessment: передає checklist, якщо наданий', () => {
   const planWithChecklist = { ...plan, checklist: [{ canonical_control_id: 'AT-2', control_id: 'AT-02', family: 'AT',
-    family_title: 'Обізнаність', control_title: 'X', verification_statement: 'текст', source_status: 'GENERATED',
+    family_title: 'Обізнаність', control_title: 'X', statements: [{ id: 'AT-2#1', text: 'текст' }],
     included: true, exclusion_reason: null }] };
   const a = makeAssessment({ approvedRecord, approvedName: 'test', plan: planWithChecklist, warnings: [], id: 'ASSESS-2026-005' });
   assert.equal(a.plan.checklist.length, 1);
@@ -89,7 +89,29 @@ test('migrateAssessment: v3-об\u02BCєкт з наявним plan.checklist �
   const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-008' });
   assert.equal(migrateAssessment(a), a);
 });
+test('migrateAssessment: нормалізує старий формат verification_statement → statements[]', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-012' });
+  a.plan.checklist = [{ control_id: 'AT-02', verification_statement: 'старий текст', source_status: 'GENERATED',
+    included: true, exclusion_reason: null }];
+  const migrated = migrateAssessment(a);
+  assert.deepEqual(migrated.plan.checklist[0].statements, [{ id: 'AT-02#1', text: 'старий текст' }]);
+  assert.equal(migrated.plan.checklist[0].verification_statement, undefined);
+  assert.equal(migrated.plan.checklist[0].source_status, undefined);
+});
 
+test('migrateAssessment: старий формат з null verification_statement → statements []', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-013' });
+  a.plan.checklist = [{ control_id: 'AT-02', verification_statement: null, source_status: 'MANUAL_REQUIRED',
+    included: true, exclusion_reason: null }];
+  const migrated = migrateAssessment(a);
+  assert.deepEqual(migrated.plan.checklist[0].statements, []);
+});
+
+test('migrateAssessment: вже новий формат (statements присутній) — identity, без змін', () => {
+  const a = makeAssessment({ approvedRecord, approvedName: 'test', plan, warnings: [], id: 'ASSESS-2026-014' });
+  a.plan.checklist = [{ control_id: 'AT-02', statements: [{ id: 'AT-02#1', text: 'x' }], included: true, exclusion_reason: null }];
+  assert.equal(migrateAssessment(a), a);
+});
 test('nextAssessmentId', () => {
   const y = new Date().getFullYear();
   assert.equal(nextAssessmentId([`ASSESS-${y}-001`, `ASSESS-${y}-007`]), `ASSESS-${y}-008`);

@@ -1,5 +1,12 @@
 // core/assessment/assessment-io.js
 
+function normalizeChecklistEntry(entry) {
+  if (Array.isArray(entry.statements)) return entry;
+  const { verification_statement, source_status, ...rest } = entry;
+  const statements = verification_statement ? [{ id: `${entry.control_id}#1`, text: verification_statement }] : [];
+  return { ...rest, statements };
+}
+
 export function nextAssessmentId(existingIds) {
   const year = new Date().getFullYear();
   const nums = existingIds
@@ -77,8 +84,11 @@ const V1_CONCLUSION_MAP = {
 
 export function migrateAssessment(obj) {
   if (obj?.schema_version?.startsWith('3.')) {
-    if (Array.isArray(obj.plan?.checklist)) return obj;
-    return { ...obj, plan: { ...obj.plan, checklist: [] } };
+    const hasChecklist = Array.isArray(obj.plan?.checklist);
+    const normalizedChecklist = hasChecklist ? obj.plan.checklist.map(normalizeChecklistEntry) : [];
+    const checklistChanged = !hasChecklist || normalizedChecklist.some((e, i) => e !== obj.plan.checklist[i]);
+    if (!checklistChanged) return obj;
+    return { ...obj, plan: { ...obj.plan, checklist: normalizedChecklist } };
   }
   const now = new Date().toISOString();
   const evidence = [];
