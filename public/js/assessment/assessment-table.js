@@ -49,7 +49,7 @@ export function groupPlanItems(assessment) {
       controlGroup = {
         control_id: planItem.control_id,
         control_title: planItem.control_title,
-        checklist_statement: checklistEntry?.verification_statement ?? null,
+        checklist_statements: (checklistEntry?.statements ?? []).map(s => s.text),
         items: []
       };
       familyGroup._byControl.set(planItem.control_id, controlGroup);
@@ -317,10 +317,11 @@ export function renderAssessmentTable(container, { onOpenItem }) {
         )
       );
 
-      if (controlGroup.checklist_statement) {
+      if (controlGroup.checklist_statements.length) {
         tbody.append(
           el('tr', { class: 'checklist-statement-row' },
-            el('td', { colspan: '5' }, el('em', {}, controlGroup.checklist_statement)))
+            el('td', { colspan: '5' },
+              ...controlGroup.checklist_statements.map((text, i) => el('div', {}, el('em', {}, `${i + 1}. ${text}`)))))
         );
       }
 

@@ -10,8 +10,8 @@ test('groupPlanItems: виключений control_id (plan.checklist included:f
         { assessment_source_id: 'a2', control_id: 'AT-03', family: 'AT', family_title: 'Обізнаність', control_title: 'Y' },
       ],
       checklist: [
-        { control_id: 'AT-02', included: false, verification_statement: 'текст AT-02' },
-        { control_id: 'AT-03', included: true, verification_statement: 'текст AT-03' },
+        { control_id: 'AT-02', included: false, statements: [{ id: 'AT-02#1', text: 'текст AT-02' }] },
+        { control_id: 'AT-03', included: true, statements: [{ id: 'AT-03#1', text: 'текст AT-03' }] },
       ],
     },
     results: [],
@@ -21,23 +21,26 @@ test('groupPlanItems: виключений control_id (plan.checklist included:f
   assert.deepEqual(controlIds, ['AT-03']);
 });
 
-test('groupPlanItems: приєднує узгоджену інструкцію перевірки (checklist_statement) до control-групи', () => {
+test('groupPlanItems: приєднує список узгоджених пунктів перевірки (checklist_statements) до control-групи', () => {
   const assessment = {
     plan: {
       items: [{ assessment_source_id: 'a1', control_id: 'AT-02', family: 'AT', family_title: 'Обізнаність', control_title: 'X' }],
-      checklist: [{ control_id: 'AT-02', included: true, verification_statement: 'Перевірити журнал навчання' }],
+      checklist: [{ control_id: 'AT-02', included: true, statements: [
+        { id: 'AT-02#1', text: 'Перевірити журнал навчання' },
+        { id: 'AT-02#2', text: 'Перевірити журнал паролів' },
+      ] }],
     },
     results: [],
   };
   const [group] = groupPlanItems(assessment);
-  assert.equal(group.controls[0].checklist_statement, 'Перевірити журнал навчання');
+  assert.deepEqual(group.controls[0].checklist_statements, ['Перевірити журнал навчання', 'Перевірити журнал паролів']);
 });
 
-test('groupPlanItems: без plan.checklist (старі записи) — нічого не приховується, checklist_statement null', () => {
+test('groupPlanItems: без plan.checklist (старі записи) — нічого не приховується, checklist_statements порожній', () => {
   const assessment = { plan: { items: [{ assessment_source_id: 'a1', control_id: 'AT-02', family: 'AT', family_title: 'X', control_title: 'Y' }] }, results: [] };
   const [group] = groupPlanItems(assessment);
   assert.equal(group.controls[0].control_id, 'AT-02');
-  assert.equal(group.controls[0].checklist_statement, null);
+  assert.deepEqual(group.controls[0].checklist_statements, []);
 });
 
 test('firstSegmentLabel: розпізнає формат [a]/[b] (напр. AC-05) так само, як a/a.[01]/d.03[02]', () => {
