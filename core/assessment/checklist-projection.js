@@ -26,10 +26,11 @@ export function buildChecklistProjection({ assessment }) {
       groupByFamily.set(entry.family, group);
       families.push(group);
     }
+    const joined = (entry.statements ?? []).map((s, i) => `${i + 1}. ${s.text}`).join('\n');
     group.rows.push({
       control_id: entry.control_id,
       control_title: entry.control_title,
-      verification_statement: entry.verification_statement ?? NO_STATEMENT_PLACEHOLDER,
+      verification_statement: joined || NO_STATEMENT_PLACEHOLDER,
     });
   }
 

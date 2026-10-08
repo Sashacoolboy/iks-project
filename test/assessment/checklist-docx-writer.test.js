@@ -12,7 +12,7 @@ const assessment = {
   metadata: { ics_name: 'АС-2', as_class: 2, info_type: 'open_confidential', assessment_start_date: '2026-10-06' },
   plan: { checklist: [
     { control_id: 'AT-02', control_title: 'НАВЧАННЯ З ПІДВИЩЕННЯ ОБІЗНАНОСТІ', family: 'AT', family_title: 'Обізнаність та навчання',
-      verification_statement: 'Перевірити журнал проведення тренінгів.', included: true },
+      statements: [{ id: 'AT-2#1', text: 'Перевірити журнал проведення тренінгів.' }], included: true },
   ] },
 };
 
