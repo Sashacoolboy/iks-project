@@ -27,8 +27,11 @@ const AU_WITHDRAWN = ['AU-2(1)', 'AU-2(2)', 'AU-2(3)', 'AU-2(4)', 'AU-3(2)', 'AU
 const SC_WITHDRAWN = ['SC-4(1)', 'SC-7(1)', 'SC-7(2)', 'SC-7(6)', 'SC-9', 'SC-12(4)', 'SC-12(5)',
   'SC-13(1)', 'SC-13(2)', 'SC-13(3)', 'SC-13(4)', 'SC-14', 'SC-19', 'SC-20(1)', 'SC-26(1)', 'SC-30(1)', 'SC-33'];
 
-test('довідник містить точно 373 записи: 15 AT + 120 AC + 55 IA + 81 AU/CA + 102 SC', () => {
-  assert.equal(Object.keys(ref.entries).length, 373);
+const SI_WITHDRAWN = ['SI-2(1)', 'SI-3(1)', 'SI-3(2)', 'SI-3(3)', 'SI-3(5)', 'SI-3(7)', 'SI-3(9)',
+  'SI-4(6)', 'SI-4(8)', 'SI-7(4)', 'SI-7(13)', 'SI-7(14)', 'SI-9', 'SI-13(2)'];
+
+test('довідник містить точно 460 записів: 15 AT + 120 AC + 55 IA + 81 AU/CA + 102 SC + 87 SI', () => {
+  assert.equal(Object.keys(ref.entries).length, 460);
 });
 
 test('родина AT: точно 15 записів, без змін (AT-3(4) і AT-5 вилучені з НД ТЗІ — пропущені навмисно)', () => {
@@ -61,6 +64,12 @@ test('родина SC: точно 102 записи (17 справжніх вил
   for (const id of ['SC-7(4)', 'SC-15', 'SC-42']) assert.ok(ref.entries[id], `${id} — реальний контроль, має бути в довіднику`);
 });
 
+test('родина SI: точно 87 записів (14 вилучених НД ТЗІ заходів відсутні навмисно)', () => {
+  const siIds = Object.keys(ref.entries).filter(id => id.startsWith('SI-'));
+  assert.equal(siIds.length, 87);
+  for (const w of SI_WITHDRAWN) assert.ok(!ref.entries[w], `${w} вилучений з НД ТЗІ — не повинен бути в довіднику`);
+});
+
 test('кожен запис (усіх родин) має непорожній масив statements, control_title і статус DRAFT_HEURISTIC', () => {
   for (const [id, e] of Object.entries(ref.entries)) {
     assert.ok(e.control_title?.length > 0, `${id}: control_title`);
@@ -77,14 +86,16 @@ test('плейсхолдери {{ insert: param, ... }} у statements — лиш
   assert.ok(ref.entries['AC-2'].statements.some(s => s.includes('{{ insert: param, ac-2_odp.01 }}')));
   assert.ok(ref.entries['IA-5(1)'].statements.some(s => s.includes('{{ insert: param, ia-5.1_odp.01 }}')));
   assert.ok(ref.entries['AU-6'].statements.some(s => s.includes('{{ insert: param, au-6_odp.01 }}')));
+  assert.ok(ref.entries['SI-4'].statements.some(s => s.includes('{{ insert: param, si-4_odp.02 }}')));
 });
 
-test('AT-2, AC-2, IA-5(1), AU-6 і SC-7(4) розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
+test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4) і SI-4 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
   assert.ok(ref.entries['AT-2'].statements.length >= 4);
   assert.ok(ref.entries['AC-2'].statements.length >= 4);
   assert.ok(ref.entries['IA-5(1)'].statements.length >= 4);
   assert.ok(ref.entries['AU-6'].statements.length >= 2);
   assert.ok(ref.entries['SC-7(4)'].statements.length >= 4);
+  assert.ok(ref.entries['SI-4'].statements.length >= 3);
 });
 
 test('жоден плейсхолдер з source_requirement_text не загублено при розбитті на statements (усі родини)', () => {
