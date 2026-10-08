@@ -383,5 +383,9 @@ tbody tr:hover { background: #f8fafc; }
 .badge-planning { background: #0369a1; color: #fff; }
 .checklist-row { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3); margin: var(--space-3) 0; }
 .checklist-row header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
-.checklist-row textarea { width: 100%; min-height: 4rem; padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; }
+.statements-list { margin: var(--space-2) 0; }
+.statement-item { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); }
+.statement-item:last-child { border-bottom: none; }
+.statement-item p { margin: 0; flex: 1; }
+.statement-actions { display: flex; gap: var(--space-2); flex-shrink: 0; white-space: nowrap; }
 .checklist-family { margin: var(--space-4) 0; }

@@ -1,5 +1,5 @@
 // public/js/assessment/plan-review.js
-import { el } from '../render/dom.js';
+import { el, showModal } from '../render/dom.js';
 import { getAssessment, setAssessment, subscribe } from './assessment-state.js';
 
 let isSubscribed = false;
@@ -30,14 +30,63 @@ function patchChecklistEntry(controlId, patch) {
   }));
 }
 
-function renderRow(entry) {
-  const textarea = el('textarea', {
-    rows: '3',
-  }, entry.verification_statement ?? '');
+function addStatement(controlId, text) {
+  const entry = getAssessment().plan.checklist.find(e => e.control_id === controlId);
+  patchChecklistEntry(controlId, { statements: [...(entry.statements ?? []), { id: crypto.randomUUID(), text }] });
+}
 
-  textarea.addEventListener('blur', () => {
-    patchChecklistEntry(entry.control_id, { verification_statement: textarea.value });
-  });
+function updateStatement(controlId, statementId, text) {
+  const entry = getAssessment().plan.checklist.find(e => e.control_id === controlId);
+  patchChecklistEntry(controlId, { statements: entry.statements.map(s => s.id === statementId ? { ...s, text } : s) });
+}
+
+function removeStatement(controlId, statementId) {
+  const entry = getAssessment().plan.checklist.find(e => e.control_id === controlId);
+  patchChecklistEntry(controlId, { statements: entry.statements.filter(s => s.id !== statementId) });
+}
+
+function openStatementModal({ title, initialText, onSave, onDelete }) {
+  const textarea = el('textarea', { rows: '4' }, initialText ?? '');
+  const saveBtn = el('button', { type: 'button', class: 'primary', onclick: () => {
+    const text = textarea.value.trim();
+    if (!text) return;
+    onSave(text);
+    modal.close();
+  } }, 'Зберегти');
+  const cancelBtn = el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати');
+  const deleteBtn = onDelete ? el('button', { type: 'button', class: 'link-btn', onclick: () => {
+    if (!confirm('Видалити цей пункт перевірки?')) return;
+    onDelete();
+    modal.close();
+  } }, 'Видалити') : null;
+
+  const modal = showModal(el('div', { class: 'field-grid' },
+    el('label', { class: 'field' }, 'Текст пункту перевірки', textarea),
+    el('div', { class: 'actions' }, saveBtn, cancelBtn, deleteBtn)),
+    { title });
+  textarea.focus();
+}
+
+function renderStatement(entry, statement) {
+  return el('div', { class: 'statement-item' },
+    el('p', {}, statement.text),
+    el('div', { class: 'statement-actions' },
+      el('button', { type: 'button', class: 'link-btn', onclick: () => {
+        openStatementModal({
+          title: 'Редагувати пункт перевірки',
+          initialText: statement.text,
+          onSave: (text) => updateStatement(entry.control_id, statement.id, text),
+          onDelete: () => removeStatement(entry.control_id, statement.id),
+        });
+      } }, 'Редагувати'),
+      el('button', { type: 'button', class: 'link-btn', onclick: () => {
+        if (!confirm('Видалити цей пункт перевірки?')) return;
+        removeStatement(entry.control_id, statement.id);
+      } }, 'Видалити')));
+}
+
+function renderRow(entry) {
+  const statements = entry.statements ?? [];
 
   const includeCheckbox = el('input', {
     type: 'checkbox',
@@ -45,17 +94,25 @@ function renderRow(entry) {
     onchange: (e) => patchChecklistEntry(entry.control_id, { included: e.target.checked }),
   });
 
-  const sourceBadge = entry.source_status === 'MANUAL_REQUIRED'
-    ? el('span', { class: 'badge badge-exempt' }, 'немає згенерованої інструкції — заповніть вручну')
-    : null;
+  const statementsList = statements.length
+    ? el('div', { class: 'statements-list' }, ...statements.map(s => renderStatement(entry, s)))
+    : el('p', { class: 'hint' }, 'Немає пунктів перевірки — додайте власний');
+
+  const addBtn = el('button', { type: 'button', class: 'link-btn', onclick: () => {
+    openStatementModal({
+      title: 'Додати пункт перевірки',
+      initialText: '',
+      onSave: (text) => addStatement(entry.control_id, text),
+    });
+  } }, '+ Додати пункт перевірки');
 
   return el('div', { class: 'checklist-row' },
     el('header', {},
       el('strong', {}, `${entry.control_id} — ${entry.control_title}`),
       ' ',
       el('label', {}, includeCheckbox, ' включити в оцінювання')),
-    sourceBadge,
-    el('label', { class: 'field' }, 'Інструкція перевірки', textarea));
+    statementsList,
+    addBtn);
 }
 
 export function renderPlanReview(container, { onApproved }) {
