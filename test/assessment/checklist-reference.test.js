@@ -12,18 +12,23 @@ test('довідник містить рівно 15 записів родини 
   assert.deepEqual(Object.keys(ref.entries).sort(), [...AT_IDS].sort());
 });
 
-test('кожен запис має непорожню verification_statement, control_title і статус DRAFT_HEURISTIC', () => {
+test('кожен запис має непорожній масив statements, control_title і статус DRAFT_HEURISTIC', () => {
   for (const id of AT_IDS) {
     const e = ref.entries[id];
     assert.ok(e, `${id} має бути в довіднику`);
     assert.ok(e.control_title?.length > 0, `${id}: control_title`);
-    assert.ok(e.verification_statement?.length > 20, `${id}: verification_statement має бути змістовним`);
+    assert.ok(Array.isArray(e.statements) && e.statements.length > 0, `${id}: statements має бути непорожнім масивом`);
+    for (const s of e.statements) assert.ok(s.length > 10, `${id}: кожен пункт перевірки має бути змістовним`);
     assert.ok(e.source_requirement_text?.length > 0, `${id}: source_requirement_text`);
     assert.equal(e.status, 'DRAFT_HEURISTIC');
   }
 });
 
-test('плейсхолдери {{ insert: param, ... }} у verification_statement — лише ті, що реально є в НД ТЗІ для цього заходу', () => {
-  assert.ok(ref.entries['AT-2'].verification_statement.includes('{{ insert: param, at-2_odp.01 }}'));
-  assert.ok(ref.entries['AT-2(4)'].verification_statement.includes('{{ insert: param, at-2.4_odp.01 }}'));
+test('плейсхолдери {{ insert: param, ... }} у statements — лише ті, що реально є в НД ТЗІ для цього заходу', () => {
+  assert.ok(ref.entries['AT-2'].statements.some(s => s.includes('{{ insert: param, at-2_odp.01 }}')));
+  assert.ok(ref.entries['AT-2(4)'].statements.some(s => s.includes('{{ insert: param, at-2.4_odp.01 }}')));
+});
+
+test('AT-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
+  assert.ok(ref.entries['AT-2'].statements.length >= 4);
 });
