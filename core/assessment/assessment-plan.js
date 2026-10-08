@@ -90,7 +90,8 @@ function indexNdNodes(ndTzi) {
  * @param {object} params.catalogs – { ndTzi, bpb, exemptions, genericDefaults }
  * @param {object} params.assessmentCatalog – v3 assessment catalog
  * @param {object} params.adapter – ODP adapter document
- * @returns {{ items: Array, warnings: Array }}
+ * @param {object} [params.checklistReference] – { entries: { [canonical_id]: { statements: string[] } } }
+ * @returns {{ items: Array, checklist: Array, warnings: Array }}
  */
 export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter, checklistReference = { entries: {} } }) {
   const items = [];
@@ -130,24 +131,17 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
       continue;
     }
     const refEntry = checklistEntries[canonicalId];
-    let verification_statement = null;
-    let source_status = 'MANUAL_REQUIRED';
-    if (refEntry) {
-      const { resolved_statement } = resolveChecklistStatement({
-        template: refEntry.verification_statement,
-        effectiveValueFor: (localOdpId) => effectiveValueFor(localOdpId),
-      });
-      verification_statement = resolved_statement;
-      source_status = 'GENERATED';
-    }
+    const statements = (refEntry?.statements ?? []).map((template, i) => ({
+      id: `${canonicalId}#${i + 1}`,
+      text: resolveChecklistStatement({ template, effectiveValueFor }).resolved_statement,
+    }));
     checklist.push({
       canonical_control_id: canonicalId,
       control_id: denormalizeControlId(canonicalId),
       family: ndNode.family,
       family_title: ndNode.family_title,
       control_title: ndNode.control_title,
-      verification_statement,
-      source_status,
+      statements,
       included: true,
       exclusion_reason: null,
     });

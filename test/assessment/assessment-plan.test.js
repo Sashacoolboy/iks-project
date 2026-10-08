@@ -22,25 +22,25 @@ test('plan.checklist: один запис на APPLIED control/enhancement, не
   assert.ok(checklist.length > 0);
   const ids = checklist.map(c => c.canonical_control_id);
   assert.equal(new Set(ids).size, ids.length, 'без дублікатів control/enhancement');
-  // AT-2 застосовний в АС-2 фікстурі — має прийти з довідника як GENERATED
+  // AT-2 застосовний в АС-2 фікстурі — має прийти з довідника з кількома пунктами перевірки
   const at2 = checklist.find(c => c.canonical_control_id === 'AT-2');
   assert.ok(at2, 'AT-2 має бути в чеклісті (застосовний в АС-2)');
-  assert.equal(at2.source_status, 'GENERATED');
-  assert.ok(at2.verification_statement.includes('Перевірити програму навчання'));
+  assert.ok(at2.statements.length > 1, 'AT-2 має кілька окремих пунктів перевірки');
+  assert.equal(at2.statements[0].id, 'AT-2#1');
+  assert.ok(at2.statements[0].text.includes('новий користувач'));
   assert.equal(at2.included, true);
   assert.equal(at2.exclusion_reason, null);
 });
 
-test('plan.checklist: заходи без запису в довіднику → MANUAL_REQUIRED, verification_statement null', () => {
-  const noRef = checklist.find(c => c.source_status === 'MANUAL_REQUIRED');
+test('plan.checklist: заходи без запису в довіднику → statements порожній масив', () => {
+  const noRef = checklist.find(c => c.statements.length === 0);
   assert.ok(noRef, 'мають бути заходи поза пілотним довідником (поки лише AT покрито)');
-  assert.equal(noRef.verification_statement, null);
 });
 
-test('buildAssessmentPlan без checklistReference (backward-compat) — усі MANUAL_REQUIRED', () => {
+test('buildAssessmentPlan без checklistReference (backward-compat) — усі statements порожні', () => {
   const { checklist: c2 } = buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter });
   assert.ok(c2.length > 0);
-  assert.ok(c2.every(c => c.source_status === 'MANUAL_REQUIRED' && c.verification_statement === null));
+  assert.ok(c2.every(c => Array.isArray(c.statements) && c.statements.length === 0));
 });
 
 test('план містить лише applicable контролі, без EXEMPT/EXCLUDED items', () => {
