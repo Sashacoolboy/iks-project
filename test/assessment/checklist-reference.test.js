@@ -7,28 +7,54 @@ const ref = JSON.parse(await readFile(new URL('../../data/assessment/checklist_r
 const AT_IDS = ['AT-1', 'AT-2', 'AT-2(1)', 'AT-2(2)', 'AT-2(3)', 'AT-2(4)', 'AT-2(5)', 'AT-2(6)',
   'AT-3', 'AT-3(1)', 'AT-3(2)', 'AT-3(3)', 'AT-3(5)', 'AT-4', 'AT-6'];
 
-test('довідник містить рівно 15 записів родини AT (AT-3(4) і AT-5 вилучені з НД ТЗІ — пропущені навмисно)', () => {
-  assert.equal(Object.keys(ref.entries).length, 15);
-  assert.deepEqual(Object.keys(ref.entries).sort(), [...AT_IDS].sort());
+// Вилучені/об'єднані в НД ТЗІ заходи родини AC — не повинні мати запису в довіднику
+const AC_WITHDRAWN = ['AC-2(10)', 'AC-3(1)', 'AC-3(6)', 'AC-4(16)', 'AC-4(18)', 'AC-7(1)', 'AC-13',
+  'AC-15', 'AC-17(5)', 'AC-17(7)', 'AC-17(8)', 'AC-18(2)', 'AC-19(1)', 'AC-19(2)', 'AC-19(3)'];
+
+test('довідник містить точно 135 записів: 15 AT + 120 AC', () => {
+  assert.equal(Object.keys(ref.entries).length, 135);
 });
 
-test('кожен запис має непорожній масив statements, control_title і статус DRAFT_HEURISTIC', () => {
-  for (const id of AT_IDS) {
-    const e = ref.entries[id];
-    assert.ok(e, `${id} має бути в довіднику`);
+test('родина AT: точно 15 записів, без змін (AT-3(4) і AT-5 вилучені з НД ТЗІ — пропущені навмисно)', () => {
+  const atIds = Object.keys(ref.entries).filter(id => id.startsWith('AT-'));
+  assert.deepEqual(atIds.sort(), [...AT_IDS].sort());
+});
+
+test('родина AC: точно 120 записів (15 вилучених НД ТЗІ заходів відсутні навмисно)', () => {
+  const acIds = Object.keys(ref.entries).filter(id => id.startsWith('AC-'));
+  assert.equal(acIds.length, 120);
+  for (const w of AC_WITHDRAWN) assert.ok(!ref.entries[w], `${w} вилучений з НД ТЗІ — не повинен бути в довіднику`);
+});
+
+test('кожен запис (усіх родин) має непорожній масив statements, control_title і статус DRAFT_HEURISTIC', () => {
+  for (const [id, e] of Object.entries(ref.entries)) {
     assert.ok(e.control_title?.length > 0, `${id}: control_title`);
     assert.ok(Array.isArray(e.statements) && e.statements.length > 0, `${id}: statements має бути непорожнім масивом`);
     for (const s of e.statements) assert.ok(s.length > 10, `${id}: кожен пункт перевірки має бути змістовним`);
     assert.ok(e.source_requirement_text?.length > 0, `${id}: source_requirement_text`);
-    assert.equal(e.status, 'DRAFT_HEURISTIC');
+    assert.equal(e.status, 'DRAFT_HEURISTIC', `${id}: status`);
   }
 });
 
 test('плейсхолдери {{ insert: param, ... }} у statements — лише ті, що реально є в НД ТЗІ для цього заходу', () => {
   assert.ok(ref.entries['AT-2'].statements.some(s => s.includes('{{ insert: param, at-2_odp.01 }}')));
   assert.ok(ref.entries['AT-2(4)'].statements.some(s => s.includes('{{ insert: param, at-2.4_odp.01 }}')));
+  assert.ok(ref.entries['AC-2'].statements.some(s => s.includes('{{ insert: param, ac-2_odp.01 }}')));
 });
 
-test('AT-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
+test('AT-2 і AC-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
   assert.ok(ref.entries['AT-2'].statements.length >= 4);
+  assert.ok(ref.entries['AC-2'].statements.length >= 4);
 });
+
+test('жоден плейсхолдер з source_requirement_text не загублено при розбитті на statements (усі родини)', () => {
+  const PLACEHOLDER_RE = /\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g;
+  for (const [id, e] of Object.entries(ref.entries)) {
+    const sourceTokens = new Set([...e.source_requirement_text.matchAll(PLACEHOLDER_RE)].map(m => m[1]));
+    const statementsText = e.statements.join(' ');
+    for (const token of sourceTokens) {
+      assert.ok(statementsText.includes(token), `${id}: плейсхолдер ${token} загублено при розбитті на statements`);
+    }
+  }
+});
+
