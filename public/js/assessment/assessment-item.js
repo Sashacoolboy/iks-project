@@ -8,6 +8,7 @@ import { renderFindingDialog } from './finding-dialog.js';
 import { renderTraceabilityDrawer } from './traceability-drawer.js';
 
 let openItemSourceId = null;
+let showPlanView = false;
 let isDashboardSubscribed = false;
 let currentDashboardRerender = null;
 
@@ -203,6 +204,13 @@ function renderWarningsBlock(assessment) {
 export function renderDashboard(container, { onBack }) {
   const assessment = getAssessment();
 
+  if (showPlanView) {
+    import('./plan-review.js').then(({ renderPlanReadOnly }) => {
+      renderPlanReadOnly(container, { onBack: () => { showPlanView = false; renderDashboard(container, { onBack }); } });
+    });
+    return;
+  }
+
   // Set up subscription for dashboard re-render (once only)
   if (!isDashboardSubscribed) {
     subscribe(() => {
@@ -233,6 +241,11 @@ export function renderDashboard(container, { onBack }) {
   const progressText = `${assessed} / ${summary.total} оцінено`;
 
   const backBtn = el('button', { type: 'button', onclick: onBack }, '← До реєстру оцінювань');
+
+  const planViewBtn = el('button', {
+    type: 'button',
+    onclick: () => { showPlanView = true; renderDashboard(container, { onBack }); }
+  }, '📋 План оцінювання');
 
   const exportBtn = el('button', {
     type: 'button',
@@ -314,7 +327,7 @@ export function renderDashboard(container, { onBack }) {
   const header = el('section', { class: 'assessment-header' },
     el('h2', {}, `Оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
     el('p', {}, statusBadge, saveErrorBadge ? [' ', saveErrorBadge] : [], ' ', progressText),
-    el('div', { class: 'actions' }, backBtn, exportBtn),
+    el('div', { class: 'actions' }, backBtn, planViewBtn, exportBtn),
     finalizeBtn
   );
 

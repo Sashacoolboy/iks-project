@@ -155,3 +155,36 @@ export function renderPlanReview(container, { onApproved }) {
       el('div', { class: 'actions' }, exportBtn, approveBtn)),
     ...sections);
 }
+
+function renderReadOnlyRow(entry) {
+  const statements = entry.statements ?? [];
+  const excludedBadge = entry.included === false ? el('span', { class: 'badge badge-excluded' }, 'Виключено') : null;
+
+  const statementsList = statements.length
+    ? el('ul', { class: 'statements-list-readonly' }, ...statements.map(s => el('li', {}, s.text)))
+    : el('p', { class: 'hint' }, 'Немає пунктів перевірки');
+
+  return el('div', { class: `checklist-row${entry.included === false ? ' excluded' : ''}` },
+    el('header', {},
+      el('strong', {}, `${entry.control_id} — ${entry.control_title}`),
+      excludedBadge ? [' ', excludedBadge] : []),
+    statementsList);
+}
+
+export function renderPlanReadOnly(container, { onBack }) {
+  const assessment = getAssessment();
+  const groups = groupChecklist(assessment);
+
+  const backBtn = el('button', { type: 'button', onclick: onBack }, '← Назад до оцінювання');
+
+  const sections = groups.map(group => el('section', { class: 'checklist-family' },
+    el('h3', {}, `${group.family} — ${group.family_title}`),
+    ...group.entries.map(renderReadOnlyRow)));
+
+  container.replaceChildren(
+    el('section', { class: 'assessment-header' },
+      el('h2', {}, `План оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
+      el('p', {}, el('span', { class: 'badge badge-planning' }, 'План (лише перегляд)')),
+      el('div', { class: 'actions' }, backBtn)),
+    ...sections);
+}
