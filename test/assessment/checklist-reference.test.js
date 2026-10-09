@@ -56,8 +56,8 @@ const MP_WITHDRAWN = ['MP-2(1)', 'MP-2(2)', 'MP-4(1)', 'MP-5(1)', 'MP-5(2)', 'MP
 
 const RA_WITHDRAWN = ['RA-4', 'RA-5(1)', 'RA-5(7)', 'RA-5(9)'];
 
-test('довідник містить точно 909 записів: 15 AT + 120 AC + 55 IA + 81 AU/CA + 102 SC + 87 SI + 106 SA + 56 CM + 49 CP + 39 IR + 38 PE + 35 PM + 34 PS/PT + 28 MA + 16 MP + 22 RA + 26 SR', () => {
-  assert.equal(Object.keys(ref.entries).length, 909);
+test('довідник містить точно 920 записів: 15 AT + 120 AC + 55 IA + 81 AU/CA + 102 SC + 87 SI + 106 SA + 56 CM + 49 CP + 39 IR + 38 PE + 35 PM + 34 PS/PT + 28 MA + 16 MP + 22 RA + 26 SR + 11 PL (повне покриття всіх 18 родин НД ТЗІ)', () => {
+  assert.equal(Object.keys(ref.entries).length, 920);
 });
 
 test('родина AT: точно 15 записів, без змін (AT-3(4) і AT-5 вилучені з НД ТЗІ — пропущені навмисно)', () => {
@@ -162,6 +162,13 @@ test('родина SR: точно 26 записів (вилучених захо
   assert.equal(srIds.length, 26);
 });
 
+test('родина PL: точно 11 записів (6 вилучених НД ТЗІ заходів відсутні навмисно)', () => {
+  const plIds = Object.keys(ref.entries).filter(id => id.startsWith('PL-'));
+  assert.equal(plIds.length, 11);
+  const PL_WITHDRAWN = ['PL-2(1)', 'PL-2(2)', 'PL-2(3)', 'PL-3', 'PL-5', 'PL-6'];
+  for (const w of PL_WITHDRAWN) assert.ok(!ref.entries[w], `${w} вилучений з НД ТЗІ — не повинен бути в довіднику`);
+});
+
 test('кожен запис (усіх родин) має непорожній масив statements, control_title і статус DRAFT_HEURISTIC', () => {
   for (const [id, e] of Object.entries(ref.entries)) {
     assert.ok(e.control_title?.length > 0, `${id}: control_title`);
@@ -190,9 +197,10 @@ test('плейсхолдери {{ insert: param, ... }} у statements — лиш
   assert.ok(ref.entries['MP-6'].statements.some(s => s.includes('{{ insert: param, mp-6_odp.01 }}')));
   assert.ok(ref.entries['RA-5'].statements.some(s => s.includes('{{ insert: param, ra-5_odp.01 }}')));
   assert.ok(ref.entries['SR-2'].statements.some(s => s.includes('{{ insert: param, sr-2_odp.01 }}')));
+  assert.ok(ref.entries['PL-2'].statements.some(s => s.includes('{{ insert: param, pl-2_odp.01 }}')));
 });
 
-test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4), SI-4, SA-9, CM-6, CP-9, IR-4, PE-3, PM-1, PT-2, MA-2, MP-6, RA-5 і SR-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
+test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4), SI-4, SA-9, CM-6, CP-9, IR-4, PE-3, PM-1, PT-2, MA-2, MP-6, RA-5, SR-2 і PL-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
   assert.ok(ref.entries['AT-2'].statements.length >= 4);
   assert.ok(ref.entries['AC-2'].statements.length >= 4);
   assert.ok(ref.entries['IA-5(1)'].statements.length >= 4);
@@ -210,6 +218,7 @@ test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4), SI-4, SA-9, CM-6, CP-9, IR-4, PE-3, PM
   assert.ok(ref.entries['SR-2'].statements.length >= 2);
   assert.ok(ref.entries['MP-6'].statements.length >= 2);
   assert.ok(ref.entries['RA-5'].statements.length >= 4);
+  assert.ok(ref.entries['PL-2'].statements.length >= 4);
 });
 
 test('жоден плейсхолдер з source_requirement_text не загублено при розбитті на statements (усі родини)', () => {
@@ -220,6 +229,19 @@ test('жоден плейсхолдер з source_requirement_text не загу
     for (const token of sourceTokens) {
       assert.ok(statementsText.includes(token), `${id}: плейсхолдер ${token} загублено при розбитті на statements`);
     }
+  }
+});
+
+test('довідник охоплює всі 18 родин НД ТЗІ (повне покриття)', () => {
+  const families = ['AT', 'AC', 'IA', 'AU', 'CA', 'SC', 'SI', 'SA', 'CM', 'CP', 'IR', 'PE', 'PM',
+    'PS', 'PT', 'MA', 'MP', 'RA', 'SR', 'PL'];
+  const idsByFamily = new Map();
+  for (const id of Object.keys(ref.entries)) {
+    const prefix = id.match(/^[A-Z]+/)[0];
+    idsByFamily.set(prefix, (idsByFamily.get(prefix) ?? 0) + 1);
+  }
+  for (const f of families) {
+    assert.ok(idsByFamily.get(f) > 0, `родина ${f} має бути представлена в довіднику`);
   }
 });
 

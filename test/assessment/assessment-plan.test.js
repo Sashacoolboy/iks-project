@@ -32,9 +32,9 @@ test('plan.checklist: один запис на APPLIED control/enhancement, не
   assert.equal(at2.exclusion_reason, null);
 });
 
-test('plan.checklist: заходи без запису в довіднику → statements порожній масив', () => {
+test('plan.checklist: довідник checklist_reference.json має повне покриття — жоден захід у плані АС-2 не лишається без statements', () => {
   const noRef = checklist.find(c => c.statements.length === 0);
-  assert.ok(noRef, 'мають бути заходи поза пілотним довідником (поки лише AT покрито)');
+  assert.equal(noRef, undefined, 'усі 18 родин НД ТЗІ тепер покрито довідником, тому заходів без statements у плані АС-2 лишитися не повинно');
 });
 
 test('buildAssessmentPlan без checklistReference (backward-compat) — усі statements порожні', () => {
