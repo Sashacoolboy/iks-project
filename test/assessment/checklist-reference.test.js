@@ -48,8 +48,11 @@ const PE_WITHDRAWN = ['PE-3(6)', 'PE-7'];
 // PT-4(3) має справжній запис (титул «ВІДКЛИКАННЯ» — відкликання згоди, не маркер вилучення).
 const PS_WITHDRAWN = ['PS-6(1)'];
 
-test('довідник містить точно 817 записів: 15 AT + 120 AC + 55 IA + 81 AU/CA + 102 SC + 87 SI + 106 SA + 56 CM + 49 CP + 39 IR + 38 PE + 35 PM + 34 PS/PT', () => {
-  assert.equal(Object.keys(ref.entries).length, 817);
+// MA-5(1) містить звичайне (не вилучене) слово «вилучено» в середині речення (не маркер) — це справжній контроль.
+const MA_WITHDRAWN = ['MA-2(1)', 'MA-4(2)'];
+
+test('довідник містить точно 845 записів: 15 AT + 120 AC + 55 IA + 81 AU/CA + 102 SC + 87 SI + 106 SA + 56 CM + 49 CP + 39 IR + 38 PE + 35 PM + 34 PS/PT + 28 MA', () => {
+  assert.equal(Object.keys(ref.entries).length, 845);
 });
 
 test('родина AT: точно 15 записів, без змін (AT-3(4) і AT-5 вилучені з НД ТЗІ — пропущені навмисно)', () => {
@@ -130,6 +133,13 @@ test('родина PS: точно 34 записи (PS-*+PT-*, 1 вилучени
   assert.ok(ref.entries['PT-4(3)'], 'PT-4(3) — реальний контроль (відкликання згоди), має бути в довіднику');
 });
 
+test('родина MA: точно 28 записів (2 вилучених НД ТЗІ заходів відсутні навмисно; MA-5(1) — реальний контроль, не вилучений, незважаючи на слово «вилучено» в тексті)', () => {
+  const maIds = Object.keys(ref.entries).filter(id => id.startsWith('MA-'));
+  assert.equal(maIds.length, 28);
+  for (const w of MA_WITHDRAWN) assert.ok(!ref.entries[w], `${w} вилучений з НД ТЗІ — не повинен бути в довіднику`);
+  assert.ok(ref.entries['MA-5(1)'], 'MA-5(1) — реальний контроль, має бути в довіднику');
+});
+
 test('кожен запис (усіх родин) має непорожній масив statements, control_title і статус DRAFT_HEURISTIC', () => {
   for (const [id, e] of Object.entries(ref.entries)) {
     assert.ok(e.control_title?.length > 0, `${id}: control_title`);
@@ -154,9 +164,10 @@ test('плейсхолдери {{ insert: param, ... }} у statements — лиш
   assert.ok(ref.entries['PE-3'].statements.some(s => s.includes('{{ insert: param, pe-3_odp.01 }}')));
   assert.ok(ref.entries['PM-9'].statements.some(s => s.includes('{{ insert: param, pm-9_odp.01 }}')));
   assert.ok(ref.entries['PT-2'].statements.some(s => s.includes('{{ insert: param, pt-2_odp.01 }}')));
+  assert.ok(ref.entries['MA-2'].statements.some(s => s.includes('{{ insert: param, ma-2_odp.01 }}')));
 });
 
-test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4), SI-4, SA-9, CM-6, CP-9, IR-4, PE-3, PM-1 і PT-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
+test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4), SI-4, SA-9, CM-6, CP-9, IR-4, PE-3, PM-1, PT-2 і MA-2 розбито на кілька окремих пунктів перевірки (не один суцільний текст)', () => {
   assert.ok(ref.entries['AT-2'].statements.length >= 4);
   assert.ok(ref.entries['AC-2'].statements.length >= 4);
   assert.ok(ref.entries['IA-5(1)'].statements.length >= 4);
@@ -170,6 +181,7 @@ test('AT-2, AC-2, IA-5(1), AU-6, SC-7(4), SI-4, SA-9, CM-6, CP-9, IR-4, PE-3, PM
   assert.ok(ref.entries['PE-3'].statements.length >= 4);
   assert.ok(ref.entries['PM-1'].statements.length >= 2);
   assert.ok(ref.entries['PT-2'].statements.length >= 2);
+  assert.ok(ref.entries['MA-2'].statements.length >= 4);
 });
 
 test('жоден плейсхолдер з source_requirement_text не загублено при розбитті на statements (усі родини)', () => {
