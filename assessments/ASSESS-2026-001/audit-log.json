@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": "2026-10-12T13:04:04.656Z",
+    "actor": "",
+    "action": "ASSESSMENT_CREATED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {},
+    "after": {}
+  },
+  {
+    "timestamp": "2026-10-12T13:04:29.451Z",
+    "actor": "",
+    "action": "PLAN_APPROVED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {},
+    "after": {}
+  }
+]
