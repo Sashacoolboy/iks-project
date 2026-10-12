@@ -1,4 +1,4 @@
-// Пріоритет ТЗ §7: CPB_OVERRIDE → BPB_INHERITED → GENERIC_DEFAULT → UNRESOLVED
+// Пріоритет ТЗ §7: CPB_OVERRIDE → POLICY_MAPPING → BPB_INHERITED → GENERIC_DEFAULT → UNRESOLVED
 export function baselineValue({ adapterEntry, infoType }) {
   const bindings = adapterEntry.bpb_bindings?.[infoType] ?? [];
   if (!bindings.length) return null;
@@ -6,11 +6,15 @@ export function baselineValue({ adapterEntry, infoType }) {
   return values.length === 1 ? values[0] : values;
 }
 
-export function resolveEffectiveValue({ adapterEntry, cpb, genericDefaults }) {
+export function resolveEffectiveValue({ adapterEntry, cpb, genericDefaults, policyIndex }) {
   const localOdpId = adapterEntry.binding?.cpb_ref ?? adapterEntry.local_odp_id;
   const override = cpb?.profile?.param_overrides?.[localOdpId];
   if (override != null && override !== '')
     return { status: 'RESOLVED', source: 'CPB_OVERRIDE', value: override, evidence: [] };
+
+  // Параметр, успадкований з глобальних політик ЦПБ (Крок 1), якщо його не перевизначено явно
+  if (policyIndex?.has(localOdpId))
+    return { status: 'RESOLVED', source: 'POLICY_MAPPING', value: policyIndex.get(localOdpId), evidence: [] };
 
   const infoType = cpb?.info_type;
   const bindings = adapterEntry.bpb_bindings?.[infoType] ?? [];

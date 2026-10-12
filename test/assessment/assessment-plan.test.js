@@ -9,6 +9,7 @@ const catalogs = {
   bpb: { service: await read('data/bpb_service.json'), open_confidential: await read('data/bpb_open_confidential.json') },
   exemptions: await read('data/as_class_exemptions.json'),
   genericDefaults: await read('data/generic_parameter_defaults.json'),
+  policyMapping: await read('data/policy_mapping.json'),
 };
 const assessmentCatalog = await read('data/assessment/assessment_catalog.json');
 const adapter = await read('data/assessment/assessment_odp_adapter.json');
@@ -41,6 +42,19 @@ test('buildAssessmentPlan без checklistReference (backward-compat) — усі
   const { checklist: c2 } = buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog, adapter });
   assert.ok(c2.length > 0);
   assert.ok(c2.every(c => Array.isArray(c.statements) && c.statements.length === 0));
+});
+
+test('POLICY_MAPPING: ac-2_odp.01 лишається UNRESOLVED без global_constants, але підставляється, якщо вони задані в ЦПБ', () => {
+  const ac2 = checklist.find(c => c.canonical_control_id === 'AC-2');
+  const stmtE = ac2.statements.find(s => s.text.includes('схвалення'));
+  assert.ok(stmtE.text.includes('[НЕ ВИЗНАЧЕНО: ac-2_odp.01]'), 'без заповнених глобальних політик ЦПБ лишається позначка UNRESOLVED');
+
+  const approvedStateWithPolicy = { ...approvedState, global_constants: { security_personnel_roles: 'адміністратор безпеки, начальник відділу ІБ' } };
+  const { checklist: c2 } = buildAssessmentPlan({ approvedState: approvedStateWithPolicy, catalogs, assessmentCatalog, adapter, checklistReference });
+  const ac2b = c2.find(c => c.canonical_control_id === 'AC-2');
+  const stmtEb = ac2b.statements.find(s => s.id === stmtE.id);
+  assert.ok(stmtEb.text.includes('адміністратор безпеки, начальник відділу ІБ'));
+  assert.ok(!stmtEb.text.includes('НЕ ВИЗНАЧЕНО'));
 });
 
 test('план містить лише applicable контролі, без EXEMPT/EXCLUDED items', () => {

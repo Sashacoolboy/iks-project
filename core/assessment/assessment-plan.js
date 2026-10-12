@@ -1,4 +1,5 @@
 import { STATUS } from '../profile-engine.js';
+import { buildPolicyParamIndex } from '../policy-autofill.js';
 import { normalizeControlId, denormalizeControlId } from './control-id.js';
 import { indexAdapter } from './odp-adapter.js';
 import { resolveEffectiveValue, baselineValue } from './effective-value-resolver.js';
@@ -101,6 +102,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
   const ndNodes = indexNdNodes(catalogs.ndTzi);
   const cpb = { info_type: approvedState.info_type, profile: approvedState.profile };
   const genericDefaults = catalogs.genericDefaults;
+  const policyIndex = buildPolicyParamIndex(catalogs.policyMapping ?? { global_constants: [] }, approvedState.global_constants ?? {});
   const applicable = cpbApplicableControlIds(approvedState, catalogs);
 
   const catalogByNorm = new Map();
@@ -111,7 +113,7 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
   const effCache = new Map();
   const effectiveFor = (adapterEntry) => {
     if (!effCache.has(adapterEntry.local_odp_id)) {
-      effCache.set(adapterEntry.local_odp_id, resolveEffectiveValue({ adapterEntry, cpb, genericDefaults }));
+      effCache.set(adapterEntry.local_odp_id, resolveEffectiveValue({ adapterEntry, cpb, genericDefaults, policyIndex }));
     }
     return effCache.get(adapterEntry.local_odp_id);
   };
