@@ -8,7 +8,7 @@ import { renderFindingDialog } from './finding-dialog.js';
 import { renderTraceabilityDrawer } from './traceability-drawer.js';
 
 let openItemSourceId = null;
-let showPlanView = false;
+let activeTab = 'assessment';
 let isDashboardSubscribed = false;
 let currentDashboardRerender = null;
 
@@ -204,9 +204,21 @@ function renderWarningsBlock(assessment) {
 export function renderDashboard(container, { onBack }) {
   const assessment = getAssessment();
 
-  if (showPlanView) {
+  const stepper = el('nav', { class: 'stepper' },
+    el('button', {
+      type: 'button',
+      class: `step-tab${activeTab === 'plan' ? ' active' : ''}`,
+      onclick: () => { activeTab = 'plan'; renderDashboard(container, { onBack }); },
+    }, 'План'),
+    el('button', {
+      type: 'button',
+      class: `step-tab${activeTab === 'assessment' ? ' active' : ''}`,
+      onclick: () => { activeTab = 'assessment'; renderDashboard(container, { onBack }); },
+    }, 'Оцінювання'));
+
+  if (activeTab === 'plan') {
     import('./plan-review.js').then(({ renderPlanReadOnly }) => {
-      renderPlanReadOnly(container, { onBack: () => { showPlanView = false; renderDashboard(container, { onBack }); } });
+      renderPlanReadOnly(container, { stepper });
     });
     return;
   }
@@ -241,11 +253,6 @@ export function renderDashboard(container, { onBack }) {
   const progressText = `${assessed} / ${summary.total} оцінено`;
 
   const backBtn = el('button', { type: 'button', onclick: onBack }, '← До реєстру оцінювань');
-
-  const planViewBtn = el('button', {
-    type: 'button',
-    onclick: () => { showPlanView = true; renderDashboard(container, { onBack }); }
-  }, '📋 План оцінювання');
 
   const exportBtn = el('button', {
     type: 'button',
@@ -326,8 +333,9 @@ export function renderDashboard(container, { onBack }) {
 
   const header = el('section', { class: 'assessment-header' },
     el('h2', {}, `Оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
+    stepper,
     el('p', {}, statusBadge, saveErrorBadge ? [' ', saveErrorBadge] : [], ' ', progressText),
-    el('div', { class: 'actions' }, backBtn, planViewBtn, exportBtn),
+    el('div', { class: 'actions' }, backBtn, exportBtn),
     finalizeBtn
   );
 

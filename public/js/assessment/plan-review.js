@@ -171,11 +171,9 @@ function renderReadOnlyRow(entry) {
     statementsList);
 }
 
-export function renderPlanReadOnly(container, { onBack }) {
+export function renderPlanReadOnly(container, { stepper }) {
   const assessment = getAssessment();
   const groups = groupChecklist(assessment);
-
-  const backBtn = el('button', { type: 'button', onclick: onBack }, '← Назад до оцінювання');
 
   const sections = groups.map(group => el('section', { class: 'checklist-family' },
     el('h3', {}, `${group.family} — ${group.family_title}`),
@@ -184,7 +182,7 @@ export function renderPlanReadOnly(container, { onBack }) {
   container.replaceChildren(
     el('section', { class: 'assessment-header' },
       el('h2', {}, `План оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
-      el('p', {}, el('span', { class: 'badge badge-planning' }, 'План (лише перегляд)')),
-      el('div', { class: 'actions' }, backBtn)),
+      stepper,
+      el('p', {}, el('span', { class: 'badge badge-planning' }, 'План (лише перегляд)'))),
     ...sections);
 }
