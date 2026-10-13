@@ -78,6 +78,15 @@ const expandedRows = new Set();
 // Module-level state for expanded control document-view blocks (family::control_id)
 const expandedControlDocs = new Set();
 
+// Module-level state for expanded checklist («План перевірки») blocks (family::control_id)
+const expandedChecklists = new Set();
+
+// Рядок-перемикач внутрішнього акордеону («План перевірки» / «ЦПБ»)
+function accordionHeaderRow(label, isExpanded, onToggle) {
+  return el('tr', { class: 'accordion-header-row', onclick: onToggle },
+    el('td', { colspan: '7' }, el('span', { class: 'collapse-mark' }, isExpanded ? '▼' : '▶'), ` ${label}`));
+}
+
 // Module-level state for re-render subscription
 let isSubscribed = false;
 let currentRerenderFn = null;
@@ -365,31 +374,33 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     for (const controlGroup of familyGroup.controls) {
       const controlKey = `${familyGroup.family}::${controlGroup.control_id}`;
       const isDocExpanded = expandedControlDocs.has(controlKey);
+      const isChecklistExpanded = expandedChecklists.has(controlKey);
 
-      // Control header row — клік розгортає/згортає документ-в'ю
+      // Control header row — лише заголовок, перемикачі акордеонів нижче — окремі
       tbody.append(
-        el('tr', {
-          class: 'group-row control',
-          onclick: () => {
-            if (isDocExpanded) expandedControlDocs.delete(controlKey);
-            else expandedControlDocs.add(controlKey);
-            rerender();
-          }
-        },
-          el('td', { colspan: '7' },
-            `${controlGroup.control_id} — ${controlGroup.control_title} `,
-            el('span', { class: 'collapse-mark' }, isDocExpanded ? '▲' : '▼'))
+        el('tr', { class: 'group-row control' },
+          el('td', { colspan: '7' }, `${controlGroup.control_id} — ${controlGroup.control_title}`)
         )
       );
 
       if (controlGroup.checklist_statements.length) {
-        tbody.append(
-          el('tr', { class: 'checklist-statement-row' },
-            el('td', { colspan: '7' },
-              ...controlGroup.checklist_statements.map((text, i) => el('div', {}, el('em', {}, `${i + 1}. ${text}`)))))
-        );
+        tbody.append(accordionHeaderRow(
+          `План перевірки (${controlGroup.checklist_statements.length})`,
+          isChecklistExpanded,
+          () => { if (isChecklistExpanded) expandedChecklists.delete(controlKey); else expandedChecklists.add(controlKey); rerender(); }));
+        if (isChecklistExpanded) {
+          tbody.append(
+            el('tr', { class: 'checklist-statement-row' },
+              el('td', { colspan: '7' },
+                ...controlGroup.checklist_statements.map((text, i) => el('div', {}, el('em', {}, `${i + 1}. ${text}`)))))
+          );
+        }
       }
 
+      tbody.append(accordionHeaderRow(
+        'ЦПБ',
+        isDocExpanded,
+        () => { if (isDocExpanded) expandedControlDocs.delete(controlKey); else expandedControlDocs.add(controlKey); rerender(); }));
       if (isDocExpanded) {
         const docCell = el('td', { colspan: '7' });
         tbody.append(el('tr', { class: 'control-doc-row' }, docCell));
