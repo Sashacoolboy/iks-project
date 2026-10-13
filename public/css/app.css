@@ -139,7 +139,7 @@ tbody tr:hover { background: #f8fafc; }
 .approved-details { font-size: 0.85rem; margin: 0.3rem 0 0 var(--space-2); }
 .approved-details p { margin: 0.15rem 0; }
 .src-policy { background: #bbf7d0; }
-.src-bpb, .src-generic { background: var(--color-muted); }
+.src-bpb, .src-generic, .src-policy { background: var(--color-muted); }
 .src-empty { background: #fecaca; font-weight: 600; }
 .src-override { background: #bfdbfe; }
 

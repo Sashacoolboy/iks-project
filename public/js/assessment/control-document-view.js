@@ -6,6 +6,7 @@ const PARAM_RE = /\{\{\s*insert:\s*param,\s*([\w.-]+)\s*\}\}/g;
 
 const SOURCE_CLASS = {
   CPB_OVERRIDE: 'src-override',
+  POLICY_MAPPING: 'src-policy',
   BPB_INHERITED: 'src-bpb',
   GENERIC_DEFAULT: 'src-generic',
 };
@@ -94,6 +95,7 @@ export function renderControlDocument(container, items) {
 
   const legend = el('div', { class: 'control-doc-legend' },
     el('span', { class: 'param src-override' }, '  '), ' введено вручну в ЦПБ   ',
+    el('span', { class: 'param src-policy' }, '  '), ' з глобальних політик ЦПБ (Крок 1)   ',
     el('span', { class: 'param src-bpb' }, '  '), ' успадковано з БПБ / типове значення   ',
     el('span', { class: 'param src-empty' }, '  '), ' не визначено');
 
