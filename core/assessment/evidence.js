@@ -26,6 +26,23 @@ export function addEvidence(assessment, resultSourceId, fields) {
   return { assessment: { ...assessment, results, evidence: [...assessment.evidence, evidence], updated_at: evidence.collected_at }, evidence };
 }
 
+export function updateEvidence(assessment, evidenceId, patch) {
+  assertMutable(assessment);
+  const i = assessment.evidence.findIndex(e => e.evidence_id === evidenceId);
+  if (i === -1) throw new Error(`доказ не знайдено: ${evidenceId}`);
+  if (patch.type !== undefined && !EVIDENCE_TYPES.includes(patch.type)) throw new Error(`невідомий тип доказу: ${patch.type}`);
+  const path = patch.source?.path;
+  if (patch.source?.kind === 'LOCAL_FILE' && (typeof path !== 'string' || !path.startsWith('evidence/') || path.includes('..')))
+    throw new Error('шлях доказу має бути в межах evidence/');
+  const before = assessment.evidence[i];
+  const allowed = ['type', 'title', 'source', 'reference', 'observation', 'collected_by'];
+  const after = { ...before };
+  for (const k of allowed) if (patch[k] !== undefined) after[k] = patch[k];
+  const evidence = assessment.evidence.slice();
+  evidence[i] = after;
+  return { assessment: { ...assessment, evidence, updated_at: new Date().toISOString() }, before, after };
+}
+
 export function removeEvidence(assessment, evidenceId) {
   assertMutable(assessment);
   const removed = assessment.evidence.find(e => e.evidence_id === evidenceId);

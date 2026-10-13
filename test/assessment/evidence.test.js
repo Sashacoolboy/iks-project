@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeAssessment } from '../../core/assessment/assessment-io.js';
-import { addEvidence, removeEvidence, EVIDENCE_TYPES } from '../../core/assessment/evidence.js';
+import { addEvidence, removeEvidence, updateEvidence, EVIDENCE_TYPES } from '../../core/assessment/evidence.js';
 import { finalizeAssessment, approvePlan } from '../../core/assessment/assessment-run.js';
 
 const plan = { items: [{ assessment_source_id: 'AC-02e', control_id: 'AC-02', available_methods: ['EXAMINE'], odp_values: [] }] };
@@ -25,4 +25,17 @@ test('removeEvidence знімає всі посилання', () => {
   const { assessment } = removeEvidence(a1, 'EV-001');
   assert.deepEqual(assessment.evidence, []);
   assert.deepEqual(assessment.results[0].evidence_ids, []);
+});
+
+test('updateEvidence: часткове оновлення полів, evidence_id/collected_at незмінні', () => {
+  const a1 = addEvidence(base(), 'AC-02e', fields).assessment;
+  const { assessment, after } = updateEvidence(a1, 'EV-001', { title: 'Оновлена назва', observation: 'нове спостереження' });
+  assert.equal(after.title, 'Оновлена назва');
+  assert.equal(after.observation, 'нове спостереження');
+  assert.equal(after.evidence_id, 'EV-001');
+  assert.equal(after.collected_at, a1.evidence[0].collected_at);
+  assert.equal(assessment.evidence[0].title, 'Оновлена назва');
+  assert.throws(() => updateEvidence(a1, 'EV-001', { type: 'MALWARE' }), /тип/i);
+  assert.throws(() => updateEvidence(a1, 'EV-999', {}), /не знайдено/i);
+  assert.throws(() => updateEvidence(finalizeAssessment(approvePlan(a1)), 'EV-001', { title: 'x' }), /фіналізован/i);
 });

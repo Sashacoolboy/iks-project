@@ -1,6 +1,6 @@
 import { el } from '../render/dom.js';
 import { getAssessment, setAssessment } from './assessment-state.js';
-import { EVIDENCE_TYPES, addEvidence, removeEvidence } from '../../../core/assessment/evidence.js';
+import { EVIDENCE_TYPES, addEvidence, removeEvidence, updateEvidence } from '../../../core/assessment/evidence.js';
 
 const EVIDENCE_TYPE_LABELS = {
   DOCUMENT: 'Документ',
@@ -47,42 +47,81 @@ export function renderEvidenceEditor(container, { sourceId }) {
     assessment.evidence.find(e => e.evidence_id === evidId)
   ).filter(Boolean);
 
-  const listEl = el('div', { class: 'evidence-list' },
+  const patchEvidence = (evidenceId, patch) => {
+    if (isFinalized) return;
+    const { assessment: updated } = updateEvidence(getAssessment(), evidenceId, patch);
+    setAssessment(updated);
+  };
+
+  const evidenceItemBlock = (ev) => {
+    const typeSel = el('select', {
+      disabled: isFinalized ? '' : null,
+      onchange: () => patchEvidence(ev.evidence_id, { type: typeSel.value })
+    }, ...EVIDENCE_TYPES.map(t => el('option', { value: t, selected: t === ev.type ? '' : null }, EVIDENCE_TYPE_LABELS[t] || t)));
+
+    const titleInput = el('input', {
+      type: 'text', value: ev.title, placeholder: 'Назва доказу', disabled: isFinalized ? '' : null,
+      onblur: () => patchEvidence(ev.evidence_id, { title: titleInput.value })
+    });
+
+    const refInput = el('input', {
+      type: 'text', value: ev.reference, placeholder: 'Реквізити (номер, дата, розділ)', disabled: isFinalized ? '' : null,
+      onblur: () => patchEvidence(ev.evidence_id, { reference: refInput.value })
+    });
+
+    const obsTextarea = el('textarea', {
+      rows: '2', placeholder: 'Спостереження/висновок з доказу', disabled: isFinalized ? '' : null,
+      onblur: () => patchEvidence(ev.evidence_id, { observation: obsTextarea.value })
+    }, ev.observation);
+
+    const collectedByInput = el('input', {
+      type: 'text', value: ev.collected_by, placeholder: 'Зібрав (ПІБ)', disabled: isFinalized ? '' : null,
+      onblur: () => patchEvidence(ev.evidence_id, { collected_by: collectedByInput.value })
+    });
+
+    const sourceInfo = ev.source?.kind === 'LOCAL_FILE'
+      ? el('span', { class: 'hint' }, ` 📎 ${ev.source.path.replace('evidence/', '')}`)
+      : null;
+
+    const deleteBtn = el('button', {
+      type: 'button',
+      class: 'link-btn',
+      disabled: isFinalized ? '' : null,
+      onclick: async () => {
+        if (isFinalized) return;
+        const current = getAssessment();
+        const { assessment: updated } = removeEvidence(current, ev.evidence_id);
+        setAssessment(updated);
+
+        // Delete uploaded file if exists
+        if (ev.source?.kind === 'LOCAL_FILE' && ev.source.path) {
+          const filename = ev.source.path.replace('evidence/', '');
+          fetch(`/api/assessments/${encodeURIComponent(current.id)}/evidence/${encodeURIComponent(filename)}`, {
+            method: 'DELETE'
+          }).catch(() => {}); // fire-and-forget, ignore 404
+        }
+      }
+    }, '✕ Видалити');
+
+    return el('div', { class: 'evidence-item' },
+      el('div', { class: 'evidence-item-header' },
+        el('strong', {}, ev.evidence_id),
+        sourceInfo,
+        deleteBtn
+      ),
+      el('label', { class: 'field' }, 'Тип доказу', typeSel),
+      el('label', { class: 'field' }, 'Назва', titleInput),
+      el('label', { class: 'field' }, 'Реквізити', refInput),
+      el('label', { class: 'field' }, 'Спостереження', obsTextarea),
+      el('label', { class: 'field' }, 'Зібрав', collectedByInput)
+    );
+  };
+
+  const listEl = el('fieldset', { class: 'evidence-list' },
+    el('legend', {}, 'Додані докази'),
     evidenceList.length === 0
       ? el('p', { class: 'hint' }, 'Докази відсутні')
-      : el('ul', { class: 'custom-list' },
-          ...evidenceList.map(ev => {
-            const deleteBtn = el('button', {
-              type: 'button',
-              class: 'link-btn',
-              disabled: isFinalized ? '' : null,
-              onclick: async () => {
-                if (isFinalized) return;
-                const current = getAssessment();
-                const { assessment: updated } = removeEvidence(current, ev.evidence_id);
-                setAssessment(updated);
-
-                // Delete uploaded file if exists
-                if (ev.source?.kind === 'LOCAL_FILE' && ev.source.path) {
-                  const filename = ev.source.path.replace('evidence/', '');
-                  fetch(`/api/assessments/${encodeURIComponent(current.id)}/evidence/${encodeURIComponent(filename)}`, {
-                    method: 'DELETE'
-                  }).catch(() => {}); // fire-and-forget, ignore 404
-                }
-              }
-            }, '✕');
-
-            const sourceInfo = ev.source?.kind === 'LOCAL_FILE'
-              ? ` (📎 ${ev.source.path.replace('evidence/', '')})`
-              : '';
-
-            return el('li', {},
-              `${EVIDENCE_TYPE_LABELS[ev.type] || ev.type}: ${ev.title || '—'}${sourceInfo}`,
-              ' ',
-              deleteBtn
-            );
-          })
-        )
+      : el('div', {}, ...evidenceList.map(evidenceItemBlock))
   );
 
   const typeSelect = el('select', { disabled: isFinalized ? '' : null },
@@ -154,7 +193,8 @@ export function renderEvidenceEditor(container, { sourceId }) {
     }
   }, 'Додати доказ');
 
-  const form = el('div', { class: 'evidence-form' },
+  const form = el('fieldset', { class: 'evidence-form' },
+    el('legend', {}, 'Додати новий доказ'),
     el('label', { class: 'field' },
       'Тип доказу',
       typeSelect

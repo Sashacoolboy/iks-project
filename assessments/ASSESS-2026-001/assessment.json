@@ -3,7 +3,7 @@
   "schema_version": "3.0.0",
   "id": "ASSESS-2026-001",
   "created_at": "2026-10-12T13:04:04.572Z",
-  "updated_at": "2026-10-12T13:37:19.328Z",
+  "updated_at": "2026-10-13T08:03:52.063Z",
   "status": "IN_PROGRESS",
   "started_by": "",
   "finalized_at": null,
@@ -126664,7 +126664,9 @@
       "assessment_source_id": "AC-02_ODP[01]",
       "methods_used": [],
       "result": "NOT_ASSESSED",
-      "evidence_ids": [],
+      "evidence_ids": [
+        "EV-001"
+      ],
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
@@ -138061,6 +138063,20 @@
       "finding_ids": []
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "evidence_id": "EV-001",
+      "type": "PROCEDURE",
+      "title": "Процедура формування сертифікатів через ВПР",
+      "source": {
+        "kind": "NONE",
+        "path": null
+      },
+      "reference": "Розділ 3",
+      "observation": "Якийсь висновок спостереження",
+      "collected_at": "2026-10-13T07:42:17.747Z",
+      "collected_by": "ООО"
+    }
+  ],
   "findings": []
 }
