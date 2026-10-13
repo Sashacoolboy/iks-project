@@ -1,4 +1,4 @@
-import { el } from '../render/dom.js';
+import { el, showModal } from '../render/dom.js';
 import { getAssessment, setAssessment } from './assessment-state.js';
 import { EVIDENCE_TYPES, addEvidence, removeEvidence, updateEvidence } from '../../../core/assessment/evidence.js';
 
@@ -34,6 +34,44 @@ function sanitizeFilename(name) {
   return name.replace(/[\/\\:*?"<>|]/g, '_');
 }
 
+// Модалка редагування одного доказу поверх списку; Зберегти — коммітить усі поля разом, Скасувати — без змін
+function openEditEvidenceModal(ev, isFinalized) {
+  const typeSel = el('select', { disabled: isFinalized ? '' : null },
+    ...EVIDENCE_TYPES.map(t => el('option', { value: t, selected: t === ev.type ? '' : null }, EVIDENCE_TYPE_LABELS[t] || t)));
+  const titleInput = el('input', { type: 'text', value: ev.title, placeholder: 'Назва доказу', disabled: isFinalized ? '' : null });
+  const refInput = el('input', { type: 'text', value: ev.reference, placeholder: 'Реквізити (номер, дата, розділ)', disabled: isFinalized ? '' : null });
+  const obsTextarea = el('textarea', { rows: '3', placeholder: 'Спостереження/висновок з доказу', disabled: isFinalized ? '' : null }, ev.observation);
+  const collectedByInput = el('input', { type: 'text', value: ev.collected_by, placeholder: 'Зібрав (ПІБ)', disabled: isFinalized ? '' : null });
+  const sourceInfo = ev.source?.kind === 'LOCAL_FILE'
+    ? el('p', { class: 'hint' }, `📎 ${ev.source.path.replace('evidence/', '')}`)
+    : null;
+
+  const saveBtn = el('button', {
+    type: 'button',
+    disabled: isFinalized ? '' : null,
+    onclick: () => {
+      const { assessment: updated } = updateEvidence(getAssessment(), ev.evidence_id, {
+        type: typeSel.value, title: titleInput.value, reference: refInput.value,
+        observation: obsTextarea.value, collected_by: collectedByInput.value
+      });
+      setAssessment(updated);
+      modal.close();
+    }
+  }, 'Зберегти');
+  const cancelBtn = el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати');
+
+  const body = el('div', {},
+    sourceInfo,
+    el('label', { class: 'field' }, 'Тип доказу', typeSel),
+    el('label', { class: 'field' }, 'Назва', titleInput),
+    el('label', { class: 'field' }, 'Реквізити', refInput),
+    el('label', { class: 'field' }, 'Спостереження', obsTextarea),
+    el('label', { class: 'field' }, 'Зібрав', collectedByInput),
+    isFinalized ? null : el('div', { class: 'actions' }, saveBtn, cancelBtn));
+
+  const modal = showModal(body, { title: `Редагування доказу — ${ev.evidence_id}` });
+}
+
 export function renderEvidenceEditor(container, { sourceId }) {
   const assessment = getAssessment();
   const result = assessment.results.find(r => r.assessment_source_id === sourceId);
@@ -47,41 +85,16 @@ export function renderEvidenceEditor(container, { sourceId }) {
     assessment.evidence.find(e => e.evidence_id === evidId)
   ).filter(Boolean);
 
-  const patchEvidence = (evidenceId, patch) => {
-    if (isFinalized) return;
-    const { assessment: updated } = updateEvidence(getAssessment(), evidenceId, patch);
-    setAssessment(updated);
-  };
-
-  const evidenceItemBlock = (ev) => {
-    const typeSel = el('select', {
-      disabled: isFinalized ? '' : null,
-      onchange: () => patchEvidence(ev.evidence_id, { type: typeSel.value })
-    }, ...EVIDENCE_TYPES.map(t => el('option', { value: t, selected: t === ev.type ? '' : null }, EVIDENCE_TYPE_LABELS[t] || t)));
-
-    const titleInput = el('input', {
-      type: 'text', value: ev.title, placeholder: 'Назва доказу', disabled: isFinalized ? '' : null,
-      onblur: () => patchEvidence(ev.evidence_id, { title: titleInput.value })
-    });
-
-    const refInput = el('input', {
-      type: 'text', value: ev.reference, placeholder: 'Реквізити (номер, дата, розділ)', disabled: isFinalized ? '' : null,
-      onblur: () => patchEvidence(ev.evidence_id, { reference: refInput.value })
-    });
-
-    const obsTextarea = el('textarea', {
-      rows: '2', placeholder: 'Спостереження/висновок з доказу', disabled: isFinalized ? '' : null,
-      onblur: () => patchEvidence(ev.evidence_id, { observation: obsTextarea.value })
-    }, ev.observation);
-
-    const collectedByInput = el('input', {
-      type: 'text', value: ev.collected_by, placeholder: 'Зібрав (ПІБ)', disabled: isFinalized ? '' : null,
-      onblur: () => patchEvidence(ev.evidence_id, { collected_by: collectedByInput.value })
-    });
-
+  const evidenceLine = (ev) => {
     const sourceInfo = ev.source?.kind === 'LOCAL_FILE'
-      ? el('span', { class: 'hint' }, ` 📎 ${ev.source.path.replace('evidence/', '')}`)
-      : null;
+      ? ` 📎 ${ev.source.path.replace('evidence/', '')}`
+      : '';
+
+    const editBtn = el('button', {
+      type: 'button',
+      class: 'link-btn',
+      onclick: () => openEditEvidenceModal(ev, isFinalized)
+    }, '✎ Редагувати');
 
     const deleteBtn = el('button', {
       type: 'button',
@@ -103,17 +116,10 @@ export function renderEvidenceEditor(container, { sourceId }) {
       }
     }, '✕ Видалити');
 
-    return el('div', { class: 'evidence-item' },
-      el('div', { class: 'evidence-item-header' },
-        el('strong', {}, ev.evidence_id),
-        sourceInfo,
-        deleteBtn
-      ),
-      el('label', { class: 'field' }, 'Тип доказу', typeSel),
-      el('label', { class: 'field' }, 'Назва', titleInput),
-      el('label', { class: 'field' }, 'Реквізити', refInput),
-      el('label', { class: 'field' }, 'Спостереження', obsTextarea),
-      el('label', { class: 'field' }, 'Зібрав', collectedByInput)
+    return el('li', {},
+      el('strong', {}, ev.evidence_id), ' ',
+      `${EVIDENCE_TYPE_LABELS[ev.type] || ev.type}: ${ev.title || '—'}${sourceInfo}`,
+      ' ', editBtn, ' ', deleteBtn
     );
   };
 
@@ -121,7 +127,7 @@ export function renderEvidenceEditor(container, { sourceId }) {
     el('legend', {}, 'Додані докази'),
     evidenceList.length === 0
       ? el('p', { class: 'hint' }, 'Докази відсутні')
-      : el('div', {}, ...evidenceList.map(evidenceItemBlock))
+      : el('ul', { class: 'custom-list' }, ...evidenceList.map(evidenceLine))
   );
 
   const typeSelect = el('select', { disabled: isFinalized ? '' : null },

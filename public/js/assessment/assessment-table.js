@@ -7,9 +7,9 @@ import { renderFindingDialog } from './finding-dialog.js';
 
 export const RESULT_LABELS = {
   NOT_ASSESSED: 'Не оцінено',
-  SATISFIED: 'Відповідає',
+  SATISFIED: 'Позитивно',
   //PARTIALLY_SATISFIED: 'Частково відповідає',
-  NOT_SATISFIED: 'Не відповідає',
+  NOT_SATISFIED: 'Негативно',
   //NOT_APPLICABLE: 'Не застосовується'
 };
 
@@ -246,7 +246,7 @@ function openConclusionModal(sourceId) {
   showModal(el('div', {}, textarea), { title: `Висновок — ${sourceId}` });
 }
 
-function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
+function itemRow({ planItem, result }, { rerender, isFinalized }) {
   const sourceId = planItem.assessment_source_id;
   const isExpanded = expandedRows.has(sourceId);
 
@@ -265,14 +265,6 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
       rerender();
     }
   }, sourceId);
-
-  // Деталі (коментар оцінювача, шаблон мети, трасування) — залишок колишньої великої панелі
-  const detailsBtn = el('button', {
-    type: 'button',
-    class: 'link',
-    title: 'Деталі: коментар оцінювача, трасування',
-    onclick: () => onOpenItem(sourceId)
-  }, 'ℹ️');
 
   // Result select dropdown
   const resultSelect = el('select', {
@@ -313,7 +305,7 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     pencilBtn(() => openConclusionModal(sourceId), 'Редагувати висновок'));
 
   const row = el('tr', { class: 'assessment-item-row' },
-    el('td', {}, toggleBtn, ' ', detailsBtn),
+    el('td', {}, toggleBtn),
     el('td', { class: 'objective' }, planItem.resolved_objective ?? ''),
     el('td', {}, resultSelect),
     evidenceCell,
@@ -329,13 +321,11 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
 /**
  * Renders the assessment table with grouped rows
  * @param {HTMLElement} container - The container element
- * @param {Object} options - Options object
- * @param {Function} options.onOpenItem - Callback when item detail is requested
  */
-export function renderAssessmentTable(container, { onOpenItem }) {
+export function renderAssessmentTable(container) {
   const assessment = getAssessment();
   const isFinalized = assessment.status === 'FINALIZED';
-  const rerender = () => renderAssessmentTable(container, { onOpenItem });
+  const rerender = () => renderAssessmentTable(container);
 
   // Set up subscription for auto re-render on state changes (once only)
   if (!isSubscribed) {
@@ -409,7 +399,7 @@ export function renderAssessmentTable(container, { onOpenItem }) {
 
       // Item rows with optional ODP subrows
       for (const pair of controlGroup.items) {
-        const { row, subrows } = itemRow(pair, { onOpenItem, rerender, isFinalized });
+        const { row, subrows } = itemRow(pair, { rerender, isFinalized });
         tbody.append(row);
         for (const subrow of subrows) {
           tbody.append(subrow);

@@ -1,135 +1,11 @@
 import { el } from '../render/dom.js';
 import { getAssessment, setAssessment, subscribe, loadAssessment, getLastSaveError } from './assessment-state.js';
-import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
-import { renderAssessmentTable, collapsePlaceholders } from './assessment-table.js';
-import { renderTraceabilityDrawer } from './traceability-drawer.js';
+import { renderAssessmentTable } from './assessment-table.js';
 
-let openItemSourceId = null;
 let activeTab = 'assessment';
 let isDashboardSubscribed = false;
 let currentDashboardRerender = null;
-
-function renderItemDetailPanel(sourceId) {
-  const assessment = getAssessment();
-  const planItem = assessment.plan.items.find(p => p.assessment_source_id === sourceId);
-  const result = assessment.results.find(r => r.assessment_source_id === sourceId);
-
-  if (!planItem || !result) {
-    return el('aside', { class: 'item-detail-panel' },
-      el('p', {}, 'Пункт не знайдено'),
-      el('button', { type: 'button', onclick: () => { openItemSourceId = null; renderDashboard(document.querySelector('.assessment-container'), { onBack: () => {} }); } }, 'Закрити')
-    );
-  }
-
-  const isFinalized = assessment.status === 'FINALIZED';
-
-  // ODP values table
-  const odpTable = planItem.odp_values?.length > 0
-    ? el('table', { class: 'odp-detail-table' },
-        el('thead', {},
-          el('tr', {},
-            el('th', {}, 'Assessment ODP ID'),
-            el('th', {}, 'Local ODP ID'),
-            el('th', {}, 'БПБ'),
-            el('th', {}, 'ЦПБ'),
-            el('th', {}, 'Джерело'),
-            el('th', {}, 'Статус')
-          )
-        ),
-        el('tbody', {},
-          ...planItem.odp_values.map(odp => {
-            const baseline = Array.isArray(odp.baseline_value)
-              ? odp.baseline_value.join('; ')
-              : (odp.baseline_value ?? '—');
-            const target = Array.isArray(odp.target_value)
-              ? odp.target_value.join('; ')
-              : (odp.target_value ?? '[НЕ ВИЗНАЧЕНО]');
-            return el('tr', {},
-              el('td', {}, odp.assessment_odp_id ?? ''),
-              el('td', {}, odp.local_odp_id ?? ''),
-              el('td', {}, baseline),
-              el('td', {}, target),
-              el('td', {}, odp.effective_source ?? '—'),
-              el('td', {}, odp.status ?? '')
-            );
-          })
-        )
-      )
-    : el('p', {}, 'Немає значень параметрів визначення організації (ODP)');
-
-  // Assessor comment textarea
-  const commentArea = el('textarea', {
-    rows: '3',
-    disabled: isFinalized ? '' : null,
-    placeholder: 'Коментар оцінювача...'
-  }, result.assessor_comment ?? '');
-
-  commentArea.addEventListener('blur', () => {
-    const current = getAssessment();
-    const { assessment: updated } = updateResult(current, sourceId, {
-      assessor_comment: commentArea.value
-    });
-    setAssessment(updated);
-  });
-
-  // Conclusion відібрано в окрему модалку в таблиці (колонка «Висновок»)
-
-  const closeBtn = el('button', {
-    type: 'button',
-    onclick: () => {
-      openItemSourceId = null;
-      renderDashboard(document.querySelector('.assessment-container'), { onBack: () => {} });
-    }
-  }, 'Закрити');
-
-  // Трасування (докази/недоліки відібрано в окремі модалки в таблиці)
-  const traceabilitySection = el('section', {});
-  renderTraceabilityDrawer(traceabilitySection, planItem);
-
-  const step1Section = el('section', { class: 'assessment-item-step' },
-    // el('h4', {}, 'Крок 1. Валідність заповнення ЦПБ'),
-    // el('p', { class: 'resolved-objective' }, collapsePlaceholders(planItem.statement_text)),
-    // el('p', { class: 'note' }, 'Перевірте, чи трактування параметра в ЦПБ відповідає вимозі НД ТЗІ.'),
-    // odpTable
-  );
-
-  const methodStepSection = (method, title) => {
-    // const refs = planItem.methods_reference?.[method] ?? [];
-    // const text = refs.length ? refs.join('\n') : 'Підказка відсутня для цього заходу.';
-    // return el('section', { class: 'assessment-item-step' },
-    //   el('h4', {}, title),
-    //   el('p', { class: 'methods-guidance' }, text)
-    //);
-  };
-  const step2Section = methodStepSection('EXAMINE', 'Крок 2. Дослідження');
-  const step3Section = methodStepSection('INTERVIEW', 'Крок 3. Опитування');
-  const step4Section = methodStepSection('TEST', 'Крок 4. Тестування');
-
-  return el('aside', { class: 'item-detail-panel' },
-    el('header', {},
-      el('h3', {}, sourceId),
-      closeBtn
-    ),
-    el('section', {},
-      el('h4', {}, 'Шаблон мети'),
-      el('p', { class: 'objective-template' }, planItem.objective_template ?? ''),
-      el('h4', {}, 'Розв\'язана мета оцінювання'),
-      el('p', { class: 'resolved-objective' }, planItem.resolved_objective ?? '')
-    ),
-    step1Section,
-    step2Section,
-    step3Section,
-    step4Section,
-    el('section', {},
-      el('label', { class: 'field' },
-        'Коментар оцінювача',
-        commentArea
-      )
-    ),
-    traceabilitySection
-  );
-}
 
 function renderWarningsBlock(assessment) {
   const unresolvedWarnings = (assessment.warnings ?? []).filter(w => w.code === 'ODP_UNRESOLVED');
@@ -195,13 +71,7 @@ export function renderDashboard(container, { onBack }) {
   // Set up subscription for dashboard re-render (once only)
   if (!isDashboardSubscribed) {
     subscribe(() => {
-      // Skip re-render if user is typing in a detail panel input/select/textarea
-      const activeEl = document.activeElement;
-      const isTypingInPanel = ['INPUT', 'SELECT', 'TEXTAREA'].includes(activeEl?.tagName) && 
-                               activeEl?.closest('.item-detail-panel');
-      if (!isTypingInPanel && currentDashboardRerender) {
-        currentDashboardRerender();
-      }
+      if (currentDashboardRerender) currentDashboardRerender();
     });
     isDashboardSubscribed = true;
   }
@@ -314,21 +184,12 @@ export function renderDashboard(container, { onBack }) {
   // Table container
   const tableContainer = el('div', { class: 'assessment-table-container' });
 
-  // Detail panel (if item is open)
-  const detailPanel = openItemSourceId ? renderItemDetailPanel(openItemSourceId) : null;
-
   // Render the table
-  renderAssessmentTable(tableContainer, {
-    onOpenItem: (sourceId) => {
-      openItemSourceId = sourceId;
-      renderDashboard(container, { onBack });
-    }
-  });
+  renderAssessmentTable(tableContainer);
 
   const children = [header];
   if (warningsBlock) children.push(warningsBlock);
   children.push(tableContainer);
-  if (detailPanel) children.push(detailPanel);
 
   container.replaceChildren(el('div', { class: 'assessment-container' }, ...children));
 }

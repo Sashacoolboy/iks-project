@@ -3,7 +3,7 @@
   "schema_version": "3.0.0",
   "id": "ASSESS-2026-001",
   "created_at": "2026-10-12T13:04:04.572Z",
-  "updated_at": "2026-10-13T08:03:52.063Z",
+  "updated_at": "2026-10-13T09:30:23.991Z",
   "status": "IN_PROGRESS",
   "started_by": "",
   "finalized_at": null,
@@ -126670,7 +126670,9 @@
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
-      "finding_ids": []
+      "finding_ids": [
+        "F-001"
+      ]
     },
     {
       "assessment_source_id": "AC-02_ODP[02]",
@@ -138078,5 +138080,16 @@
       "collected_by": "ООО"
     }
   ],
-  "findings": []
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "assessment_source_id": "AC-02_ODP[01]",
+      "severity": "CRITICAL",
+      "title": "Відсутнє шифрування",
+      "description": "Опис як повинно працювати",
+      "evidence_ids": [],
+      "recommendation": "Впровадити шифрування за алгоритмом RSA",
+      "status": "OPEN"
+    }
+  ]
 }

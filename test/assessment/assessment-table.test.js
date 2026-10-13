@@ -223,9 +223,9 @@ test('groupPlanItems: handles empty plan', () => {
 
 test('RESULT_LABELS: Ukrainian labels', () => {
   assert.equal(RESULT_LABELS.NOT_ASSESSED, 'Не оцінено');
-  assert.equal(RESULT_LABELS.SATISFIED, 'Відповідає');
+  assert.equal(RESULT_LABELS.SATISFIED, 'Позитивно');
   assert.equal(RESULT_LABELS.PARTIALLY_SATISFIED, 'Частково відповідає');
-  assert.equal(RESULT_LABELS.NOT_SATISFIED, 'Не відповідає');
+  assert.equal(RESULT_LABELS.NOT_SATISFIED, 'Негативно');
   assert.equal(RESULT_LABELS.NOT_APPLICABLE, 'Не застосовується');
 });
 
