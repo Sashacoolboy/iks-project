@@ -146,5 +146,17 @@
     "after": {
       "updated_at": "2026-10-13T11:39:44.692Z"
     }
+  },
+  {
+    "timestamp": "2026-10-13T12:16:15.134Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {
+      "updated_at": "2026-10-13T11:39:44.692Z"
+    },
+    "after": {
+      "updated_at": "2026-10-13T12:16:15.101Z"
+    }
   }
 ]

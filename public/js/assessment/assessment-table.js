@@ -261,7 +261,7 @@ function openOdpPickerModal({ excludeId, initiallySelected, onConfirm }) {
   searchInput.addEventListener('input', renderList);
   renderList();
 
-  const applyBtn = el('button', { type: 'button', onclick: () => { onConfirm([...selected]); modal.close(); } }, 'Застосувати');
+  const applyBtn = el('button', { type: 'button', class: 'primary', onclick: () => { onConfirm([...selected]); modal.close(); } }, 'Застосувати');
   const cancelBtn = el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати');
 
   const modal = showModal(

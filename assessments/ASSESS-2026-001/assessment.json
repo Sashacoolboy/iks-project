@@ -3,7 +3,7 @@
   "schema_version": "3.0.0",
   "id": "ASSESS-2026-001",
   "created_at": "2026-10-12T13:04:04.572Z",
-  "updated_at": "2026-10-13T11:39:44.692Z",
+  "updated_at": "2026-10-13T12:16:15.101Z",
   "status": "IN_PROGRESS",
   "started_by": "",
   "finalized_at": null,
@@ -126673,7 +126673,7 @@
       "finding_ids": [
         "F-001"
       ],
-      "conclusion_id": null
+      "conclusion_id": "CN-001"
     },
     {
       "assessment_source_id": "AC-02_ODP[02]",
@@ -126684,7 +126684,7 @@
       "assessor_comment": "",
       "conclusion": "",
       "finding_ids": [],
-      "conclusion_id": null
+      "conclusion_id": "CN-001"
     },
     {
       "assessment_source_id": "AC-02_ODP[03]",
@@ -126694,7 +126694,8 @@
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
-      "finding_ids": []
+      "finding_ids": [],
+      "conclusion_id": "CN-001"
     },
     {
       "assessment_source_id": "AC-02_ODP[04]",
@@ -126704,7 +126705,8 @@
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
-      "finding_ids": []
+      "finding_ids": [],
+      "conclusion_id": "CN-001"
     },
     {
       "assessment_source_id": "AC-02_ODP[05]",
@@ -126714,7 +126716,8 @@
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
-      "finding_ids": []
+      "finding_ids": [],
+      "conclusion_id": "CN-001"
     },
     {
       "assessment_source_id": "AC-02_ODP[06]",
@@ -126724,7 +126727,8 @@
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
-      "finding_ids": []
+      "finding_ids": [],
+      "conclusion_id": "CN-001"
     },
     {
       "assessment_source_id": "AC-02_ODP[07]",
@@ -138096,5 +138100,10 @@
       "status": "OPEN"
     }
   ],
-  "conclusions": []
+  "conclusions": [
+    {
+      "conclusion_id": "CN-001",
+      "text": "Виконано "
+    }
+  ]
 }
