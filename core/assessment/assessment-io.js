@@ -28,6 +28,7 @@ export function emptyResult(assessmentSourceId) {
     source_references: [],
     assessor_comment: '',
     conclusion: '',
+    conclusion_id: null,
     finding_ids: [],
   };
 }
@@ -71,6 +72,7 @@ export function makeAssessment({ approvedRecord, approvedName, plan, warnings, i
     results: plan.items.map(i => emptyResult(i.assessment_source_id)),
     evidence: [],
     findings: [],
+    conclusions: [],
   };
 }
 

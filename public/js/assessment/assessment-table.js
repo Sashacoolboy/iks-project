@@ -4,6 +4,7 @@ import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { renderControlDocument } from './control-document-view.js';
 import { renderEvidenceEditor } from './evidence-editor.js';
 import { renderFindingDialog } from './finding-dialog.js';
+import { conclusionTextFor, sourcesForConclusion, setConclusionText, linkSource, unlinkSource } from '../../../core/assessment/conclusions.js';
 
 export const RESULT_LABELS = {
   NOT_ASSESSED: 'Не оцінено',
@@ -234,16 +235,104 @@ function openFindingsModal(sourceId) {
   showModal(body, { title: `Недоліки та план виправлення — ${sourceId}`, onClose: unsubscribe });
 }
 
+// Пікер інших ODP (checkbox-список з пошуком), щоб долучити/вилучити з поточного висновку
+function openOdpPickerModal({ excludeId, initiallySelected, onConfirm }) {
+  const assessment = getAssessment();
+  const allItems = (assessment.plan?.items ?? []).filter(p => p.assessment_source_id !== excludeId);
+  let selected = new Set(initiallySelected);
+
+  const searchInput = el('input', { type: 'text', placeholder: 'пошук за ID, заходом або текстом…' });
+  const listBox = el('div', { class: 'ctrl-list' });
+
+  const renderList = () => {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = q
+      ? allItems.filter(p => p.assessment_source_id.toLowerCase().includes(q)
+          || (p.control_id ?? '').toLowerCase().includes(q)
+          || (p.resolved_objective ?? '').toLowerCase().includes(q))
+      : allItems;
+    listBox.replaceChildren(...filtered.map(p => el('label', { class: 'checkbox' },
+      el('input', {
+        type: 'checkbox', checked: selected.has(p.assessment_source_id) ? '' : null,
+        onchange: (e) => { if (e.target.checked) selected.add(p.assessment_source_id); else selected.delete(p.assessment_source_id); }
+      }),
+      ` ${p.assessment_source_id} — ${(p.resolved_objective ?? '').slice(0, 90)}`)));
+  };
+  searchInput.addEventListener('input', renderList);
+  renderList();
+
+  const applyBtn = el('button', { type: 'button', onclick: () => { onConfirm([...selected]); modal.close(); } }, 'Застосувати');
+  const cancelBtn = el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати');
+
+  const modal = showModal(
+    el('div', {}, searchInput, listBox, el('div', { class: 'actions' }, applyBtn, cancelBtn)),
+    { title: 'Додати ODP до висновку' });
+}
+
 function openConclusionModal(sourceId) {
   const assessment = getAssessment();
   const result = assessment.results.find(r => r.assessment_source_id === sourceId);
   const isFinalized = assessment.status === 'FINALIZED';
-  const textarea = el('textarea', { rows: '4', disabled: isFinalized ? '' : null,
-    placeholder: 'Висновок...' }, result?.conclusion ?? '');
-  textarea.addEventListener('blur', () => {
-    patchResult(sourceId, { conclusion: textarea.value });
-  });
-  showModal(el('div', {}, textarea), { title: `Висновок — ${sourceId}` });
+  const conclusionId = result?.conclusion_id ?? null;
+  const currentText = conclusionTextFor(assessment, result);
+  let linkedOthers = conclusionId ? sourcesForConclusion(assessment, conclusionId).filter(id => id !== sourceId) : [];
+
+  const textarea = el('textarea', { rows: '4', disabled: isFinalized ? '' : null, placeholder: 'Висновок...' }, currentText);
+
+  const linkedList = el('div', { class: 'id-badges' });
+  const renderLinkedList = () => {
+    linkedList.replaceChildren(
+      ...(linkedOthers.length
+        ? linkedOthers.map(id => el('span', { class: 'badge ctrl-chip' }, id,
+            isFinalized ? null : el('button', {
+              type: 'button', class: 'chip-remove',
+              onclick: () => { linkedOthers = linkedOthers.filter(x => x !== id); renderLinkedList(); }
+            }, '✕')))
+        : [el('span', { class: 'hint' }, 'Лише цей пункт')]));
+  };
+  renderLinkedList();
+
+  const addBtn = el('button', {
+    type: 'button',
+    disabled: isFinalized ? '' : null,
+    onclick: () => openOdpPickerModal({
+      excludeId: sourceId,
+      initiallySelected: linkedOthers,
+      onConfirm: (ids) => { linkedOthers = ids; renderLinkedList(); }
+    })
+  }, '+ Додати ODP');
+
+  const saveBtn = el('button', {
+    type: 'button',
+    disabled: isFinalized ? '' : null,
+    onclick: () => {
+      let current = getAssessment();
+      const { assessment: a1, conclusion_id } = setConclusionText(current, sourceId, textarea.value);
+      current = a1;
+      if (conclusion_id) {
+        const nowLinked = new Set(sourcesForConclusion(current, conclusion_id).filter(id => id !== sourceId));
+        for (const id of linkedOthers) {
+          if (!nowLinked.has(id)) current = linkSource(current, conclusion_id, id).assessment;
+        }
+        for (const id of nowLinked) {
+          if (!linkedOthers.includes(id)) current = unlinkSource(current, id).assessment;
+        }
+      }
+      setAssessment(current);
+      modal.close();
+    }
+  }, 'Зберегти');
+  const cancelBtn = el('button', { type: 'button', onclick: () => modal.close() }, 'Скасувати');
+
+  const body = el('div', {},
+    el('label', { class: 'field' }, 'Висновок', textarea),
+    el('fieldset', {},
+      el('legend', {}, 'Охоплює ще ODP'),
+      linkedList,
+      isFinalized ? null : addBtn),
+    isFinalized ? null : el('div', { class: 'actions' }, saveBtn, cancelBtn));
+
+  const modal = showModal(body, { title: `Висновок — ${sourceId}` });
 }
 
 function itemRow({ planItem, result }, { rerender, isFinalized }) {
@@ -297,10 +386,12 @@ function itemRow({ planItem, result }, { rerender, isFinalized }) {
     ' ',
     pencilBtn(() => openFindingsModal(sourceId), 'Редагувати план виправлення'));
 
-  // Conclusion cell with edit button
-  const conclusionText = result?.conclusion || '';
+  // Conclusion cell with edit button — спільний висновок показує, скільки ще ODP він охоплює
+  const conclusionText = conclusionTextFor(getAssessment(), result);
+  const sharedCount = result?.conclusion_id ? sourcesForConclusion(getAssessment(), result.conclusion_id).length : 0;
   const conclusionCell = el('td', { class: 'conclusion' },
     el('span', {}, conclusionText),
+    sharedCount > 1 ? el('span', { class: 'id-badge', title: 'Спільний висновок для кількох ODP' }, `×${sharedCount}`) : null,
     ' ',
     pencilBtn(() => openConclusionModal(sourceId), 'Редагувати висновок'));
 

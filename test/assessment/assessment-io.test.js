@@ -14,7 +14,7 @@ test('makeAssessment v3: schema 3.0.0, results ініціалізовані NOT_
   assert.equal(a.schema_version, '3.0.0');
   assert.equal(a.results.length, 1);
   assert.deepEqual(a.results[0], { assessment_source_id: 'AC-02e', methods_used: [], result: 'NOT_ASSESSED',
-    evidence_ids: [], source_references: [], assessor_comment: '', conclusion: '', finding_ids: [] });
+    evidence_ids: [], source_references: [], assessor_comment: '', conclusion: '', conclusion_id: null, finding_ids: [] });
   assert.deepEqual(validateAssessmentSchema(a), []);
 });
 

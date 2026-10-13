@@ -86,5 +86,53 @@
     "after": {
       "updated_at": "2026-10-13T09:30:23.991Z"
     }
+  },
+  {
+    "timestamp": "2026-10-13T09:48:41.415Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {
+      "updated_at": "2026-10-13T09:30:23.991Z"
+    },
+    "after": {
+      "updated_at": "2026-10-13T09:48:41.390Z"
+    }
+  },
+  {
+    "timestamp": "2026-10-13T09:58:48.175Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {
+      "updated_at": "2026-10-13T09:48:41.390Z"
+    },
+    "after": {
+      "updated_at": "2026-10-13T09:58:48.149Z"
+    }
+  },
+  {
+    "timestamp": "2026-10-13T09:59:40.487Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {
+      "updated_at": "2026-10-13T09:58:48.149Z"
+    },
+    "after": {
+      "updated_at": "2026-10-13T09:59:40.464Z"
+    }
+  },
+  {
+    "timestamp": "2026-10-13T10:02:40.852Z",
+    "actor": "",
+    "action": "RESULT_UPDATED",
+    "entity_id": "ASSESS-2026-001",
+    "before": {
+      "updated_at": "2026-10-13T09:59:40.464Z"
+    },
+    "after": {
+      "updated_at": "2026-10-13T10:02:40.817Z"
+    }
   }
 ]

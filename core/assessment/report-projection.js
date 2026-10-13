@@ -3,6 +3,7 @@
  * No fs imports, no Date.now(), no live catalog imports.
  * Exports dictionaries for UI reuse.
  */
+import { conclusionTextFor } from './conclusions.js';
 
 export const RESULT_LABELS = {
   NOT_ASSESSED: 'Не оцінено',
@@ -145,7 +146,7 @@ export function buildReportProjection({ assessment, cpbSnapshot }) {
           result: result?.result ?? 'NOT_ASSESSED',
           result_label: RESULT_LABELS[result?.result ?? 'NOT_ASSESSED'],
           evidence_ids: result?.evidence_ids ?? [],
-          conclusion: result?.conclusion ?? ''
+          conclusion: conclusionTextFor(assessment, result)
         };
       })
     }))

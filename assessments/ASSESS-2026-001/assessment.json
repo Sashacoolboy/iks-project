@@ -3,7 +3,7 @@
   "schema_version": "3.0.0",
   "id": "ASSESS-2026-001",
   "created_at": "2026-10-12T13:04:04.572Z",
-  "updated_at": "2026-10-13T09:30:23.991Z",
+  "updated_at": "2026-10-13T10:02:40.817Z",
   "status": "IN_PROGRESS",
   "started_by": "",
   "finalized_at": null,
@@ -126672,7 +126672,8 @@
       "conclusion": "",
       "finding_ids": [
         "F-001"
-      ]
+      ],
+      "conclusion_id": null
     },
     {
       "assessment_source_id": "AC-02_ODP[02]",
@@ -126682,7 +126683,8 @@
       "source_references": [],
       "assessor_comment": "",
       "conclusion": "",
-      "finding_ids": []
+      "finding_ids": [],
+      "conclusion_id": null
     },
     {
       "assessment_source_id": "AC-02_ODP[03]",
@@ -138091,5 +138093,6 @@
       "recommendation": "Впровадити шифрування за алгоритмом RSA",
       "status": "OPEN"
     }
-  ]
+  ],
+  "conclusions": []
 }
