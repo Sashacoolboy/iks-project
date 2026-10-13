@@ -37,6 +37,7 @@ function openEditFindingModal(finding, resultEvidence, isFinalized) {
 
   const saveBtn = el('button', {
     type: 'button',
+    class: 'primary',
     disabled: isFinalized ? '' : null,
     onclick: () => {
       const { assessment: updated } = updateFinding(getAssessment(), finding.finding_id, {

@@ -304,6 +304,7 @@ function openConclusionModal(sourceId) {
 
   const saveBtn = el('button', {
     type: 'button',
+    class: 'primary',
     disabled: isFinalized ? '' : null,
     onclick: () => {
       let current = getAssessment();

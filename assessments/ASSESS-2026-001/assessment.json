@@ -3,7 +3,7 @@
   "schema_version": "3.0.0",
   "id": "ASSESS-2026-001",
   "created_at": "2026-10-12T13:04:04.572Z",
-  "updated_at": "2026-10-13T10:02:40.817Z",
+  "updated_at": "2026-10-13T11:39:44.692Z",
   "status": "IN_PROGRESS",
   "started_by": "",
   "finalized_at": null,
@@ -138089,7 +138089,9 @@
       "severity": "CRITICAL",
       "title": "Відсутнє шифрування",
       "description": "Опис як повинно працювати",
-      "evidence_ids": [],
+      "evidence_ids": [
+        "EV-001"
+      ],
       "recommendation": "Впровадити шифрування за алгоритмом RSA",
       "status": "OPEN"
     }

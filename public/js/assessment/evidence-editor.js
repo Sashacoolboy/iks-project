@@ -48,6 +48,7 @@ function openEditEvidenceModal(ev, isFinalized) {
 
   const saveBtn = el('button', {
     type: 'button',
+    class: 'primary',
     disabled: isFinalized ? '' : null,
     onclick: () => {
       const { assessment: updated } = updateEvidence(getAssessment(), ev.evidence_id, {
