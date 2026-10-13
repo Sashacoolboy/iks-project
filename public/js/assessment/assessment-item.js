@@ -3,8 +3,6 @@ import { getAssessment, setAssessment, subscribe, loadAssessment, getLastSaveErr
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { buildAssessmentSummary } from '../../../core/assessment/assessment-summary.js';
 import { renderAssessmentTable, collapsePlaceholders } from './assessment-table.js';
-import { renderEvidenceEditor } from './evidence-editor.js';
-import { renderFindingDialog } from './finding-dialog.js';
 import { renderTraceabilityDrawer } from './traceability-drawer.js';
 
 let openItemSourceId = null;
@@ -75,20 +73,7 @@ function renderItemDetailPanel(sourceId) {
     setAssessment(updated);
   });
 
-  // Conclusion textarea
-  const conclusionArea = el('textarea', {
-    rows: '3',
-    disabled: isFinalized ? '' : null,
-    placeholder: 'Висновок...'
-  }, result.conclusion ?? '');
-
-  conclusionArea.addEventListener('blur', () => {
-    const current = getAssessment();
-    const { assessment: updated } = updateResult(current, sourceId, {
-      conclusion: conclusionArea.value
-    });
-    setAssessment(updated);
-  });
+  // Conclusion відібрано в окрему модалку в таблиці (колонка «Висновок»)
 
   const closeBtn = el('button', {
     type: 'button',
@@ -98,15 +83,7 @@ function renderItemDetailPanel(sourceId) {
     }
   }, 'Закрити');
 
-  // Evidence editor section
-  const evidenceSection = el('section', {});
-  renderEvidenceEditor(evidenceSection, { sourceId });
-
-  // Findings dialog section
-  const findingsSection = el('section', {});
-  renderFindingDialog(findingsSection, { sourceId });
-
-  // Traceability drawer section
+  // Трасування (докази/недоліки відібрано в окремі модалки в таблиці)
   const traceabilitySection = el('section', {});
   renderTraceabilityDrawer(traceabilitySection, planItem);
 
@@ -150,14 +127,6 @@ function renderItemDetailPanel(sourceId) {
         commentArea
       )
     ),
-    el('section', {},
-      el('label', { class: 'field' },
-        'Висновок',
-        conclusionArea
-      )
-    ),
-    evidenceSection,
-    findingsSection,
     traceabilitySection
   );
 }

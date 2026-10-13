@@ -1,7 +1,9 @@
-import { el } from '../render/dom.js';
+import { el, showModal } from '../render/dom.js';
 import { getAssessment, setAssessment, subscribe } from './assessment-state.js';
 import { updateResult } from '../../../core/assessment/assessment-run.js';
 import { renderControlDocument } from './control-document-view.js';
+import { renderEvidenceEditor } from './evidence-editor.js';
+import { renderFindingDialog } from './finding-dialog.js';
 
 export const RESULT_LABELS = {
   NOT_ASSESSED: 'Не оцінено',
@@ -181,7 +183,7 @@ function odpSubrows(planItem) {
 
     return el('tr', { class: 'odp-subrow', ...(title ? { title } : {}) },
       el('td', {}, odp.assessment_odp_id ?? ''),
-      el('td', { colspan: '4' },
+      el('td', { colspan: '6' },
         el('span', { class: 'odp-meta' }, `local: ${odp.local_odp_id}`),
         el('span', { class: 'odp-meta' }, `БПБ: ${baseline}`),
         el('span', { class: 'odp-meta' }, `ЦПБ: ${target}`),
@@ -189,6 +191,50 @@ function odpSubrows(planItem) {
       )
     );
   });
+}
+
+// Компактний перелік порядкових номерів пов'язаних записів (докази/недоліки); сам текст — у модалці за ✎
+function idBadges(ids) {
+  if (!ids.length) return el('span', { class: 'hint' }, '—');
+  return el('span', { class: 'id-badges' }, ...ids.map((_, i) => el('span', { class: 'id-badge' }, String(i + 1))));
+}
+
+// План виправлення — recommendation кожного пов'язаного недоліку, у тому ж нумеруванні, що й колонка «Недоліки»
+function remediationBadges(linkedFindings) {
+  if (!linkedFindings.length) return el('span', { class: 'hint' }, '—');
+  return el('span', { class: 'id-badges' }, ...linkedFindings.map((f, i) =>
+    el('span', { class: 'id-badge', title: f.recommendation || '(план виправлення не вказано)' }, String(i + 1))));
+}
+
+function pencilBtn(onclick, title) {
+  return el('button', { type: 'button', class: 'link pencil-btn', title, onclick }, '✎');
+}
+
+// Невелика модалка замість колишньої спільної панелі — перерендерюється при кожній зміні стану, доки відкрита
+function openEvidenceModal(sourceId) {
+  const body = el('div', {});
+  renderEvidenceEditor(body, { sourceId });
+  const unsubscribe = subscribe(() => renderEvidenceEditor(body, { sourceId }));
+  showModal(body, { title: `Докази — ${sourceId}`, onClose: unsubscribe });
+}
+
+function openFindingsModal(sourceId) {
+  const body = el('div', {});
+  renderFindingDialog(body, { sourceId });
+  const unsubscribe = subscribe(() => renderFindingDialog(body, { sourceId }));
+  showModal(body, { title: `Недоліки та план виправлення — ${sourceId}`, onClose: unsubscribe });
+}
+
+function openConclusionModal(sourceId) {
+  const assessment = getAssessment();
+  const result = assessment.results.find(r => r.assessment_source_id === sourceId);
+  const isFinalized = assessment.status === 'FINALIZED';
+  const textarea = el('textarea', { rows: '4', disabled: isFinalized ? '' : null,
+    placeholder: 'Висновок...' }, result?.conclusion ?? '');
+  textarea.addEventListener('blur', () => {
+    patchResult(sourceId, { conclusion: textarea.value });
+  });
+  showModal(el('div', {}, textarea), { title: `Висновок — ${sourceId}` });
 }
 
 function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
@@ -211,6 +257,14 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     }
   }, sourceId);
 
+  // Деталі (коментар оцінювача, шаблон мети, трасування) — залишок колишньої великої панелі
+  const detailsBtn = el('button', {
+    type: 'button',
+    class: 'link',
+    title: 'Деталі: коментар оцінювача, трасування',
+    onclick: () => onOpenItem(sourceId)
+  }, 'ℹ️');
+
   // Result select dropdown
   const resultSelect = el('select', {
     disabled: isFinalized ? '' : null,
@@ -222,31 +276,40 @@ function itemRow({ planItem, result }, { onOpenItem, rerender, isFinalized }) {
     }, label)
   ));
 
+  const evidenceIds = result?.evidence_ids ?? [];
+  const evidenceCell = el('td', { class: 'evidence' },
+    idBadges(evidenceIds),
+    ' ',
+    pencilBtn(() => openEvidenceModal(sourceId), 'Редагувати докази'));
 
-  // Evidence button
-  const evidenceCount = result?.evidence_ids?.length ?? 0;
-  const evidenceBtn = el('button', {
-    type: 'button',
-    onclick: () => onOpenItem(sourceId)
-  }, `Докази: ${evidenceCount}`);
+  const findingIds = result?.finding_ids ?? [];
+  const linkedFindings = findingIds
+    .map(id => getAssessment().findings.find(f => f.finding_id === id))
+    .filter(Boolean);
+  const findingsCell = el('td', { class: 'findings' },
+    idBadges(findingIds),
+    ' ',
+    pencilBtn(() => openFindingsModal(sourceId), 'Редагувати недоліки'));
+
+  const remediationCell = el('td', { class: 'remediation' },
+    remediationBadges(linkedFindings),
+    ' ',
+    pencilBtn(() => openFindingsModal(sourceId), 'Редагувати план виправлення'));
 
   // Conclusion cell with edit button
   const conclusionText = result?.conclusion || '';
   const conclusionCell = el('td', { class: 'conclusion' },
     el('span', {}, conclusionText),
     ' ',
-    el('button', {
-      type: 'button',
-      class: 'link',
-      onclick: () => onOpenItem(sourceId)
-    }, '✎')
-  );
+    pencilBtn(() => openConclusionModal(sourceId), 'Редагувати висновок'));
 
   const row = el('tr', { class: 'assessment-item-row' },
-    el('td', {}, toggleBtn),
+    el('td', {}, toggleBtn, ' ', detailsBtn),
     el('td', { class: 'objective' }, planItem.resolved_objective ?? ''),
     el('td', {}, resultSelect),
-    el('td', {}, evidenceBtn),
+    evidenceCell,
+    findingsCell,
+    remediationCell,
     conclusionCell
   );
 
@@ -281,7 +344,9 @@ export function renderAssessmentTable(container, { onOpenItem }) {
       el('th', {}, 'Позначення мети оцінювання'),
       el('th', {}, 'Мета оцінювання'),
       el('th', {}, 'Вибір оцінки'),
-      el('th', {}, 'Докази / джерела'),
+      el('th', {}, 'Докази'),
+      el('th', {}, 'Недоліки'),
+      el('th', {}, 'План виправлення'),
       el('th', {}, 'Висновок')
     )
   );
@@ -293,7 +358,7 @@ export function renderAssessmentTable(container, { onOpenItem }) {
     // Family header row
     tbody.append(
       el('tr', { class: 'group-row family' },
-        el('td', { colspan: '5' }, `${familyGroup.family} — ${familyGroup.family_title}`)
+        el('td', { colspan: '7' }, `${familyGroup.family} — ${familyGroup.family_title}`)
       )
     );
 
@@ -311,7 +376,7 @@ export function renderAssessmentTable(container, { onOpenItem }) {
             rerender();
           }
         },
-          el('td', { colspan: '5' },
+          el('td', { colspan: '7' },
             `${controlGroup.control_id} — ${controlGroup.control_title} `,
             el('span', { class: 'collapse-mark' }, isDocExpanded ? '▲' : '▼'))
         )
@@ -320,13 +385,13 @@ export function renderAssessmentTable(container, { onOpenItem }) {
       if (controlGroup.checklist_statements.length) {
         tbody.append(
           el('tr', { class: 'checklist-statement-row' },
-            el('td', { colspan: '5' },
+            el('td', { colspan: '7' },
               ...controlGroup.checklist_statements.map((text, i) => el('div', {}, el('em', {}, `${i + 1}. ${text}`)))))
         );
       }
 
       if (isDocExpanded) {
-        const docCell = el('td', { colspan: '5' });
+        const docCell = el('td', { colspan: '7' });
         tbody.append(el('tr', { class: 'control-doc-row' }, docCell));
         renderControlDocument(docCell, controlGroup.items);
       }

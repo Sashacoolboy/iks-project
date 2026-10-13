@@ -17,7 +17,7 @@ export const option = (value, label, selected = false) =>
   el('option', selected ? { value, selected: '' } : { value }, label);
 
 // Модальне вікно поверх сторінки (fixed overlay). Закриття: ✕, клік по фону, Esc.
-export function showModal(contentEl, { title } = {}) {
+export function showModal(contentEl, { title, onClose } = {}) {
   const onKeydown = (e) => { if (e.key === 'Escape') close(); };
   const overlay = el('div', { class: 'modal-overlay', onclick: (e) => { if (e.target === overlay) close(); } },
     el('div', { class: 'modal-panel' },
@@ -25,7 +25,7 @@ export function showModal(contentEl, { title } = {}) {
         title ? el('h3', {}, title) : el('span', {}),
         el('button', { type: 'button', class: 'modal-close', 'aria-label': 'Закрити', onclick: () => close() }, '✕')),
       el('div', { class: 'modal-body' }, contentEl)));
-  const close = () => { overlay.remove(); document.removeEventListener('keydown', onKeydown); };
+  const close = () => { overlay.remove(); document.removeEventListener('keydown', onKeydown); onClose?.(); };
   document.addEventListener('keydown', onKeydown);
   document.body.append(overlay);
   return { close };

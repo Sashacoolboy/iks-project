@@ -288,6 +288,12 @@ tbody tr:hover { background: #f8fafc; }
 .assessment-table .assessment-item-row td { font-size: 0.82rem; }
 .assessment-table .objective { max-width: 20rem; }
 .assessment-table .conclusion { max-width: 12rem; }
+.assessment-table .evidence, .assessment-table .findings, .assessment-table .remediation { max-width: 8rem; }
+
+.id-badges { display: inline-flex; gap: 0.2rem; flex-wrap: wrap; }
+.id-badge { display: inline-block; min-width: 1.2rem; text-align: center; padding: 0 0.3rem;
+  border-radius: var(--radius-sm); background: var(--color-muted); font-size: 0.75rem; cursor: default; }
+.pencil-btn { margin-left: 0.2rem; }
 
 .assessment-table .odp-subrow { background: #f0fdf4; }
 .assessment-table .odp-subrow td { padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #14532d; }
