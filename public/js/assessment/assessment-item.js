@@ -49,6 +49,17 @@ function renderWarningsBlock(assessment) {
 export function renderDashboard(container, { onBack }) {
   const assessment = getAssessment();
 
+  // Set up subscription for dashboard re-render (once only) — потрібно для обох вкладок (План редагується в IN_PROGRESS)
+  // Guard на status: без неї ця підписка лишається "привидом" і після переходу
+  // на екран plan-review.js (статус PLANNING) перезаписує його назад на dashboard
+  if (!isDashboardSubscribed) {
+    subscribe((a) => {
+      if (currentDashboardRerender && a.status !== 'PLANNING') currentDashboardRerender();
+    });
+    isDashboardSubscribed = true;
+  }
+  currentDashboardRerender = () => renderDashboard(container, { onBack });
+
   const stepper = el('nav', { class: 'stepper' },
     el('button', {
       type: 'button',
@@ -62,20 +73,11 @@ export function renderDashboard(container, { onBack }) {
     }, 'Оцінювання'));
 
   if (activeTab === 'plan') {
-    import('./plan-review.js').then(({ renderPlanReadOnly }) => {
-      renderPlanReadOnly(container, { stepper });
+    import('./plan-review.js').then(({ renderPlanTab }) => {
+      renderPlanTab(container, { stepper, readOnly: assessment.status === 'FINALIZED' });
     });
     return;
   }
-
-  // Set up subscription for dashboard re-render (once only)
-  if (!isDashboardSubscribed) {
-    subscribe(() => {
-      if (currentDashboardRerender) currentDashboardRerender();
-    });
-    isDashboardSubscribed = true;
-  }
-  currentDashboardRerender = () => renderDashboard(container, { onBack });
 
   // Header with metadata and status
   const statusBadge = el('span', {

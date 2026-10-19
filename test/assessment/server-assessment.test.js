@@ -190,7 +190,7 @@ test('PUT server-owned fields: клієнт не може змінити status,
   assert.equal(updated.status, originalStatus, 'status має залишитися незмінним');
   assert.equal(updated.cpb_snapshot.hash, originalCpbHash, 'cpb_snapshot.hash має залишитися незмінним');
 
-  // Спроба змінити plan.checklist після погодження плану (статус вже не PLANNING) — має бути заблоковано
+  // plan.checklist і надалі редагується поки IN_PROGRESS (локується лише з FINALIZED)
   const beforeChecklist = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
   const originalIncluded = beforeChecklist.plan.checklist[0].included;
   beforeChecklist.plan.checklist[0].included = !originalIncluded;
@@ -202,7 +202,15 @@ test('PUT server-owned fields: клієнт не може змінити status,
   assert.equal(r2.status, 200, 'PUT має пройти успішно');
 
   const afterChecklist = await (await fetch(BASE + '/api/assessments/' + createdId)).json();
-  assert.equal(afterChecklist.plan.checklist[0].included, originalIncluded, 'plan.checklist не можна змінити після виходу з PLANNING');
+  assert.equal(afterChecklist.plan.checklist[0].included, !originalIncluded, 'plan.checklist можна редагувати під час IN_PROGRESS');
+
+  const audit = JSON.parse(readFileSync(join(ROOT, 'assessments', createdId, 'audit-log.json'), 'utf8'));
+  const planEditedDuringProgress = audit.filter(e => e.action === 'PLAN_EDITED');
+  assert.ok(planEditedDuringProgress.length > 0, 'редагування checklist під час IN_PROGRESS логується як PLAN_EDITED');
+
+  // Повернути включення назад, щоб не впливати на наступні тести
+  beforeChecklist.plan.checklist[0].included = originalIncluded;
+  await fetch(BASE + '/api/assessments/' + createdId, { method: 'PUT', body: JSON.stringify(beforeChecklist) });
 });
 
 test('POST /api/assessments/:id/finalize з невалідними results → 400 з errors', async () => {

@@ -212,10 +212,11 @@ createServer(async (req, res) => {
           body.finalized_by = existing.finalized_by;
           body.created_at = existing.created_at;
           body.cpb_snapshot = existing.cpb_snapshot;
-          if (existing.status !== 'PLANNING') body.plan = { ...body.plan, checklist: existing.plan.checklist };
+          // plan.checklist редагований аж до FINALIZED (заблоковано вище); тут лише визначаємо audit action
+          const checklistChanged = JSON.stringify(body.plan?.checklist) !== JSON.stringify(existing.plan.checklist);
           body.updated_at = new Date().toISOString();
           await writeFile(join(dir, 'assessment.json'), serializeAssessment(body));
-          await appendAudit(dir, makeAuditEntry({ actor: body.actor_name ?? '', action: existing.status === 'PLANNING' ? 'PLAN_EDITED' : 'RESULT_UPDATED', entity_id: body.id,
+          await appendAudit(dir, makeAuditEntry({ actor: body.actor_name ?? '', action: existing.status === 'PLANNING' || checklistChanged ? 'PLAN_EDITED' : 'RESULT_UPDATED', entity_id: body.id,
             before: { updated_at: existing.updated_at }, after: { updated_at: body.updated_at } }));
           return json(res, 200, { ok: true });
         }

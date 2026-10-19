@@ -119,7 +119,9 @@ export function renderPlanReview(container, { onApproved }) {
   const assessment = getAssessment();
 
   if (!isSubscribed) {
-    subscribe(() => { if (currentRerender) currentRerender(); });
+    // перевірка статусу — інакше ця підписка лишається "привидом" і після approve-plan
+    // перезаписує dashboard назад на цей екран на кожен setAssessment()
+    subscribe((a) => { if (currentRerender && a.status === 'PLANNING') currentRerender(); });
     isSubscribed = true;
   }
   currentRerender = () => renderPlanReview(container, { onApproved });
@@ -171,18 +173,18 @@ function renderReadOnlyRow(entry) {
     statementsList);
 }
 
-export function renderPlanReadOnly(container, { stepper }) {
+export function renderPlanTab(container, { stepper, readOnly }) {
   const assessment = getAssessment();
   const groups = groupChecklist(assessment);
 
   const sections = groups.map(group => el('section', { class: 'checklist-family' },
     el('h3', {}, `${group.family} — ${group.family_title}`),
-    ...group.entries.map(renderReadOnlyRow)));
+    ...group.entries.map(readOnly ? renderReadOnlyRow : renderRow)));
 
   container.replaceChildren(
     el('section', { class: 'assessment-header' },
       el('h2', {}, `План оцінювання «${assessment.metadata.ics_name}» (${assessment.id})`),
       stepper,
-      el('p', {}, el('span', { class: 'badge badge-planning' }, 'План (лише перегляд)'))),
+      el('p', {}, el('span', { class: 'badge badge-planning' }, readOnly ? 'План (лише перегляд)' : 'План'))),
     ...sections);
 }
