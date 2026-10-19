@@ -336,7 +336,23 @@ function openConclusionModal(sourceId) {
   const modal = showModal(body, { title: `Висновок — ${sourceId}` });
 }
 
-function itemRow({ planItem, result }, { rerender, isFinalized }) {
+// Суміжні рядки з однаковим conclusion_id об'єднуються в одну комірку (rowspan); null = немає спільного висновку
+function computeConclusionRuns(items) {
+  const runs = new Array(items.length).fill(null);
+  let i = 0;
+  while (i < items.length) {
+    const conclusionId = items[i].result?.conclusion_id ?? null;
+    if (!conclusionId) { i++; continue; }
+    let j = i + 1;
+    while (j < items.length && (items[j].result?.conclusion_id ?? null) === conclusionId) j++;
+    runs[i] = { span: j - i };
+    for (let k = i + 1; k < j; k++) runs[k] = 'skip';
+    i = j;
+  }
+  return runs;
+}
+
+function itemRow({ planItem, result }, { rerender, isFinalized, conclusionRun }) {
   const sourceId = planItem.assessment_source_id;
   const isExpanded = expandedRows.has(sourceId);
 
@@ -387,14 +403,18 @@ function itemRow({ planItem, result }, { rerender, isFinalized }) {
     ' ',
     pencilBtn(() => openFindingsModal(sourceId), 'Редагувати план виправлення'));
 
-  // Conclusion cell with edit button — спільний висновок показує, скільки ще ODP він охоплює
-  const conclusionText = conclusionTextFor(getAssessment(), result);
-  const sharedCount = result?.conclusion_id ? sourcesForConclusion(getAssessment(), result.conclusion_id).length : 0;
-  const conclusionCell = el('td', { class: 'conclusion' },
-    el('span', {}, conclusionText),
-    sharedCount > 1 ? el('span', { class: 'id-badge', title: 'Спільний висновок для кількох ODP' }, `×${sharedCount}`) : null,
-    ' ',
-    pencilBtn(() => openConclusionModal(sourceId), 'Редагувати висновок'));
+  // Conclusion cell with edit button — суміжні ODP з однаковим conclusion_id об'єднуються в одну комірку (rowspan);
+  // ×N лишається, якщо висновок охоплює ще й НЕсуміжні ODP (ті не можна об'єднати візуально)
+  const conclusionCell = conclusionRun === 'skip' ? null : (() => {
+    const conclusionText = conclusionTextFor(getAssessment(), result);
+    const sharedCount = result?.conclusion_id ? sourcesForConclusion(getAssessment(), result.conclusion_id).length : 0;
+    const span = conclusionRun?.span > 1 ? String(conclusionRun.span) : null;
+    return el('td', { class: 'conclusion', ...(span ? { rowspan: span } : {}) },
+      el('span', {}, conclusionText),
+      sharedCount > 1 ? el('span', { class: 'id-badge', title: 'Спільний висновок для кількох ODP' }, `×${sharedCount}`) : null,
+      ' ',
+      pencilBtn(() => openConclusionModal(sourceId), 'Редагувати висновок'));
+  })();
 
   const row = el('tr', { class: 'assessment-item-row' },
     el('td', {}, toggleBtn),
@@ -490,13 +510,14 @@ export function renderAssessmentTable(container) {
       }
 
       // Item rows with optional ODP subrows
-      for (const pair of controlGroup.items) {
-        const { row, subrows } = itemRow(pair, { rerender, isFinalized });
+      const conclusionRuns = computeConclusionRuns(controlGroup.items);
+      controlGroup.items.forEach((pair, idx) => {
+        const { row, subrows } = itemRow(pair, { rerender, isFinalized, conclusionRun: conclusionRuns[idx] });
         tbody.append(row);
         for (const subrow of subrows) {
           tbody.append(subrow);
         }
-      }
+      });
     }
   }
 
