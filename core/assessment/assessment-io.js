@@ -1,4 +1,5 @@
 // core/assessment/assessment-io.js
+import { sortWithinFamilyByControlNumber } from './assessment-plan.js';
 
 function normalizeChecklistEntry(entry) {
   if (Array.isArray(entry.statements)) return entry;
@@ -88,9 +89,16 @@ export function migrateAssessment(obj) {
   if (obj?.schema_version?.startsWith('3.')) {
     const hasChecklist = Array.isArray(obj.plan?.checklist);
     const normalizedChecklist = hasChecklist ? obj.plan.checklist.map(normalizeChecklistEntry) : [];
-    const checklistChanged = !hasChecklist || normalizedChecklist.some((e, i) => e !== obj.plan.checklist[i]);
-    if (!checklistChanged) return obj;
-    return { ...obj, plan: { ...obj.plan, checklist: normalizedChecklist } };
+    // Старі (до 2026-10-19) assessment.json мають plan.items/checklist у "сирому" порядку дій BPB,
+    // а не за номером заходу — повторне сортування тут підтягує вже створені оцінювання до
+    // поточної логіки buildAssessmentPlan без перегенерації плану.
+    const sortedChecklist = sortWithinFamilyByControlNumber(normalizedChecklist);
+    const items = Array.isArray(obj.plan?.items) ? obj.plan.items : [];
+    const sortedItems = sortWithinFamilyByControlNumber(items);
+    const checklistChanged = !hasChecklist || sortedChecklist.some((e, i) => e !== obj.plan.checklist[i]);
+    const itemsChanged = sortedItems.some((e, i) => e !== items[i]);
+    if (!checklistChanged && !itemsChanged) return obj;
+    return { ...obj, plan: { ...obj.plan, checklist: sortedChecklist, items: sortedItems } };
   }
   const now = new Date().toISOString();
   const evidence = [];

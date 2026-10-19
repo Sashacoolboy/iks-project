@@ -72,6 +72,34 @@ function ndFullStatementText(flat) {
   return flat.map(l => (l.seg ? `${l.seg}) ` : '') + l.text).join('\n');
 }
 
+// Порядок дій у BPB не збігається з номерами заходів (напр. AU-01 опиняється перед
+// AU-09(04), а той — перед AU-02); сортуємо в межах кожної родини за номером заходу,
+// потім номером посилення (базовий захід — перед своїми ж посиленнями). Родини
+// лишаються в порядку першої появи, а запис без власної родини в масиві — без прив'язки
+// до суміжності (enhancements додаються окремим циклом, тому не йдуть поруч з базовим заходом).
+function controlSortKey(canonicalId) {
+  const m = String(canonicalId ?? '').match(/^[A-Z]+-(\d+)(?:\((\d+)\))?$/);
+  if (!m) return [Infinity, Infinity];
+  return [Number(m[1]), m[2] !== undefined ? Number(m[2]) : -1];
+}
+
+function sortWithinFamilyByControlNumber(list) {
+  const familyOrder = [];
+  const byFamily = new Map();
+  for (const entry of list) {
+    if (!byFamily.has(entry.family)) { byFamily.set(entry.family, []); familyOrder.push(entry.family); }
+    byFamily.get(entry.family).push(entry);
+  }
+  const result = [];
+  for (const family of familyOrder) {
+    const withKey = byFamily.get(family).map((entry, i) => ({ entry, i, key: controlSortKey(entry.canonical_control_id) }));
+    withKey.sort((a, b) => (a.key[0] - b.key[0]) || (a.key[1] - b.key[1]) || (a.i - b.i));
+    for (const { entry } of withKey) result.push(entry);
+  }
+  return result;
+}
+export { sortWithinFamilyByControlNumber };
+
 // canonical_id (базовий захід АБО посилення) → { family, family_title, control_title } — для plan.checklist
 function indexNdNodes(ndTzi) {
   const map = new Map();
@@ -256,5 +284,5 @@ export function buildAssessmentPlan({ approvedState, catalogs, assessmentCatalog
     return true;
   });
 
-  return { items, checklist, warnings: dedup };
+  return { items: sortWithinFamilyByControlNumber(items), checklist: sortWithinFamilyByControlNumber(checklist), warnings: dedup };
 }
